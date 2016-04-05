@@ -6,6 +6,7 @@ uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
+uniform sampler2D depthtex1;
 uniform sampler2D shadowcolor;
 uniform sampler2DShadow shadow;
 
@@ -18,6 +19,7 @@ uniform mat4 shadowProjectionInverse;
 uniform mat4 shadowModelViewInverse;
 
 uniform vec3 cameraPosition;
+uniform vec3 upPosition;
 
 uniform float viewWidth;
 uniform float viewHeight;
@@ -63,6 +65,10 @@ vec3 GetNormal(in vec2 coord) {
 
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
+}
+
+float GetTransparentDepth(in vec2 coord) {
+	return texture2D(depthtex1, coord).x;
 }
 
 float ExpToLinearDepth(in float depth) {
@@ -166,16 +172,39 @@ void CalculateSky(inout vec3 color, in vec4 viewSpacePosition, in float fogVolum
 	color  = mix(color, skyComposite.rgb, skyComposite.a);
 }
 
+float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal) {
+	vec3 underwaterVector = viewSpacePosition.xyz - viewSpacePosition1.xyz;
+	
+	float UdotN = abs(dot(normalize(underwaterVector.xyz), normal));
+	
+	float depth = length(underwaterVector.xyz) * UdotN;
+		  depth = exp(-depth * 0.35);
+	
+	float fogFactor = CalculateFogFactor(viewSpacePosition1, 10.0);
+	
+	return 1.0 - clamp(depth - fogFactor, 0.0, 1.0);
+//	return 1.0 - clamp(depth, 0.0, 1.0);
+}
+
+void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in Mask mask) {
+	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.5) * colorSkylight;
+	
+	if (mask.water > 0.5)
+		color = mix(color, waterVolumeColor, ComputeSkyAbsorbance(viewSpacePosition, viewSpacePosition1, normal));
+}
+
 
 void main() {
 	Mask mask;
 	CalculateMasks(mask, texture2D(colortex3, texcoord).b, true);
 	
-	vec3  diffuse           = (mask.sky < 0.5 ? GetDiffuse(texcoord) : vec3(0.0));    // These ternary statements avoid redundant texture lookups for sky pixels.
-	vec3  normal            = (mask.sky < 0.5 ?  GetNormal(texcoord) : vec3(0.0));
-	float depth             = (mask.sky < 0.5 ?   GetDepth(texcoord) : 1.0);
+	vec3  diffuse           = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0));    // These ternary statements avoid redundant texture lookups for sky pixels.
+	vec3  normal            = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
+	float depth             = (mask.sky < 0.5 ?              GetDepth(texcoord) : 1.0);
+	float depth1            = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0);    // Going to append a "1" onto the end of anything that represents first-layer transparency
 	
-	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
+	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
+	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	#ifdef DEFERRED_SHADING
 	float torchLightmap     = texture2D(colortex3, texcoord).r;
@@ -193,6 +222,8 @@ void main() {
 	
 	
 	composite += GI * colorSunlight * pow(diffuse, vec3(2.2));
+	
+	ComputeUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
 	CalculateSky(composite, viewSpacePosition, Fog, mask);
 	
