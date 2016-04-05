@@ -13,6 +13,10 @@
 #define FOG_POWER 3.0               // [1.0 2.0 3.0 4.0 6.0 8.0]
 #define VOLUMETRIC_FOG_POWER 1.0    // [1.0 2.0 3.0 4.0]
 
+#define WAVING_GRASS
+#define WAVING_LEAVES
+#define WAVING_WATER
+
 #define FORWARD_SHADING
 
 
@@ -56,3 +60,6 @@ const int noiseTextureResolution = 4;
 #else
 	#define Volumetric_Fog false
 #endif
+
+#define PI 3.1415926
+#define TIME frameTimeCounter

@@ -7,8 +7,6 @@ attribute vec4 at_tangent;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
-uniform mat4 shadowModelView;
-uniform mat4 shadowModelViewInverse;
 
 uniform vec3  cameraPosition;
 uniform float rainStrength;
@@ -45,12 +43,13 @@ float clamp01(in float x) {
 	return clamp(x, 0.0, 1.0);
 }
 
-#define PI 3.14159
+#define PI 3.1415926
+#define TIME frameTimeCounter
 //#include include/PostHeader.vsh"
 
-
-#define FRAME_TIME frameTimeCounter
-const float pi = 3.14159265;
+#define WAVING_GRASS
+#define WAVING_LEAVES
+#define WAVING_WATER
 
 
 vec2 GetDefaultLightmap(in vec2 lightmapCoord) {    // Gets the lightmap from the default lighting engine, ignoring any texture pack lightmap. First channel is torch lightmap, second channel is sky lightmap.
@@ -104,30 +103,80 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 	return gl_ProjectionMatrix * gbufferModelView * worldSpacePosition;
 }
 
+vec3 GetWavingGrass(in vec3 position, in float magnitude) {
+	vec3 wave = vec3(0.0);
+	
+	#ifdef WAVING_GRASS
+	const float speed = 1.0;
+	
+	float intensity = sin((TIME * 20.0 * PI / (28.0)) + position.x + position.z) * 0.1 + 0.1;
+	
+	float d0 = sin(TIME * 20.0 * PI / (122.0 * speed)) * 3.0 - 1.5 + position.z;
+	float d1 = sin(TIME * 20.0 * PI / (152.0 * speed)) * 3.0 - 1.5 + position.x;
+	float d2 = sin(TIME * 20.0 * PI / (122.0 * speed)) * 3.0 - 1.5 + position.x;
+	float d3 = sin(TIME * 20.0 * PI / (152.0 * speed)) * 3.0 - 1.5 + position.z;
+	
+	wave.x += sin((TIME * 20.0 * PI / (28.0 * speed)) + (position.x + d0) * 0.1 + (position.z + d1) * 0.1) * intensity;
+	wave.z += sin((TIME * 20.0 * PI / (28.0 * speed)) + (position.z + d2) * 0.1 + (position.x + d3) * 0.1) * intensity;
+	#endif
+	
+	return wave * magnitude;
+}
+
+vec3 GetWavingLeaves(in vec3 position, in float magnitude) {
+	vec3 wave = vec3(0.0);
+	
+	#ifdef WAVING_LEAVES
+	const float speed = 1.0;
+	
+	float intensity = (sin(((position.y + position.x)/2.0 + TIME * PI / ((88.0)))) * 0.05 + 0.15) * 0.35;
+	
+	float d0 = sin(TIME * 20.0 * PI / (122.0 * speed)) * 3.0 - 1.5;
+	float d1 = sin(TIME * 20.0 * PI / (152.0 * speed)) * 3.0 - 1.5;
+	float d2 = sin(TIME * 20.0 * PI / (192.0 * speed)) * 3.0 - 1.5;
+	float d3 = sin(TIME * 20.0 * PI / (142.0 * speed)) * 3.0 - 1.5;
+	
+	wave.x += sin((TIME * 20.0 * PI / (16.0 * speed)) + (position.x + d0) * 0.5 + (position.z + d1) * 0.5 + position.y) * intensity;
+	wave.z += sin((TIME * 20.0 * PI / (18.0 * speed)) + (position.z + d2) * 0.5 + (position.x + d3) * 0.5 + position.y) * intensity;
+	wave.y += sin((TIME * 20.0 * PI / (10.0 * speed)) + (position.z + d2)       + (position.x + d3)                   ) * intensity / 2.0;
+	#endif
+	
+	return wave * magnitude;
+}
+
 vec3 GetWavingWater(in vec3 position, in float magnitude) {
+	vec3 wave = vec3(0.0);
+	
+	#ifdef WAVING_WATER
 	float Distance = length(position.xz - cameraPosition.xz);
 	
 	float waveHeight = max(0.06 / max(Distance / 10.0, 1.0) - 0.006, 0.0);
 	
-	vec3 wave;
-	wave.y  = waveHeight * sin(pi * (FRAME_TIME / 2.1 + position.x / 7.0  + position.z / 13.0));
-	wave.y += waveHeight * sin(pi * (FRAME_TIME / 1.5 + position.x / 11.0 + position.z / 5.0 ));
+	wave.y  = waveHeight * sin(PI * (TIME / 2.1 + position.x / 7.0  + position.z / 13.0));
+	wave.y += waveHeight * sin(PI * (TIME / 1.5 + position.x / 11.0 + position.z / 5.0 ));
 	wave.y -= waveHeight;
-	wave.y *= magnitude;
 	wave.y *= float(position.y - floor(position.y) > 0.15 || position.y - floor(position.y) < 0.005);
+	#endif
 	
-	return wave;
+	return wave * magnitude;
 }
 
-vec3 GetWaves(in vec3 position) {
+vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition, in float skyLightmap) {
 	vec3 wave = vec3(0.0);
 	
-	float skylightWeight = lightmapCoord.t;
+	float skylightWeight = skyLightmap;
+	float grassWeight    = float(fract(texcoord.t * 256.0) < 0.01);
 	
 	switch(int(mc_Entity.x)) {
+		case 31:
+		case 37:
+		case 38:
+		case 59:  wave += GetWavingGrass(worldSpacePosition, skylightWeight * grassWeight); break;
+		case 18:
+		case 161: wave += GetWavingLeaves(worldSpacePosition, skylightWeight); break;
 		case 8:
 		case 9:
-		case 111:	wave += GetWavingWater(position, 1.0); break;
+		case 111: wave += GetWavingWater(worldSpacePosition, 1.0); break;
 	}
 	
 	return wave;
@@ -145,13 +194,14 @@ void main() {
 	
 	
 	vec4 position = GetWorldSpacePosition();
-	position.xyz += cameraPosition.xyz;
-//	position.xyz += GetWaves(position.xyz);
-	position.xyz -= cameraPosition.xyz;
-	position      = WorldSpaceToProjectedSpace(position);
-	gl_Position   = position;
 	
-	viewSpacePosition = gbufferProjectionInverse * position;
+	position.xyz += cameraPosition.xyz;
+	position.xyz += CalculateVertexDisplacements(position.xyz, lightmapCoord.t);
+	position.xyz -= cameraPosition.xyz;
+	
+	gl_Position   = WorldSpaceToProjectedSpace(position);
+	
+	viewSpacePosition = gbufferModelView * position;
 	
 	
 	vec3 tangent  = normalize(gl_NormalMatrix * at_tangent.xyz);
