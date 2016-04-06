@@ -164,7 +164,7 @@ void CalculateSky(inout vec3 color, in vec4 viewSpacePosition, in float fogVolum
 	vec4  skyComposite;
 	
 	
-	skyComposite.a   = min(fogVolume * fogFactor + pow(fogFactor, 6) * float(Volumetric_Fog), 1.0);
+	skyComposite.a   = GetSkyAlpha(fogVolume, fogFactor);
 	skyComposite.rgb = gradient + sunspot;
 	
 	

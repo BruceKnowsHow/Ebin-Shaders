@@ -6,7 +6,7 @@ const bool shadowtex1Mipmap    = true;
 const bool shadowcolor0Mipmap  = true;
 const bool shadowcolor1Mipmap  = true;
 
-const bool shadowtex1Nearest   = false;
+const bool shadowtex1Nearest   = true;
 const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
@@ -88,7 +88,7 @@ vec2 GetDitherred2DNoise(in vec2 coord) {    // Returns a random noise pattern r
 	return texture2D(noisetex, coord).xy * 2.0 - 1.0;
 }
 
-vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, const in float quality, in vec2 noise, in Mask mask, in float Fog) {
+vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, const in float quality, in vec2 noise, in Mask mask) {
 	float lightMult = 1.0;
 	
 	#ifdef GI_BOOST
@@ -96,11 +96,9 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	
 	float sunlight = ComputeDirectSunlight(position, normalShading);
 	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
-	
-//	float fogFactor = 
+	#endif
 	
 	if (lightMult < 0.05 && GI_Boost) return vec3(0.0);
-	#endif
 	
 	float depthLOD	= 2.0 * clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	float sampleLOD	= depthLOD * 5.0 / 2.0;
@@ -176,7 +174,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 		rayIncrement *= 1.01;
 	}
 	
-	fog /= weight;
+	fog /= max(weight, 0.00000001);
 	fog  = pow(fog, VOLUMETRIC_FOG_POWER);
 	
 	return fog;
@@ -204,7 +202,7 @@ void main() {
 	
 	vec3 normal = GetNormal(texcoord);
 	
-	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, GI_QUALITY * 4.0, noise2D, mask, Fog);
+	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, GI_QUALITY * 4.0, noise2D, mask);
 	
 	gl_FragData[0] = vec4(EncodeColor(GI), Fog);
 }
