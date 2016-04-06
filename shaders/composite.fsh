@@ -88,14 +88,18 @@ vec2 GetDitherred2DNoise(in vec2 coord) {    // Returns a random noise pattern r
 	return texture2D(noisetex, coord).xy * 2.0 - 1.0;
 }
 
-vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, const in float quality, in Mask mask, in vec2 noise) {
-	float normalShading = GetNormalShading(normal, mask);
-	
+vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, const in float quality, in vec2 noise, in Mask mask, in float Fog) {
 	float lightMult = 1.0;
 	
 	#ifdef GI_BOOST
+	float normalShading = GetNormalShading(normal, mask);
+	
 	float sunlight = ComputeDirectSunlight(position, normalShading);
-	lightMult = 1.0 - pow(sunlight, 1) * normalShading * 4.0;
+	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
+	
+//	float fogFactor = 
+	
+	if (lightMult < 0.05 && GI_Boost) return vec3(0.0);
 	#endif
 	
 	float depthLOD	= 2.0 * clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
@@ -104,16 +108,12 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	position = WorldSpaceToShadowSpace(ViewSpaceToWorldSpace(position)) * 0.5 + 0.5;    // Convert the view-space position to shadow-map coordinates (unbiased)
 	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz;     // Convert the normal from view-space to shadow-view-space
 	
-	float biasCoeff = GetShadowBias(position.xy);
-	
-	vec3 GI = vec3(0.0);
-	
 	const float brightness  = 30.0 * radius * radius;
 	const float interval    = 1.0 / quality;
 	const float scale       = radius / 512.0;
 	const float sampleCount = pow(1.0 / interval * 2.0 + 1.0, 2.0);
 	
-	if (lightMult < 0.05 && GI_Boost) return vec3(0.0);
+	vec3 GI = vec3(0.0);
 	
 	for(float x = -1.0; x <= 1.0; x += interval) {
 		for(float y = -1.0; y <= 1.0; y += interval) {
@@ -155,13 +155,13 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	return GI * lightMult * brightness;    // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
 
-float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise1D) {
+float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 	#ifdef VOLUMETRIC_FOG
 	float fog    = 0.0;
 	float weight = 0.0;
 	
 	float rayIncrement = gl_Fog.start / 64.0;
-	vec3  rayStep      = normalize(viewSpacePosition.xyz + vec3(0.0, 0.0, noise1D));
+	vec3  rayStep      = normalize(viewSpacePosition.xyz + vec3(0.0, 0.0, noise));
 	vec3  ray          = rayStep * gl_Fog.start;
 	
 	while (length(ray) < length(viewSpacePosition.xyz)) {
@@ -204,7 +204,7 @@ void main() {
 	
 	vec3 normal = GetNormal(texcoord);
 	
-	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, GI_QUALITY * 4.0, mask, noise2D);
+	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, GI_QUALITY * 4.0, noise2D, mask, Fog);
 	
 	gl_FragData[0] = vec4(EncodeColor(GI), Fog);
 }

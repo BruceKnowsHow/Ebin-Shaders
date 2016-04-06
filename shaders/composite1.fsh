@@ -178,12 +178,11 @@ float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1
 	float UdotN = abs(dot(normalize(underwaterVector.xyz), normal));
 	
 	float depth = length(underwaterVector.xyz) * UdotN;
-		  depth = exp(-depth * 0.35);
+	      depth = exp(-depth * 0.35);
 	
 	float fogFactor = CalculateFogFactor(viewSpacePosition1, 10.0);
 	
 	return 1.0 - clamp(depth - fogFactor, 0.0, 1.0);
-//	return 1.0 - clamp(depth, 0.0, 1.0);
 }
 
 void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in Mask mask) {
@@ -223,7 +222,7 @@ void main() {
 	
 	composite += GI * colorSunlight * pow(diffuse, vec3(2.2));
 	
-	ComputeUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
+	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
 	CalculateSky(composite, viewSpacePosition, Fog, mask);
 	
