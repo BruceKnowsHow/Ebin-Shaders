@@ -73,15 +73,6 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-vec2 BiasShadowMap(in vec2 shadowProjection, out float biasCoeff) {
-	biasCoeff = GetShadowBias(shadowProjection);
-	return shadowProjection / biasCoeff;
-}
-
-vec2 BiasShadowMap(in vec2 shadowProjection) {
-	return shadowProjection / GetShadowBias(shadowProjection);
-}
-
 vec2 GetDitherred2DNoise(in vec2 coord) {    // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every 4 pixels
 	coord *= vec2(viewWidth, viewHeight);
 	coord  = mod(coord, vec2(2 / COMPOSITE0_SCALE));
@@ -131,21 +122,21 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 			
 			vec3 sampleDiff = position.xyz - samplePos.xyz;
 			
-			float distanceCoeff  = max(length(sampleDiff), radius);
-			      distanceCoeff *= distanceCoeff;
+			float distanceCoeff = max(length(sampleDiff), radius);
+			      distanceCoeff = 1.0 / square(distanceCoeff);    // Inverse-square law
 			
 			vec3 sampleDir    = normalize(sampleDiff);
 			vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
 			
-			float viewNormalCoeff   = max(0.0, dot(      normal, -sampleDir));
-			float shadowNormalCoeff = max(0.0, dot(shadowNormal,  sampleDir));
+			float viewNormalCoeff   = max(0.0, dot(     -normal, sampleDir));
+			float shadowNormalCoeff = max(0.0, dot(shadowNormal, sampleDir));
 			
 			viewNormalCoeff   = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
-		//	viewNormalCoeff   = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0;
+	//		viewNormalCoeff   = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0;    // This effect tends to make trees look like crud at low composite0 sizes
 			
 			vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
 			
-			GI += flux * viewNormalCoeff * sqrt(shadowNormalCoeff) / distanceCoeff;
+			GI += flux * viewNormalCoeff * sqrt(shadowNormalCoeff) * distanceCoeff;
 		}
 	}
 	

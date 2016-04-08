@@ -5,6 +5,24 @@ float cubesmooth(in float x) {    // Applies a subtle S-shaped curve, domain [0 
 	return x * x * (3.0 - 2.0 * x);
 }
 
-float pow2(in float x) {    // Could have also been named "square()"
+float square(in float x) {
 	return x * x;
+}
+
+float pow2(in float x) {
+	return x * x;
+}
+
+float pow8(in float x) {
+	x *= x;
+	x *= x;
+	return x * x;
+}
+
+float root8(in float x) {
+	return sqrt(sqrt(sqrt(x)));
+}
+
+float length8(in vec2 x) {
+	return root8(pow8(x.x) + pow8(x.y));
 }

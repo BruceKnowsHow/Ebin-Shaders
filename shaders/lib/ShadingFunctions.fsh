@@ -24,14 +24,20 @@ vec4 WorldSpaceToShadowSpace(in vec4 worldSpacePosition) {
 float GetShadowBias(in vec2 shadowProjection) {
 	#ifdef EXTENDED_SHADOW_DISTANCE
 		shadowProjection *= 1.165;
-		shadowProjection *= shadowProjection;    // These next 3 lines and the triple sqrt() get a squircular (bevelled square) length formula (rather than the generic circular length formula most shaders use).
-		shadowProjection *= shadowProjection;
-		shadowProjection *= shadowProjection;
 		
-		return sqrt(sqrt(sqrt(shadowProjection.x + shadowProjection.y))) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
+		return length8(shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
 	#else
-		return length(shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
+		return length (shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
 	#endif
+}
+
+vec2 BiasShadowMap(in vec2 shadowProjection, out float biasCoeff) {
+	biasCoeff = GetShadowBias(shadowProjection);
+	return shadowProjection / biasCoeff;
+}
+
+vec2 BiasShadowMap(in vec2 shadowProjection) {
+	return shadowProjection / GetShadowBias(shadowProjection);
 }
 
 vec4 BiasShadowProjection(in vec4 position, out float biasCoeff) {
