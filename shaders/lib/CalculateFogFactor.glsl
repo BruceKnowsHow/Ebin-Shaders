@@ -1,9 +1,9 @@
-float CalculateFogFactor(in vec4 position, in float power) {
+float CalculateFogFactor(in vec3 position, in float power) {
 	#ifndef FOG_ENABLED
 	return 0.0;
 	#endif
 	
-	float fogFactor = length(position.xyz);
+	float fogFactor = length(position);
 		  fogFactor = max(fogFactor - gl_Fog.start, 0.0);
 		  fogFactor /= far - gl_Fog.start;
 		  fogFactor = pow(fogFactor, power);

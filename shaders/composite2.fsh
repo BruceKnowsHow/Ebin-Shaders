@@ -5,6 +5,7 @@
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
+uniform sampler2D colortex4;
 uniform sampler2D gdepthtex;
 
 uniform mat4 gbufferModelView;
@@ -18,6 +19,8 @@ uniform mat4 shadowModelViewInverse;
 
 uniform vec3 cameraPosition;
 
+uniform float viewWidth;
+uniform float viewHeight;
 uniform float near;
 uniform float far;
 
@@ -58,6 +61,10 @@ float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
 
+float GetFog(in vec2 coord) {
+	return texture2D(colortex4, coord).a;
+}
+
 float ExpToLinearDepth(in float depth) {
 	return 2.0 * near * (far + near - depth * (far - near));
 }
@@ -77,7 +84,7 @@ vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
     return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
 }
 
-bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const float rayGrowth, const int maxSteps, const int maxRefinements, out vec3 screenSpacePosition) {
+bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const float rayGrowth, const int maxSteps, const int maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
 	vec3 rayStep = rayDirection * firstStepSize;
 	vec3 ray = startingViewPosition + rayStep;
 	
@@ -95,10 +102,11 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 			-ray.z < near               || -ray.z > far * 1.6 + 16.0)
 		{   return false; }
 		
-		float sampleDepth        = GetDepth(screenSpacePosition.st);
-		vec4  sampleViewPosition = CalculateViewSpacePosition(screenSpacePosition.st, sampleDepth);
+		float sampleDepth = GetDepth(screenSpacePosition.st);
 		
-		float diff = sampleViewPosition.z - ray.z;
+		viewSpacePosition = CalculateViewSpacePosition(screenSpacePosition.st, sampleDepth);
+		
+		float diff = viewSpacePosition.z - ray.z;
 		
 		if (diff >= 0) {
 			if (doRefinements) {
@@ -130,15 +138,20 @@ vec3 ComputeRaytracedReflection(in vec4 viewSpacePosition, in vec3 normal, in Ma
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
+	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
 	
-	
-	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord))
-		reflection = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
-	else
+	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
+		reflection = CalculateSky(reflect(viewSpacePosition.xyz, normal));
+	else {
 		reflection = GetColor(reflectedCoord.st);
-	
-	CompositeFog(reflection, viewSpacePosition, 1.0);
+		
+		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz);
+		
+		CompositeFog(reflection, reflectionVector, GetFog(reflectedCoord.st));
+	}
+
+//	CompositeFog(reflection, viewSpacePosition.xyz, 1.0);
 	
 	return reflection;
 }
@@ -148,7 +161,7 @@ void main() {
 	Mask mask;
 	CalculateMasks(mask, texture2D(colortex3, texcoord).b, true);
 	
-	vec3  color             = (GetColor(texcoord));    // These ternary statements avoid redundant texture lookups for sky pixels.
+	vec3  color             = GetColor(texcoord);    // These ternary statements avoid redundant texture lookups for sky pixels.
 	vec3  normal            = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0));
 	float depth             = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);
 	
@@ -156,6 +169,11 @@ void main() {
 	
 	if (mask.water > 0.5)
 	color = ComputeRaytracedReflection(viewSpacePosition, normal, mask);
+	
+	
+	
+	if (mask.sky < 0.5)
+		CompositeFog(color, viewSpacePosition.xyz, GetFog(texcoord));
 	
 	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
 }

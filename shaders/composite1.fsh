@@ -1,6 +1,6 @@
 #version 120
 
-/* DRAWBUFFERS:2 */
+/* DRAWBUFFERS:24 */
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
@@ -135,7 +135,7 @@ float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1
 	float depth = length(underwaterVector.xyz) * UdotN;
 	      depth = exp(-depth * 0.35);
 	
-	float fogFactor = CalculateFogFactor(viewSpacePosition1, 10.0);
+	float fogFactor = CalculateFogFactor(viewSpacePosition1.xyz, 10.0);
 	
 	return 1.0 - clamp(depth - fogFactor, 0.0, 1.0);
 }
@@ -160,7 +160,7 @@ void main() {
 	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); return; }
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition.xyz)), 1.0); return; }
 	
 	#ifdef DEFERRED_SHADING
 	float torchLightmap     = texture2D(colortex3, texcoord).r;
@@ -181,7 +181,8 @@ void main() {
 	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
-	CompositeFog(composite, viewSpacePosition, Fog);
+//	CompositeFog(composite, viewSpacePosition.xyz, Fog);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
+	gl_FragData[1] = vec4(EncodeColor(GI), Fog);
 }
