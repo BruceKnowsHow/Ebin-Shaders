@@ -141,14 +141,21 @@ vec3 ComputeRaytracedReflection(in vec4 viewSpacePosition, in vec3 normal, in Ma
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
 	
+	vec3 reflectedSky = CalculateSky(reflect(viewSpacePosition.xyz, normal));
+	
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
-		reflection = CalculateSky(reflect(viewSpacePosition.xyz, normal));
+		reflection = reflectedSky;
 	else {
 		reflection = GetColor(reflectedCoord.st);
 		
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz);
 		
 		CompositeFog(reflection, reflectionVector, GetFog(reflectedCoord.st));
+		
+		float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.05, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
+		float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
+		float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff ), 0.0, 1.0);
+		reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
 	}
 	
 	return reflection;
@@ -166,9 +173,7 @@ void main() {
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
 	if (mask.water > 0.5)
-	color = ComputeRaytracedReflection(viewSpacePosition, normal, mask);
-	
-	
+		color = mix(color, ComputeRaytracedReflection(viewSpacePosition, normal, mask), 0.5);
 	
 	if (mask.sky < 0.5)
 		CompositeFog(color, viewSpacePosition.xyz, GetFog(texcoord));
