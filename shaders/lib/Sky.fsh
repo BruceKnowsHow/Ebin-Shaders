@@ -30,7 +30,7 @@ vec3 CalculateSunspot(in vec3 viewSpacePosition) {
 vec3 CalculateAtmosphereScattering(in vec3 viewSpacePosition) {
 	float factor  = pow(length(viewSpacePosition.xyz), 1.4) * 0.0002;
 	
-	return pow(colorSkylight, vec3(3.5)) * factor * 0.0;
+	return pow(colorSkylight, vec3(3.5)) * factor;
 }
 
 void CompositeFog(inout vec3 color, in vec3 viewSpacePosition, in float fogVolume) {

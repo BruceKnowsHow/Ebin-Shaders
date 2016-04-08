@@ -150,8 +150,6 @@ vec3 ComputeRaytracedReflection(in vec4 viewSpacePosition, in vec3 normal, in Ma
 		
 		CompositeFog(reflection, reflectionVector, GetFog(reflectedCoord.st));
 	}
-
-//	CompositeFog(reflection, viewSpacePosition.xyz, 1.0);
 	
 	return reflection;
 }
