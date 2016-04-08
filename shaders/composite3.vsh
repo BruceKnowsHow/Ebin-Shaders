@@ -1,6 +1,6 @@
 #version 120
 //#define COMPOSITE0_VERTEX
-//#define COMPOSITE2_VERTEX
+#define COMPOSITE2_VERTEX
 
 #define COMPOSITE0_SCALE 0.4
 

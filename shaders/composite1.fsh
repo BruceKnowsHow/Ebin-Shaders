@@ -1,5 +1,7 @@
 #version 120
 
+/* DRAWBUFFERS:2 */
+
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
@@ -29,6 +31,7 @@ uniform float far;
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
+#include "/lib/Util.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
