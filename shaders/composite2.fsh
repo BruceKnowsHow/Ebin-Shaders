@@ -69,54 +69,7 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-vec3 CalculateSkyGradient(in vec4 viewSpacePosition) {
-	float radius = max(176.0, far * sqrt(2.0));
-	const float horizonLevel = 72.0;
-	
-	vec3 worldPosition = (gbufferModelViewInverse * vec4(normalize(viewSpacePosition.xyz), 0.0)).xyz;
-	     worldPosition.y = radius * worldPosition.y / length(worldPosition.xz) + cameraPosition.y - horizonLevel;    // Reproject the world vector to have a consistent horizon height
-	     worldPosition.xz = normalize(worldPosition.xz) * radius;
-	
-	float dotUP = dot(normalize(worldPosition), vec3(0.0, 1.0, 0.0));
-	
-	float horizonCoeff  = dotUP * 0.65;
-	      horizonCoeff  = abs(horizonCoeff);
-	      horizonCoeff  = pow(1.0 - horizonCoeff, 3.0) / 0.65 * 5.0 + 0.35;
-	
-	vec3 color = colorSkylight * horizonCoeff;
-	
-	return color;
-}
-
-vec3 CalculateSunspot(in vec4 viewSpacePosition) {
-	float sunspot = max(0.0, dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
-	      sunspot = pow(sunspot, 350.0);
-	      sunspot = pow(sunspot + 1.0, 400.0) - 1.0;
-	      sunspot = min(sunspot, 20.0);
-	      sunspot += 50.0 * float(sunspot == 20.0);
-	
-	return sunspot * colorSunlight * colorSunlight;
-}
-
-vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
-	float factor  = pow(length(viewSpacePosition.xyz), 1.4) * 0.0002;
-	
-	return pow(colorSkylight, vec3(3.5)) * factor;
-}
-
-vec3 CalculateSky(in vec4 viewSpacePosition, in float fogVolume, in Mask mask) {
-	float fogFactor  = 1.0;
-	vec3  gradient   = CalculateSkyGradient(viewSpacePosition);
-	vec3  sunspot    = CalculateSunspot(viewSpacePosition) * pow(fogFactor, 25);
-	vec3  atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
-	vec4  skyComposite;
-	
-	
-	skyComposite.a   = GetSkyAlpha(fogVolume, fogFactor);
-	skyComposite.rgb = gradient + sunspot;
-	
-	return skyComposite.rgb + atmosphere;
-}
+#include "/lib/Sky.fsh"
 
 vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
     vec4 screenSpace = gbufferProjection * vec4(viewSpacePosition, 1.0);
@@ -124,7 +77,7 @@ vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
     return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
 }
 
-bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const in float rayGrowth, const in int maxSteps, const in int maxRefinements, out vec3 screenSpacePosition) {
+bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const float rayGrowth, const int maxSteps, const int maxRefinements, out vec3 screenSpacePosition) {
 	vec3 rayStep = rayDirection * firstStepSize;
 	vec3 ray = startingViewPosition + rayStep;
 	
@@ -174,13 +127,20 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 }
 
 vec3 ComputeRaytracedReflection(in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
-	vec3 reflectedCoord;
-	
+	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
+	vec3  reflectedCoord;
+	vec3  reflection;
 	
-	if (ComputeRaytracedIntersection(viewSpacePosition.xyz, normalize(reflect(viewSpacePosition.xyz, normal)), firstStepSize, 1.3, 30, 3, reflectedCoord))
-	return GetColor(reflectedCoord.st);
-	else return CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, mask);
+	
+	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord))
+		reflection = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
+	else
+		reflection = GetColor(reflectedCoord.st);
+	
+	CompositeFog(reflection, viewSpacePosition, 1.0);
+	
+	return reflection;
 }
 
 

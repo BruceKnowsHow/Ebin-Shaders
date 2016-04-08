@@ -14,6 +14,7 @@ uniform sampler2DShadow shadow;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
@@ -124,56 +125,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 	Fog /= totalFogWeight;
 }
 
-vec3 CalculateSkyGradient(in vec4 viewSpacePosition) {
-	float radius = max(176.0, far * sqrt(2.0));
-	const float horizonLevel = 72.0;
-	
-	vec3 worldPosition = (gbufferModelViewInverse * vec4(normalize(viewSpacePosition.xyz), 0.0)).xyz;
-	     worldPosition.y = radius * worldPosition.y / length(worldPosition.xz) + cameraPosition.y - horizonLevel;    // Reproject the world vector to have a consistent horizon height
-	     worldPosition.xz = normalize(worldPosition.xz) * radius;
-	
-	float dotUP = dot(normalize(worldPosition), vec3(0.0, 1.0, 0.0));
-	
-	float horizonCoeff  = dotUP * 0.65;
-	      horizonCoeff  = abs(horizonCoeff);
-	      horizonCoeff  = pow(1.0 - horizonCoeff, 3.0) / 0.65 * 5.0 + 0.35;
-	
-	vec3 color = colorSkylight * horizonCoeff;
-	
-	return color;
-}
-
-vec3 CalculateSunspot(in vec4 viewSpacePosition) {
-	float sunspot = max(0.0, dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
-	      sunspot = pow(sunspot, 350.0);
-	      sunspot = pow(sunspot + 1.0, 400.0) - 1.0;
-	      sunspot = min(sunspot, 20.0);
-	      sunspot += 50.0 * float(sunspot == 20.0);
-	
-	return sunspot * colorSunlight * colorSunlight;
-}
-
-vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
-	float factor  = pow(length(viewSpacePosition.xyz), 1.4) * 0.0002;
-	
-	return pow(colorSkylight, vec3(3.5)) * factor;
-}
-
-void CalculateSky(inout vec3 color, in vec4 viewSpacePosition, in float fogVolume, in Mask mask) {
-	float fogFactor  = max(CalculateFogFactor(viewSpacePosition, FOG_POWER), mask.sky);
-	vec3  gradient   = CalculateSkyGradient(viewSpacePosition);
-	vec3  sunspot    = CalculateSunspot(viewSpacePosition) * pow(fogFactor, 25);
-	vec3  atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
-	vec4  skyComposite;
-	
-	
-	skyComposite.a   = GetSkyAlpha(fogVolume, fogFactor);
-	skyComposite.rgb = gradient + sunspot;
-	
-	
-	color += atmosphere;
-	color  = mix(color, skyComposite.rgb, skyComposite.a);
-}
+#include "/lib/Sky.fsh"
 
 float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal) {
 	vec3 underwaterVector = viewSpacePosition.xyz - viewSpacePosition1.xyz;
@@ -208,6 +160,8 @@ void main() {
 	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); return; }
+	
 	#ifdef DEFERRED_SHADING
 	float torchLightmap     = texture2D(colortex3, texcoord).r;
 	float skyLightmap       = texture2D(colortex3, texcoord).g;
@@ -227,7 +181,7 @@ void main() {
 	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
-	CalculateSky(composite, viewSpacePosition, Fog, mask);
+	CompositeFog(composite, viewSpacePosition, Fog);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 }
