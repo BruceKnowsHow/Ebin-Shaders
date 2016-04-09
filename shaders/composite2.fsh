@@ -18,6 +18,7 @@ uniform mat4 shadowProjectionInverse;
 uniform mat4 shadowModelViewInverse;
 
 uniform vec3 cameraPosition;
+uniform vec3 upPosition;
 
 uniform float viewWidth;
 uniform float viewHeight;
@@ -134,7 +135,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 	return false;
 }
 
-vec3 ComputeRaytracedReflection(in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
@@ -152,13 +153,16 @@ vec3 ComputeRaytracedReflection(in vec4 viewSpacePosition, in vec3 normal, in Ma
 		
 		CompositeFog(reflection, reflectionVector, GetFog(reflectedCoord.st));
 		
-		float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.05, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
+		float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
 		float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
-		float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff ), 0.0, 1.0);
+		float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
 		reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
 	}
 	
-	return reflection;
+	float VdotN = dot(normalize(viewSpacePosition.xyz), normal);
+	float alpha = pow(min(1.0 + VdotN, 1.0), 5.0) * 0.99 + 0.01;
+	
+	color = mix(color, reflection, alpha);
 }
 
 
@@ -173,7 +177,7 @@ void main() {
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
 	if (mask.water > 0.5)
-		color = mix(color, ComputeRaytracedReflection(viewSpacePosition, normal, mask), 0.5);
+		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
 	if (mask.sky < 0.5)
 		CompositeFog(color, viewSpacePosition.xyz, GetFog(texcoord));

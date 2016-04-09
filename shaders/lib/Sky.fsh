@@ -22,7 +22,7 @@ vec3 CalculateSunspot(in vec3 viewSpacePosition) {
 	      sunspot = pow(sunspot, 350.0);
 	      sunspot = pow(sunspot + 1.0, 400.0) - 1.0;
 	      sunspot = min(sunspot, 20.0);
-	      sunspot += 50.0 * float(sunspot == 20.0);
+	      sunspot += 100.0 * float(sunspot == 20.0);
 	
 	return sunspot * colorSunlight * colorSunlight;
 }
