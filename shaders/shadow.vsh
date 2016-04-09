@@ -128,7 +128,7 @@ vec4 BiasShadowProjection(in vec4 position) {
 	
 	biasCoeff = biasCoeff * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
 	
-	position.z  += 0.001 * (1.0 - sqrt(dot(vertNormal, vec3(0.0, 0.0, 1.0))));    // Offset the z-coordinate to fix shadow acne
+	position.z  += 0.002 * (1.0 - dot(vertNormal, vec3(0.0, 0.0, 1.0))) * biasCoeff;    // Offset the z-coordinate to fix shadow acne
 	position.z  += 0.0005 / (abs(position.x) + 1.0);
 	position.z  += 0.002 * pow(biasCoeff * 2.0, 2.0);
 	
