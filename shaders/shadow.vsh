@@ -97,10 +97,12 @@ vec3 GetWavingWater(in vec3 position, in float magnitude) {
 	return wave * magnitude;
 }
 
-vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition, in float skyLightmap) {
+vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
+	worldSpacePosition += cameraPosition.xyz;
+	
 	vec3 wave = vec3(0.0);
 	
-	float skylightWeight = skyLightmap;
+	float skylightWeight = lightmapCoord.t;
 	float grassWeight    = float(fract(texcoord.t * 256.0) < 0.01);
 	
 	switch(int(mc_Entity.x)) {
@@ -128,7 +130,7 @@ vec4 BiasShadowProjection(in vec4 position) {
 	
 	biasCoeff = biasCoeff * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
 	
-	position.z  += 0.002 * (1.0 - dot(vertNormal, vec3(0.0, 0.0, 1.0))) * biasCoeff;    // Offset the z-coordinate to fix shadow acne
+	position.z  += 0.002 * max(0.0, 1.0 - dot(vertNormal, vec3(0.0, 0.0, 1.0)));    // Offset the z-coordinate to fix shadow acne
 	position.z  += 0.0005 / (abs(position.x) + 1.0);
 	position.z  += 0.002 * pow(biasCoeff * 2.0, 2.0);
 	
@@ -144,16 +146,15 @@ void main() {
 	texcoord      = gl_MultiTexCoord0.st;
 	lightmapCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).st;
 	
-	vertNormal = gl_NormalMatrix * gl_Normal;
+	vertNormal    = gl_NormalMatrix * gl_Normal;
 	
 	
 	vec4 position = GetWorldSpacePositionShadow();
 	
-	position.xyz += cameraPosition.xyz;
-	position.xyz += CalculateVertexDisplacements(position.xyz, lightmapCoord.t);
-	position.xyz -= cameraPosition.xyz;
+	position.xyz += CalculateVertexDisplacements(position.xyz);
 	
 	gl_Position = BiasShadowProjection(WorldSpaceToShadowProjection(position));
+	
 	
 	#ifdef FORWARD_SHADING
 		if (abs(mc_Entity.x - 8.5) < 0.6) gl_Position.w = -1.0;

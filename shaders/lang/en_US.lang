@@ -33,6 +33,9 @@ option.REFLECTION_EDGE_FALLOFF=Reflection Edge Falloff
 option.REFLECTION_EDGE_FALLOFF.comment=Enables the fade-out on the edge of screen space reflections.
 
 
+option.RECALCULATE_DISPLACED_NORMALS=Recalculate Displaced Normals
+
+
 option.VOLUMETRIC_FOG_POWER=Volumetric_Fog_Power
 option.VOLUMETRIC_FOG_POWER.comment=Higher values will make Volumetric fog more visible, but may expose artifacts in some situations.
 

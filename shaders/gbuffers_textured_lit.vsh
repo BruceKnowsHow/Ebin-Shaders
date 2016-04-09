@@ -4,6 +4,7 @@ uniform mat4 gbufferProjectionInverse;
 
 attribute vec4 mc_Entity;
 attribute vec4 at_tangent;
+attribute vec4 mc_midTexCoord;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -46,6 +47,8 @@ float clamp01(in float x) {
 #define PI 3.1415926
 #define TIME frameTimeCounter
 //#include include/PostHeader.vsh"
+
+#define RECALCULATE_DISPLACED_NORMALS
 
 #define WAVING_GRASS
 #define WAVING_LEAVES
@@ -161,10 +164,12 @@ vec3 GetWavingWater(in vec3 position, in float magnitude) {
 	return wave * magnitude;
 }
 
-vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition, in float skyLightmap) {
+vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
+	worldSpacePosition += cameraPosition.xyz;
+	
 	vec3 wave = vec3(0.0);
 	
-	float skylightWeight = skyLightmap;
+	float skylightWeight = lightmapCoord.t;
 	float grassWeight    = float(fract(texcoord.t * 256.0) < 0.01);
 	
 	switch(int(mc_Entity.x)) {
@@ -182,12 +187,32 @@ vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition, in float skyLightm
 	return wave;
 }
 
+void CalculateTBN(in vec3 position, out mat3 tbnMatrix, out vec3 normal) {
+	vec3 tangent  = normalize(                  at_tangent.xyz);
+	vec3 binormal = normalize(-cross(gl_Normal, at_tangent.xyz));
+	
+	#ifdef RECALCULATE_DISPLACED_NORMALS
+	tangent  += CalculateVertexDisplacements(position +  tangent);
+	binormal += CalculateVertexDisplacements(position + binormal);
+	#endif
+	
+	tangent  = normalize(gl_NormalMatrix * tangent);
+	binormal = normalize(gl_NormalMatrix * binormal);
+	
+	normal = cross(-tangent, binormal);
+	
+	tbnMatrix = mat3(
+	tangent.x, binormal.x, normal.x,
+	tangent.y, binormal.y, normal.y,
+	tangent.z, binormal.z, normal.z);
+}
+
+
 void main() {
 	color         = gl_Color.rgb;
 	texcoord      = gl_MultiTexCoord0.st;
 	lightmapCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).st;
 	
-	vertNormal         = gl_NormalMatrix * gl_Normal;
 	vertLightmap       = GetDefaultLightmap(lightmapCoord);
 	materialIDs        = GetMaterialIDs();
 	encodedMaterialIDs = EncodeMaterialIDs(materialIDs, 0.0, 0.0, 0.0, 0.0);
@@ -195,23 +220,14 @@ void main() {
 	
 	vec4 position = GetWorldSpacePosition();
 	
-	position.xyz += cameraPosition.xyz;
-	position.xyz += CalculateVertexDisplacements(position.xyz, lightmapCoord.t);
-	position.xyz -= cameraPosition.xyz;
+	position.xyz += CalculateVertexDisplacements(position.xyz);
 	
 	gl_Position   = WorldSpaceToProjectedSpace(position);
 	
+	
+	CalculateTBN(position.xyz, tbnMatrix, vertNormal);
+	
 	viewSpacePosition = gbufferModelView * position;
-	
-	
-	vec3 tangent  = normalize(gl_NormalMatrix * at_tangent.xyz);
-	vec3 binormal = normalize(gl_NormalMatrix * -cross(gl_Normal, at_tangent.xyz));
-	
-	tbnMatrix     = mat3(
-	tangent.x, binormal.x, vertNormal.x,
-	tangent.y, binormal.y, vertNormal.y,
-	tangent.z, binormal.z, vertNormal.z);
-	
 	
 //#include "include/PostCalculations.vsh"
 	vec3 sunVector = normalize(sunPosition);    //Engine-time overrides will happen by modifying sunVector
