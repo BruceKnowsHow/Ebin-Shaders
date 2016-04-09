@@ -153,10 +153,12 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 		
 		CompositeFog(reflection, reflectionVector, GetFog(reflectedCoord.st));
 		
+		#ifdef REFLECTION_EDGE_FALLOFF
 		float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
 		float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
 		float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
 		reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
+		#endif
 	}
 	
 	float VdotN = dot(normalize(viewSpacePosition.xyz), normal);

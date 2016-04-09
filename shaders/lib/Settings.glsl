@@ -17,6 +17,8 @@
 #define WAVING_LEAVES
 #define WAVING_WATER
 
+#define REFLECTION_EDGE_FALLOFF
+
 #define FORWARD_SHADING
 
 
