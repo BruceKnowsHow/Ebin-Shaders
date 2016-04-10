@@ -4,6 +4,7 @@
 
 uniform sampler2D texture;
 uniform sampler2D normals;
+uniform sampler2D noisetex;
 
 uniform sampler2DShadow shadow;
 
@@ -63,43 +64,40 @@ vec2 EncodeNormal(vec3 normal) {
 }
 
 float GetWaveDifferential(in vec2 pos, in float wavelength, in float amplitude, in float speed, in vec2 direction) {
-	return wavelength * amplitude * cos(dot(pos, direction) * wavelength + TIME * speed);
+	return wavelength * amplitude * (cos(dot(pos, direction) * wavelength + TIME * speed));
 }
 
-void GetWaveVectors(inout vec3 tangent, inout vec3 binormal, in vec2 pos, in float wavelength, in float amplitude, in float speed, in vec2 direction) {
+void GetWaveVectors(inout vec3 normal, in vec2 pos, in float wavelength, in float amplitude, in float speed, in vec2 direction) {
 	direction  = normalize(direction);
 	wavelength = 1.0 / wavelength * PI * 2.0;
 	
 	amplitude *= 0.1;
 	
-	speed *= 1.8;
+	float wave = GetWaveDifferential(pos, wavelength, amplitude, speed, direction);
 	
-	tangent.z  += direction.x * GetWaveDifferential(pos, wavelength, amplitude, speed, direction);
-	binormal.z += direction.y * GetWaveDifferential(pos, wavelength, amplitude, speed, direction);
+	normal.x += direction.x * wave;
+	normal.y += direction.y * wave;
 }
 
-vec3 GetWaves(in vec2 position) {
-	vec3 normal = vec3(0.0, 0.0, 1.0);
+vec3 GetWaves(in vec3 position) {
+	vec3 normal = vec3(0.0, 0.0, 0.0);
 	
-	vec3 tangent  = vec3(0.0, 1.0, 0.0);
-	vec3 binormal = vec3(1.0, 0.0, 0.0);
+	GetWaveVectors(normal, position.xz, 1.0 ,  0.01, 2.0, vec2( 0.4 , 0.8 ));
+	GetWaveVectors(normal, position.xz, 5.0 ,  0.01, 3.0, vec2( 0.3 , 0.1 ));
+	GetWaveVectors(normal, position.xz, 1.0 ,  0.01, 5.0, vec2( 0.25, 0.16));
+	GetWaveVectors(normal, position.xz, 2.0 ,  0.02, 4.0, vec2(-0.8 , 0.56));
+	GetWaveVectors(normal, position.xz, 3.5 , 0.005, 2.1, vec2(-1.0 , 0.1 ));
+	GetWaveVectors(normal, position.xz, 0.79, 0.003, 2.5, vec2( 1.6 , 0.1 ));
+	GetWaveVectors(normal, position.xz, 1.4 , 0.015, 1.5, vec2( 0.6 ,-0.5 ));
 	
-	GetWaveVectors(tangent, binormal, position, 1.0 ,  0.01, 2.0, vec2( 0.4 , 0.8 ));
-	GetWaveVectors(tangent, binormal, position, 5.0 ,  0.01, 3.0, vec2( 0.3 , 0.1 ));
-	GetWaveVectors(tangent, binormal, position, 1.0 ,  0.01, 5.0, vec2( 0.25, 0.16));
-	GetWaveVectors(tangent, binormal, position, 2.0 ,  0.02, 4.0, vec2(-0.8 , 0.56));
-	GetWaveVectors(tangent, binormal, position, 3.5 , 0.005, 2.1, vec2(-1.0 , 0.1 ));
-	GetWaveVectors(tangent, binormal, position, 0.79, 0.003, 2.5, vec2( 1.6 , 0.1 ));
-	GetWaveVectors(tangent, binormal, position, 1.4 , 0.015, 1.5, vec2( 0.6 ,-0.5 ));
-	
-	normal = cross(-tangent, binormal);
+	normal.z = sqrt(1.0 - pow2(normal.x) - pow2(normal.y));    // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 	
 	return normal;
 }
 
 vec3 GetNormal() {
 	if (abs(materialIDs - 4.0) < 0.5)
-		return normalize(GetWaves(worldPosition.xz) * tbnMatrix);
+		return normalize(GetWaves(worldPosition.xyz) * tbnMatrix);
 	else
 		return normalize((texture2D(normals, texcoord).xyz * 2.0 - 1.0) * tbnMatrix);
 }
