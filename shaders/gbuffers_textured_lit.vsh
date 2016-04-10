@@ -25,6 +25,7 @@ varying float materialIDs;
 varying float encodedMaterialIDs;
 
 varying vec4 viewSpacePosition;
+varying vec3 worldPosition;
 
 
 //#include include/PostHeader.vsh"
@@ -192,8 +193,8 @@ void CalculateTBN(in vec3 position, out mat3 tbnMatrix, out vec3 normal) {
 	vec3 binormal = normalize(-cross(gl_Normal, at_tangent.xyz));
 	
 	#ifdef RECALCULATE_DISPLACED_NORMALS
-	tangent  += CalculateVertexDisplacements(position +  tangent);
-	binormal += CalculateVertexDisplacements(position + binormal);
+	tangent  += CalculateVertexDisplacements(position +  tangent) * 0.3;
+	binormal += CalculateVertexDisplacements(position + binormal) * 0.3;
 	#endif
 	
 	tangent  = normalize(gl_NormalMatrix * tangent);
@@ -227,7 +228,8 @@ void main() {
 	
 	CalculateTBN(position.xyz, tbnMatrix, vertNormal);
 	
-	viewSpacePosition = gbufferModelView * position;
+	worldPosition      = position.xyz + cameraPosition;
+	viewSpacePosition  = gbufferModelView * position;
 	
 //#include "include/PostCalculations.vsh"
 	vec3 sunVector = normalize(sunPosition);    //Engine-time overrides will happen by modifying sunVector
