@@ -35,6 +35,7 @@ varying vec3 worldPosition;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/Encoding.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/CalculateFogFactor.glsl"
 #ifdef FORWARD_SHADING
@@ -43,26 +44,12 @@ varying vec3 worldPosition;
 #endif
 
 
-vec3 DecodeColor(in vec3 color) {
-	return pow(color, vec3(2.2)) * 1000.0;
-}
-
-vec3 EncodeColor(in vec3 color) {    // Prepares the color to be sent through a limited dynamic range pipeline
-	return pow(color * 0.001, vec3(1.0 / 2.2));
-}
-
 vec4 GetDiffuse() {
 	vec4 diffuse = vec4(color.rgb, 1.0);
 	     diffuse *= texture2D(texture, texcoord);
 	
 	return diffuse;
 }
-
-vec2 EncodeNormal(vec3 normal) {
-    float p = sqrt(normal.z * 8.0 + 8.0);
-    return vec2(normal.xy / p + 0.5) * 0.5 + 0.5;
-}
-
 
 void GetWaveDifferential(inout vec2 diff, in vec2 pos, in float wavelength, in float amplitude, in float speed, in vec2 direction) {
 	direction  = normalize(direction);

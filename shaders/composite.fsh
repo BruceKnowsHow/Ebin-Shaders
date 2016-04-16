@@ -36,23 +36,12 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/Encoding.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 #include "/lib/ShadingFunctions.fsh"
 
-
-vec3 EncodeColor(in vec3 color) {    // Prepares the color to be sent through a limited dynamic range pipeline
-	return pow(color * 0.001, vec3(1.0 / 2.2));
-}
-
-vec3 DecodeNormal(vec2 encodedNormal) {
-	encodedNormal = encodedNormal * 2.0 - 1.0;
-    vec2 fenc = encodedNormal * 4.0 - 2.0;
-	float f = dot(fenc, fenc);
-	float g = sqrt(1.0 - f / 4.0);
-	return vec3(fenc * g, 1.0 - f / 2.0);
-}
 
 vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);

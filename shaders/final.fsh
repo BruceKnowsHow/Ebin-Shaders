@@ -11,15 +11,8 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/Encoding.glsl"
 
-
-vec3 DecodeColor(in vec3 color) {
-	return pow(color, vec3(2.2)) * 1000.0;
-}
-
-vec3 EncodeColor(in vec3 color) {    // Prepares the color to be sent through a limited dynamic range pipeline
-	return pow(color * 0.001, vec3(1.0 / 2.2));
-}
 
 vec3 Uncharted2Tonemap(in vec3 color) {
 	const float A = 0.15, B = 0.5, C = 0.1, D = 0.2, E = 0.02, F = 0.3, W = 11.2;

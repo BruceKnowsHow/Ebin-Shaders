@@ -33,19 +33,12 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/Encoding.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
 #include "/lib/CalculateFogFactor.glsl"
 
-
-vec3 DecodeColor(in vec3 color) {
-	return pow(color, vec3(2.2)) * 1000.0;
-}
-
-vec3 EncodeColor(in vec3 color) {    // Prepares the color to be sent through a limited dynamic range pipeline
-	return pow(color * 0.001, vec3(1.0 / 2.2));
-}
 
 vec3 GetDiffuse(in vec2 coord) {
 	return texture2D((Deferred_Shading ? colortex2 : colortex6), coord).rgb;
@@ -53,14 +46,6 @@ vec3 GetDiffuse(in vec2 coord) {
 
 vec3 GetDiffuseForward(in vec2 coord) {
 	return texture2D(colortex6, coord).rgb;
-}
-
-vec3 DecodeNormal(vec2 encodedNormal) {
-	encodedNormal = encodedNormal * 2.0 - 1.0;
-    vec2 fenc = encodedNormal * 4.0 - 2.0;
-	float f = dot(fenc, fenc);
-	float g = sqrt(1.0 - f / 4.0);
-	return vec3(fenc * g, 1.0 - f / 2.0);
 }
 
 vec3 GetNormal(in vec2 coord) {
