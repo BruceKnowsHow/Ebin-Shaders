@@ -104,7 +104,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 			vec2 mapPos = BiasShadowMap(samplePos.xy * 2.0 - 1.0) * 0.5 + 0.5;
 			
 			samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
-			samplePos.z = ((samplePos.z * 2.0 - 1.0) * 4.0) * 0.5 + 0.5;    // Undo z-shrinking
+			samplePos.z = samplePos.z * 4.0 - 1.5;    // Undo z-shrinking
 			
 			vec4 position  = shadowProjectionInverse * ( position * 2.0 - 1.0);    // Re-declaring "position" here overrides "position" with a new vec4, but only in the context of the current iterration. Without the declaration, our changes would roll-over to the next iteration because "position"'s scope is the entire function.
 			     samplePos = shadowProjectionInverse * (samplePos * 2.0 - 1.0);
