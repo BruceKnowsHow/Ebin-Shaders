@@ -1,44 +1,84 @@
-option.EXTENDED_SHADOW_DISTANCE=Extended Shadow Distance
-option.EXTENDED_SHADOW_DISTANCE.comment=Extends the shadow draw distance to the edge of the far-view distance. Looks bad if you zoom in, alright if you're on a 90+ FOV.
+option.EXPOSURE=Exposure
+option.EXPOSURE.comment=The brightness level of the entire scene
 
-option.FORWARD_SHADING=Forward Shading Pipeline
-option.FORWARD_SHADING.comment=Properly processes shading behind transparent surfaces, some performance impact
+option.SUN_LIGHT_LEVEL=Sun Light Level
+option.SUN_LIGHT_LEVEL.comment=The brightness level of sunlight
+
+option.SKY_LIGHT_LEVEL=Sky Light Level
+option.SKY_LIGHT_LEVEL.comment=The brightness level of skylight
+
+option.AMBIENT_LIGHT_LEVEL=Ambient Light Level
+option.AMBIENT_LIGHT_LEVEL.comment=The brightness level of ambient light, which is the only light inside dark caves, etc
+
+option.TORCH_LIGHT_LEVEL=Artificial Light Level
+option.TORCH_LIGHT_LEVEL.comment=The brightness level of artificial light sources, such as torches and glowstone
+
+option.SKY_BRIGHTNESS=Sky Brightness
+option.SKY_BRIGHTNESS.comment=The brightness level of the sky
 
 
-option.GI_BOOST=GI Boost
-option.GI_BOOST.comment=Disables global illumination computations in certain situations where they will have a minimal visual impact (mostly in sunlight)
+option.BLOOM_AMOUNT=Bloom Amount
+option.BLOOM_AMOUNT.comment=The visibility level of bloom, AKA Glow
 
-option.GI_TRANSLUCENCE=Translucence
-option.GI_TRANSLUCENCE.comment=Inverse coefficient of light falloff from the normals. 0.0 is "physically correct"
-
-option.GI_RADIUS=GI_Radius
-
-option.GI_QUALITY=GI_Quality
-option.GI_QUALITY.comment=You might be able to get away with 0.5, 0.25 is for plebs.
-
-
-option.FOG_ENABLED=Fog
-option.VOLUMETRIC_FOG=Volumetric Fog
-
-option.FOG_POWER=Fog_Power
-option.FOG_POWER.comment=Higher values will make fog have a smoother early falloff, but a sharper later falloff.
+option.BLOOM_CURVE=Bloom Curve
+option.BLOOM_CURVE.comment=Higher values make the bloom more concentrated to bright areas, and also make the bloom more colorful
 
 
 option.WAVING_GRASS=Waving Grass
+
 option.WAVING_LEAVES=Waving Leaves
+
 option.WAVING_WATER=Waving Water
 
 
-option.REFLECTION_EDGE_FALLOFF=Reflection Edge Falloff
-option.REFLECTION_EDGE_FALLOFF.comment=Enables the fade-out on the edge of screen space reflections.
+option.sunPathRotation=Sun Path Rotation
 
+option.shadowMapResolution=Shadow Map Resolution
+
+option.SHADOW_MAP_BIAS=Shadow Map Bias
+option.SHADOW_MAP_BIAS.comment=Higher values make nearby shadows look better, at the cost of making farther off shadows look worse.
+
+option.EXTENDED_SHADOW_DISTANCE=Extended Shadow Distance
+option.EXTENDED_SHADOW_DISTANCE.comment=Makes shadows visible at extremely far distances, accentuates shadow artifacts in some situations
+
+option.SOFT_SHADOWS=Soft Shadows
+option.SOFT_SHADOWS.comment=Softens shadow edges. Medium performance cost!
+
+
+option.FOG_ENABLED=Fog Enabled
+
+option.FOG_POWER=Fog Power
+option.FOG_POWER.comment=Higher values make fog more subtle nearby, but more intense farther away
+
+option.VOLUMETRIC_FOG=Volumetric Fog
+option.VOLUMETRIC_FOG.comment=Casts shadows on fog volume. High performance cost!
+
+option.VOLUMETRIC_FOG_POWER=Volumetric Fog Power
+option.VOLUMETRIC_FOG_POWER.comment=Higher values make volumetric fog more visible, but also make artifacts more visible
+
+
+option.GI_TRANSLUCENCE=GI Translucence
+option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "bounce through" surfaces, similar to subsurface scattering
+
+option.GI_RADIUS=GI Radius
+option.GI_RADIUS.comment=The radius of global illumination light bounces
+
+option.GI_QUALITY=GI Quality
+option.GI_QUALITY.comment=Higher values have a high performance cost!
+
+option.GI_BOOST=GI Boost
+option.GI_BOOST.comment=Disables global illumination computations in certain situations where they will have a minimal visual impact (mostly in sunlight). High performance benefit!
+
+
+option.COMPOSITE0_SCALE=Composite0 Scale
+option.COMPOSITE0_SCALE.comment=The resolution coefficient at which global illumination and volumetric fog are rendered.
+
+
+option.REFLECTION_EDGE_FALLOFF=Reflection Edge Falloff
+option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "fade out" on the edges of the screen
 
 option.RECALCULATE_DISPLACED_NORMALS=Recalculate Displaced Normals
+option.RECALCULATE_DISPLACED_NORMALS.comment=Whether or not surface normals are recalculated on blocks that have a waving effect
 
-
-option.VOLUMETRIC_FOG_POWER=Volumetric_Fog_Power
-option.VOLUMETRIC_FOG_POWER.comment=Higher values will make Volumetric fog more visible, but may expose artifacts in some situations.
-
-
-option.COMPOSITE0_SCALE=Composite Scale
-option.COMPOSITE0_SCALE.comment=Resolution coefficient for Global Illumination and Volumetric Light.
+option.FORWARD_SHADING=Forward Shading Pipeline
+option.FORWARD_SHADING.comment=Computes shading on blocks that are underwater, behind glass, etc. High performance impact!

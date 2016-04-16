@@ -98,7 +98,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	position = WorldSpaceToShadowSpace(ViewSpaceToWorldSpace(position)) * 0.5 + 0.5;    // Convert the view-space position to shadow-map coordinates (unbiased)
 	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz;     // Convert the normal from view-space to shadow-view-space
 	
-	const float brightness  = 30.0 * radius * radius;
+	const float brightness  = 30.0 * radius * radius * SUN_LIGHT_LEVEL;
 	const float interval    = 1.0 / quality;
 	const float scale       = radius / 512.0;
 	const float sampleCount = pow(1.0 / interval * 2.0 + 1.0, 2.0);

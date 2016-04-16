@@ -24,7 +24,7 @@ vec3 EncodeColor(in vec3 color) {    // Prepares the color to be sent through a 
 vec3 Uncharted2Tonemap(in vec3 color) {
 	const float A = 0.15, B = 0.5, C = 0.1, D = 0.2, E = 0.02, F = 0.3, W = 11.2;
 	const float whiteScale = 1.0 / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F);
-	const float ExposureBias = 2.3;
+	const float ExposureBias = 2.3 * EXPOSURE;
 	
 	vec3 curr = ExposureBias * color;
 	     curr = ((curr * (A * curr + C * B) + D * E) / (curr * (A * curr + B) + D * F)) - E / F;
@@ -73,7 +73,7 @@ void main() {
 	
 	vec3[8] bloom = GetBloom();
 	
-	color = mix(color, pow(bloom[0], vec3(1.25)), 0.125);
+	color = mix(color, pow(bloom[0], vec3(BLOOM_CURVE)), BLOOM_AMOUNT);
 	
 	gl_FragColor = vec4(Uncharted2Tonemap(color), 1.0);
 }

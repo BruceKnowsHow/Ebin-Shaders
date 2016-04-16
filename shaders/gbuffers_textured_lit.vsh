@@ -51,7 +51,7 @@ float clamp01(in float x) {
 
 #define RECALCULATE_DISPLACED_NORMALS
 
-#define WAVING_GRASS
+//#define WAVING_GRASS
 #define WAVING_LEAVES
 #define WAVING_WATER
 

@@ -26,7 +26,7 @@ varying vec3 vertNormal;
 #define PI 3.1415926
 #define TIME frameTimeCounter
 
-#define WAVING_GRASS
+//#define WAVING_GRASS
 #define WAVING_LEAVES
 #define WAVING_WATER
 
