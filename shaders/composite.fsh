@@ -62,11 +62,11 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-vec2 GetDitherred2DNoise(in vec2 coord) {    // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every 4 pixels
+vec2 GetDitherred2DNoise(in vec2 coord, in float n) {    // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
 	coord *= vec2(viewWidth, viewHeight);
-	coord  = mod(coord, vec2(2 / COMPOSITE0_SCALE));
+	coord  = mod(coord, vec2(n));
 	coord /= noiseTextureResolution;
-	return texture2D(noisetex, coord).xy * 2.0 - 1.0;
+	return texture2D(noisetex, coord).xy;
 }
 
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, const in float quality, in vec2 noise, in Mask mask) {
@@ -174,7 +174,7 @@ void main() {
 	
 	float depth             = texture2D(gdepthtex, texcoord).x;
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
-	vec2  noise2D           = GetDitherred2DNoise(texcoord);
+	vec2  noise2D           = GetDitherred2DNoise(texcoord, 2.0 / COMPOSITE0_SCALE) * 2.0 - 1.0;
 	
 	float Fog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
 	
