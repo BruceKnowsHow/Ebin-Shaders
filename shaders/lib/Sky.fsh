@@ -28,7 +28,7 @@ vec3 CalculateSunspot(in vec3 viewSpacePosition) {
 }
 
 vec3 CalculateAtmosphereScattering(in vec3 viewSpacePosition) {
-	float factor  = pow(length(viewSpacePosition.xyz), 1.4) * 0.0002;
+	float factor  = pow(length(viewSpacePosition.xyz), 1.4) * 0.00015 * ATMOSPHERIC_SCATTERING_AMOUNT;
 	
 	return pow(colorSkylight, vec3(3.5)) * factor;
 }
