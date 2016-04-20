@@ -17,7 +17,7 @@ uniform vec3 cameraPosition;
 uniform float frameTimeCounter;
 uniform float sunAngle;
 
-varying vec3 color;
+varying vec4 color;
 varying vec2 texcoord;
 varying vec2 lightmapCoord;
 
@@ -29,6 +29,7 @@ varying vec3 vertNormal;
 //#define WAVING_GRASS
 #define WAVING_LEAVES
 #define WAVING_WATER
+#define PLAYER_SHADOW
 
 
 vec4 GetWorldSpacePositionShadow() {
@@ -142,7 +143,7 @@ vec4 BiasShadowProjection(in vec4 position) {
 }
 
 void main() {
-	color         = gl_Color.rgb;
+	color         = gl_Color;
 	texcoord      = gl_MultiTexCoord0.st;
 	lightmapCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).st;
 	
@@ -159,6 +160,14 @@ void main() {
 	#ifdef FORWARD_SHADING
 		if (abs(mc_Entity.x - 8.5) < 0.6) gl_Position.w = -1.0;
 	#else
-		if (abs(mc_Entity.x - 8.5) < 0.6) color.rgb *= 0.0;
+		if (abs(mc_Entity.x - 8.5) < 0.6) color.rgb *= 0.0;    // Make water black, so that it doesn't bounce light
+	#endif
+	
+	#ifndef PLAYER_SHADOW
+	if (   mc_Entity.x == 0    // If the vertex is an entity
+		&& abs(position.x) < 1.0
+		&& position.y > -0.1 &&  position.y < 2.0    // Check if the vertex is in a bounding box around the player, so that at least non-near entities still cast shadows
+		&& abs(position.z) < 1.0
+	) color.a = 0.0;
 	#endif
 }

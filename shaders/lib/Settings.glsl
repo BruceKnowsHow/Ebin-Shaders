@@ -36,6 +36,7 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 #define SHADOW_MAP_BIAS 0.8     // [0.0 0.6 0.7 0.8 0.85 0.9]
 #define EXTENDED_SHADOW_DISTANCE
 #define SOFT_SHADOWS
+#define PLAYER_SHADOW
 
 #define FOG_ENABLED
 #define FOG_POWER 3.0                         // [1.0 2.0 3.0 4.0 6.0 8.0]

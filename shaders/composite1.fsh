@@ -137,7 +137,7 @@ void main() {
 	Mask mask;
 	CalculateMasks(mask, texture2D(colortex3, texcoord).b, true);
 	
-	vec3  diffuse           = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0));    // These ternary statements avoid redundant texture lookups for sky pixels.
+	vec3  diffuse           = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0));    // These ternary statements avoid redundant texture lookups for sky pixels
 	vec3  normal            = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
 	float depth             = (mask.sky < 0.5 ?              GetDepth(texcoord) : 1.0);
 	float depth1            = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0);    // Going to append a "1" onto the end of anything that represents first-layer transparency
@@ -145,7 +145,7 @@ void main() {
 	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition.xyz)), 1.0); return; }
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition.xyz)), 1.0); return; }    // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
 	
 	#ifdef DEFERRED_SHADING
 	float torchLightmap     = texture2D(colortex3, texcoord).r;
@@ -156,17 +156,14 @@ void main() {
 	vec3 composite = DecodeColor(texture2D(colortex2, texcoord).rgb);
 	#endif
 	
-	vec3  GI;
-	float Fog;
 	
+	vec3 GI; float Fog;
 	BilateralUpsample(normal, depth, mask, GI, Fog);
-	
 	
 	composite += GI * colorSunlight * pow(diffuse, vec3(2.2));
 	
-	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
-//	CompositeFog(composite, viewSpacePosition.xyz, Fog);
+	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(EncodeColor(GI), Fog);

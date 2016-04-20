@@ -18,17 +18,17 @@ vec3 CalculateSkyGradient(in vec3 viewSpacePosition) {
 }
 
 vec3 CalculateSunspot(in vec3 viewSpacePosition) {
-	float sunspot = max(0.0, dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
-	      sunspot = pow(sunspot, 350.0);
-	      sunspot = pow(sunspot + 1.0, 400.0) - 1.0;
-	      sunspot = min(sunspot, 20.0);
+	float sunspot  = max(0.0, dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
+	      sunspot  = pow(sunspot, 350.0);
+	      sunspot  = pow(sunspot + 1.0, 400.0) - 1.0;
+	      sunspot  = min(sunspot, 20.0);
 	      sunspot += 100.0 * float(sunspot == 20.0);
 	
 	return sunspot * colorSunlight * colorSunlight;
 }
 
 vec3 CalculateAtmosphereScattering(in vec3 viewSpacePosition) {
-	float factor  = pow(length(viewSpacePosition.xyz), 1.4) * 0.00015 * ATMOSPHERIC_SCATTERING_AMOUNT;
+	float factor = pow(length(viewSpacePosition.xyz), 1.4) * 0.00015 * ATMOSPHERIC_SCATTERING_AMOUNT;
 	
 	return pow(colorSkylight, vec3(3.5)) * factor;
 }
@@ -53,6 +53,7 @@ void CompositeFog(inout vec3 color, in vec3 viewSpacePosition, in float fogVolum
 
 vec3 CalculateSky(in vec3 viewSpacePosition) {
 	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz) * far;
+	
 	vec3  gradient   = CalculateSkyGradient(viewSpacePosition);
 	vec3  sunspot    = CalculateSunspot(viewSpacePosition);
 	vec3  atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
