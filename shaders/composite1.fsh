@@ -48,10 +48,6 @@ vec3 GetDiffuseForward(in vec2 coord) {
 	return texture2D(colortex6, coord).rgb;
 }
 
-vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex0, coord).xy);
-}
-
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
@@ -69,6 +65,22 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	     position /= position.w;
 	
 	return position;
+}
+
+vec3 GetNormal(in vec2 coord) {
+	return DecodeNormal(texture2D(colortex0, coord).xy);
+}
+
+float GetMaterialID(in vec2 coord) {
+	return texture2D(colortex3, texcoord).b;
+}
+
+float GetTorchLightmap(in vec2 coord) {
+	return texture2D(colortex3, texcoord).r;
+}
+
+float GetSkyLightmap(in vec2 coord) {
+	return texture2D(colortex3, texcoord).g;
 }
 
 void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float Fog) {
@@ -135,7 +147,7 @@ void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewS
 
 void main() {
 	Mask mask;
-	CalculateMasks(mask, texture2D(colortex3, texcoord).b, true);
+	CalculateMasks(mask, GetMaterialID(texcoord), true);
 	
 	vec3  diffuse           = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0));    // These ternary statements avoid redundant texture lookups for sky pixels
 	vec3  normal            = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
@@ -148,8 +160,8 @@ void main() {
 	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition.xyz)), 1.0); return; }    // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
 	
 	#ifdef DEFERRED_SHADING
-	float torchLightmap     = texture2D(colortex3, texcoord).r;
-	float skyLightmap       = texture2D(colortex3, texcoord).g;
+	float torchLightmap     = GetTorchLightmap(texcoord);
+	float skyLightmap       = GetSkyLightmap(texcoord);
 	
 	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, viewSpacePosition);
 	#else

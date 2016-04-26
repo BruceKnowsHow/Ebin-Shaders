@@ -48,8 +48,8 @@ void CalculateMasks(inout Mask mask, in float materialIDs, const bool encoded) {
 	
 	if (encoded) DecodeMaterialIDs(mask.matIDs, mask.bit0, mask.bit1, mask.bit2, mask.bit3);
 	
-	mask.grass  = GetMaterialMask(2, mask.matIDs);
-	mask.leaves = GetMaterialMask(3, mask.matIDs);
-	mask.water  = GetMaterialMask(4, mask.matIDs);
+	mask.grass  = GetMaterialMask(  2, mask.matIDs);
+	mask.leaves = GetMaterialMask(  3, mask.matIDs);
+	mask.water  = GetMaterialMask(  4, mask.matIDs);
 	mask.sky    = GetMaterialMask(255, mask.matIDs);
 }

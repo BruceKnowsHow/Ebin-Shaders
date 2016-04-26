@@ -14,19 +14,6 @@ varying vec2 texcoord;
 #include "/lib/Encoding.glsl"
 
 
-vec3 Uncharted2Tonemap(in vec3 color) {
-	const float A = 0.15, B = 0.5, C = 0.1, D = 0.2, E = 0.02, F = 0.3, W = 11.2;
-	const float whiteScale = 1.0 / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F);
-	const float ExposureBias = 2.3 * EXPOSURE;
-	
-	vec3 curr = ExposureBias * color;
-	     curr = ((curr * (A * curr + C * B) + D * E) / (curr * (A * curr + B) + D * F)) - E / F;
-	
-	color = curr * whiteScale;
-	
-	return pow(color, vec3(1.0 / 2.2));
-}
-
 vec3 GetBloomTile(const int scale, vec2 offset) {
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	
@@ -59,6 +46,19 @@ vec3[8] GetBloom() {
 	bloom[0] /= bloom.length() - 1.0;
 	
 	return bloom;
+}
+
+vec3 Uncharted2Tonemap(in vec3 color) {
+	const float A = 0.15, B = 0.5, C = 0.1, D = 0.2, E = 0.02, F = 0.3, W = 11.2;
+	const float whiteScale = 1.0 / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F);
+	const float ExposureBias = 2.3 * EXPOSURE;
+	
+	vec3 curr = ExposureBias * color;
+	     curr = ((curr * (A * curr + C * B) + D * E) / (curr * (A * curr + B) + D * F)) - E / F;
+	
+	color = curr * whiteScale;
+	
+	return pow(color, vec3(1.0 / 2.2));
 }
 
 void main() {

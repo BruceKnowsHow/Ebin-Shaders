@@ -43,10 +43,6 @@ varying vec2 texcoord;
 #include "/lib/ShadingFunctions.fsh"
 
 
-vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex0, coord).xy);
-}
-
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
@@ -60,6 +56,14 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	     position /= position.w;
 	
 	return position;
+}
+
+vec3 GetNormal(in vec2 coord) {
+	return DecodeNormal(texture2D(colortex0, coord).xy);
+}
+
+float GetMaterialID(in vec2 coord) {
+	return texture2D(colortex3, texcoord).b;
 }
 
 vec2 GetDitherred2DNoise(in vec2 coord, in float n) {    // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
@@ -167,12 +171,12 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 
 void main() {
 	Mask mask;
-	CalculateMasks(mask, texture2D(colortex3, texcoord).b, true);
+	CalculateMasks(mask, GetMaterialID(texcoord), true);
 	
 	if (mask.sky > 0.5)
 		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); return; }
 	
-	float depth             = texture2D(gdepthtex, texcoord).x;
+	float depth             = GetDepth(texcoord);
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	vec2  noise2D           = GetDitherred2DNoise(texcoord, 2.0 / COMPOSITE0_SCALE) * 2.0 - 1.0;
 	

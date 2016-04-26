@@ -16,7 +16,7 @@ varying vec2 texcoord;
 
 
 vec3 ComputeBloomTile(const int scale, vec2 offset) {    // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
-	// Each bloom tile uses (1.0 / scale) per-unit of the screen + (pixelSize * 2.0)
+	// Each bloom tile uses (1.0 / scale + pixelSize * 2.0) texcoord-units of the screen
 	
 	vec2  pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	

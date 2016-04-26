@@ -29,45 +29,26 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/Encoding.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 
 
-vec3 DecodeColor(in vec3 color) {
-	return pow(color, vec3(2.2)) * 1000.0;
-}
-
-vec3 EncodeColor(in vec3 color) {    // Prepares the color to be sent through a limited dynamic range pipeline
-	return pow(color * 0.001, vec3(1.0 / 2.2));
-}
-
 vec3 GetColor(in vec2 coord) {
 	return DecodeColor(texture2D(colortex2, coord).rgb);
-}
-
-vec3 DecodeNormal(vec2 encodedNormal) {
-	encodedNormal = encodedNormal * 2.0 - 1.0;
-    vec2 fenc = encodedNormal * 4.0 - 2.0;
-	float f = dot(fenc, fenc);
-	float g = sqrt(1.0 - f / 4.0);
-	return vec3(fenc * g, 1.0 - f / 2.0);
-}
-
-vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
 
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
 
-float GetFog(in vec2 coord) {
-	return texture2D(colortex4, coord).a;
-}
-
 float ExpToLinearDepth(in float depth) {
 	return 2.0 * near * (far + near - depth * (far - near));
+}
+
+vec3 GetNormal(in vec2 coord) {
+	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
 
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
@@ -75,6 +56,10 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	     position /= position.w;
 	
 	return position;
+}
+
+float GetFog(in vec2 coord) {
+	return texture2D(colortex4, coord).a;
 }
 
 #include "/lib/Sky.fsh"
