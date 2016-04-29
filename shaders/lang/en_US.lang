@@ -24,6 +24,25 @@ option.BLOOM_CURVE=Bloom Curve
 option.BLOOM_CURVE.comment=Higher values make the bloom more concentrated to bright areas, and also make the bloom more colorful
 
 
+option.MOTION_BLUR=Motion Blur
+
+option.VARIABLE_MOTION_BLUR_SAMPLES=Variable Sample Count
+option.VARIABLE_MOTION_BLUR_SAMPLES.comment=Whether to vary the amount of blur samples based on the amount of samples needed. This allows for higher sample counts and better quality blur. High performance impact!
+
+option.CONSTANT_MOTION_BLUR_SAMPLE_COUNT=Sample Count (Constant Samples)
+option.CONSTANT_MOTION_BLUR_SAMPLE_COUNT.comment=The sample count to be used when "variable sample count" is disabled. Medium performance impact!
+
+option.VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT=Sample Coeff (Variable Samples)
+option.VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT.comment=The sample-count-coefficient for when "variable sample count" is enabled. Medium Performance impact!
+
+option.MAX_MOTION_BLUR_SAMPLE_COUNT=Sample Count (Variable Samples)
+option.MAX_MOTION_BLUR_SAMPLE_COUNT.comment=The maximum sample count to be used when "variable sample count" is enabled. Medium performance impact!
+
+option.MOTION_BLUR_INTENSITY=Blur Intensity
+
+option.MAX_MOTION_BLUR_AMOUNT=Max Blur Amount
+
+
 option.WAVING_GRASS=Waving Grass
 
 option.WAVING_LEAVES=Waving Leaves

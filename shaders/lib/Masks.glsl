@@ -10,6 +10,7 @@ struct Mask {
 	float grass;
 	float leaves;
 	float water;
+	float hand;
 	float sky;
 };
 
@@ -51,5 +52,6 @@ void CalculateMasks(inout Mask mask, in float materialIDs, const bool encoded) {
 	mask.grass  = GetMaterialMask(  2, mask.matIDs);
 	mask.leaves = GetMaterialMask(  3, mask.matIDs);
 	mask.water  = GetMaterialMask(  4, mask.matIDs);
+	mask.hand   = GetMaterialMask(  5, mask.matIDs);
 	mask.sky    = GetMaterialMask(255, mask.matIDs);
 }

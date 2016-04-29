@@ -18,34 +18,42 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 
 
-#define EXPOSURE            1.00    // [0.20 0.40 0.60 0.80 1.00 2.00 4.00  8.00]
+#define EXPOSURE            1.00    // [0.2 0.4 0.6 0.8 1.0 2.0 4.0  8.0]
 #define SUN_LIGHT_LEVEL     1.00    // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define SKY_LIGHT_LEVEL     1.00    // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define AMBIENT_LIGHT_LEVEL 1.00    // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define TORCH_LIGHT_LEVEL   1.00    // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
-#define SKY_BRIGHTNESS      1.00    // [0.20 0.40 0.60 0.80 1.00 2.00 4.00  8.00]
+#define SKY_BRIGHTNESS      1.00    // [0.2 0.4 0.6 0.8 1.0 2.0 4.0  8.0]
 
 
 #define BLOOM_AMOUNT        0.12    // [0.00 0.12 0.25 0.50 1.00]
 #define BLOOM_CURVE         1.50    // [1.00 1.25 1.50 1.75 2.00]
 
+//#define MOTION_BLUR
+#define VARIABLE_MOTION_BLUR_SAMPLES
+#define MAX_MOTION_BLUR_SAMPLE_COUNT            50       // [10 25 50 100]
+#define VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT 1.000    // [0.125 0.250 0.500 1.000]
+#define CONSTANT_MOTION_BLUR_SAMPLE_COUNT       2        // [2 3 4 5 10]
+#define MOTION_BLUR_INTENSITY                   1.0      // [0.5 1.0 2.0]
+#define MAX_MOTION_BLUR_AMOUNT                  1.0      // [0.5 1.0 2.0]
+
 //#define WAVING_GRASS
 #define WAVING_LEAVES
 #define WAVING_WATER
 
-#define SHADOW_MAP_BIAS 0.8     // [0.0 0.6 0.7 0.8 0.85 0.9]
+#define SHADOW_MAP_BIAS 0.8     // [0.00 0.60 0.70 0.80 0.85 0.90]
 #define EXTENDED_SHADOW_DISTANCE
 #define SOFT_SHADOWS
 #define PLAYER_SHADOW
 
 #define FOG_ENABLED
-#define FOG_POWER 3.0                         // [1.0 2.0 3.0 4.0 6.0 8.0]
-#define VOLUMETRIC_FOG_POWER 2.0              // [1.0 2.0 3.0 4.0]
+#define FOG_POWER 3.0                         // [1 2 3 4 6 8]
+#define VOLUMETRIC_FOG_POWER 2.0              // [1 2 3 4]
 #define ATMOSPHERIC_SCATTERING_AMOUNT 1.00    // [0.00 0.25 0.50 0.75 1.00 2.00 4.00]
 
-#define GI_TRANSLUCENCE 0.2     // [0.0 0.2 0.4 0.6 0.8 1.0]
-#define GI_RADIUS 16.0     // [4.0 8.0 16.0 24.0 32.0]
-#define GI_QUALITY 1.0     // [0.25 0.5 1.0 2.0 3.0 4.0]
+#define GI_TRANSLUCENCE 0.2    // [0.0 0.2 0.4 0.6 0.8 1.0]
+#define GI_RADIUS 16.0         // [4 8 16 24 32]
+#define GI_QUALITY 1.0         // [0.25 0.50 1.00 2.00 3.00 4.00]
 #define GI_BOOST
 
 

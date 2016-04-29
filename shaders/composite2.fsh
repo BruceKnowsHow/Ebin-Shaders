@@ -47,10 +47,6 @@ float ExpToLinearDepth(in float depth) {
 	return 2.0 * near * (far + near - depth * (far - near));
 }
 
-vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex0, coord).xy);
-}
-
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
@@ -58,17 +54,21 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-float GetFog(in vec2 coord) {
-	return texture2D(colortex4, coord).a;
-}
-
-#include "/lib/Sky.fsh"
-
 vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
     vec4 screenSpace = gbufferProjection * vec4(viewSpacePosition, 1.0);
     
     return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
 }
+
+vec3 GetNormal(in vec2 coord) {
+	return DecodeNormal(texture2D(colortex0, coord).xy);
+}
+
+float GetFog(in vec2 coord) {
+	return texture2D(colortex4, coord).a;
+}
+
+#include "/lib/Sky.fsh"
 
 bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const float rayGrowth, const int maxSteps, const int maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
 	vec3 rayStep = rayDirection * firstStepSize;
