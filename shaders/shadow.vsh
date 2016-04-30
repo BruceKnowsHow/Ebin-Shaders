@@ -2,7 +2,7 @@
 
 #define SHADOW_MAP_BIAS 0.8
 #define EXTENDED_SHADOW_DISTANCE
-#define FORWARD_SHADING
+//#define FORWARD_SHADING
 #define CUSTOM_TIME_CYCLE
 
 attribute vec4 mc_Entity;
@@ -75,7 +75,7 @@ vec3 GetWavingLeaves(in vec3 position, in float magnitude) {
 	
 	wave.x += sin((TIME * 20.0 * PI / (16.0 * speed)) + (position.x + d0) * 0.5 + (position.z + d1) * 0.5 + position.y) * intensity;
 	wave.z += sin((TIME * 20.0 * PI / (18.0 * speed)) + (position.z + d2) * 0.5 + (position.x + d3) * 0.5 + position.y) * intensity;
-	wave.y += sin((TIME * 20.0 * PI / (10.0 * speed)) + (position.z + d2)       + (position.x + d3)                   ) * intensity / 2.0;
+	wave.y += sin((TIME * 20.0 * PI / (10.0 * speed)) + (position.z + d2)       + (position.x + d3)                   ) * intensity * 0.5;
 	#endif
 	
 	return wave * magnitude;
@@ -131,13 +131,13 @@ vec4 BiasShadowProjection(in vec4 position) {
 	
 	biasCoeff = biasCoeff * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
 	
-	position.z  += 0.002 * max(0.0, 1.0 - dot(vertNormal, vec3(0.0, 0.0, 1.0)));    // Offset the z-coordinate to fix shadow acne
+	position.z  += 0.002 * max(0.0, 1.0 - dot(vertNormal, vec3(0.0, 0.0, 1.0))); // Offset the z-coordinate to fix shadow acne
 	position.z  += 0.0005 / (abs(position.x) + 1.0);
 	position.z  += 0.002 * pow(biasCoeff * 2.0, 2.0);
 	
 	position.xy /= biasCoeff;
 	
-	position.z  /= 4.0;    // Shrink the domain of the z-buffer. This counteracts the noticable issue where far terrain would not have shadows cast, especially when the sun was near the horizon
+	position.z  /= 4.0; // Shrink the domain of the z-buffer. This counteracts the noticable issue where far terrain would not have shadows cast, especially when the sun was near the horizon
 	
 	return position;
 }
@@ -160,13 +160,13 @@ void main() {
 	#ifdef FORWARD_SHADING
 		if (abs(mc_Entity.x - 8.5) < 0.6) gl_Position.w = -1.0;
 	#else
-		if (abs(mc_Entity.x - 8.5) < 0.6) color.rgb *= 0.0;    // Make water black, so that it doesn't bounce light
+		if (abs(mc_Entity.x - 8.5) < 0.6) color.rgb *= 0.0; // Make water black, so that it doesn't bounce light
 	#endif
 	
 	#ifndef PLAYER_SHADOW
-	if (   mc_Entity.x == 0    // If the vertex is an entity
+	if (   mc_Entity.x == 0 // If the vertex is an entity
 		&& abs(position.x) < 1.0
-		&& position.y > -0.1 &&  position.y < 2.0    // Check if the vertex is in a bounding box around the player, so that at least non-near entities still cast shadows
+		&& position.y > -0.1 &&  position.y < 2.0 // Check if the vertex is in a bounding box around the player, so that at least non-near entities still cast shadows
 		&& abs(position.z) < 1.0
 	) color.a = 0.0;
 	#endif

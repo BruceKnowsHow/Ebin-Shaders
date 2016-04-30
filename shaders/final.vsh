@@ -50,7 +50,7 @@ void main() {
 	
 	
 //#include "include/PostCalculations.vsh"
-	vec3 sunVector = normalize(sunPosition);    //Engine-time overrides will happen by modifying sunVector
+	vec3 sunVector = normalize(sunPosition); //Engine-time overrides will happen by modifying sunVector
 	
 	lightVector = sunVector * mix(1.0, -1.0, float(dot(sunVector, upPosition) < 0.0));
 	
@@ -76,7 +76,7 @@ void main() {
 	vec3(1.00, 0.50, 0.00);
 	
 	colorSunlight  = sunlightDay * timeDay + sunlightNight * timeNight + sunlightHorizon * timeHorizon;
-	colorSunlight *= mix(vec3(1.0), sunlightHorizon, timeHorizon);
+//	colorSunlight *= mix(vec3(1.0), sunlightHorizon, timeHorizon);
 	
 	
 	const vec3 skylightDay =

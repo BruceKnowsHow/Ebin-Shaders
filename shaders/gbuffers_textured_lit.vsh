@@ -1,5 +1,7 @@
 #version 120
 
+//#define GBUFFERS_HAND_VERTEX
+
 uniform mat4 gbufferProjectionInverse;
 
 attribute vec4 mc_Entity;
@@ -56,29 +58,34 @@ float clamp01(in float x) {
 #define WAVING_WATER
 
 
-vec2 GetDefaultLightmap(in vec2 lightmapCoord) {    // Gets the lightmap from the default lighting engine, ignoring any texture pack lightmap. First channel is torch lightmap, second channel is sky lightmap.
-	return clamp((lightmapCoord * 1.032) - 0.032, 0.0, 1.0).st;    // Default lightmap texture coordinates work somewhat as lightmaps, however they need to be adjusted to use the full range of 0.0-1.0
+vec2 GetDefaultLightmap(in vec2 lightmapCoord) { // Gets the lightmap from the default lighting engine, ignoring any texture pack lightmap. First channel is torch lightmap, second channel is sky lightmap.
+	return clamp((lightmapCoord * 1.032) - 0.032, 0.0, 1.0).st; // Default lightmap texture coordinates work somewhat as lightmaps, however they need to be adjusted to use the full range of 0.0-1.0
 }
 
-float GetMaterialIDs() {    // Gather material masks
+float GetMaterialIDs() { // Gather material masks
+	#ifdef GBUFFERS_HAND_VERTEX
+	return 5.0;
+	#endif
+	
 	float materialID;
 	
 	switch(int(mc_Entity.x)) {
-		case 31:                                // Tall Grass
-		case 37:                                // Dandelion
-		case 38:                                // Rose
-		case 59:                                // Wheat
-		case 83:                                // Sugar Cane
-		case 175:                               // Double Tall Grass
-					materialID = 2.0; break;    // Grass
-		case 18:                                // Generic leaves
-		case 106:                               // Vines
-		case 161:                               // New leaves
-					materialID = 3.0; break;    // Leaves
+		case 31:                     // Tall Grass
+		case 37:                     // Dandelion
+		case 38:                     // Rose
+		case 59:                     // Wheat
+		case 83:                     // Sugar Cane
+		case 175:                    // Double Tall Grass
+		    materialID = 2.0; break; // Grass
+		case 18:                     // Generic leaves
+		case 106:                    // Vines
+		case 161:                    // New leaves
+		    materialID = 3.0; break; // Leaves
 		case 8:
 		case 9:
-					materialID = 4.0; break;    // Water
-		case 79:	materialID = 5.0; break;    // Ice
+		    materialID = 4.0; break; // Water
+		case 79:
+		    materialID = 5.0; break; // Ice
 		default:	materialID = 1.0;
 	}
 	
@@ -93,7 +100,7 @@ float EncodeMaterialIDs(in float materialIDs, in float bit0, in float bit1, in f
 	
 	materialIDs += 0.1;
 	materialIDs /= 255.0;
-	materialIDs  = 1.0 - materialIDs;    // MaterialIDs are sent through the pipeline inverted so that when they're decoded, sky pixels (which are always written as 0.0 in certain situations) will be 1.0
+	materialIDs  = 1.0 - materialIDs; // MaterialIDs are sent through the pipeline inverted so that when they're decoded, sky pixels (which are always written as 0.0 in certain situations) will be 1.0
 	
 	return materialIDs;
 }
@@ -142,7 +149,7 @@ vec3 GetWavingLeaves(in vec3 position, in float magnitude) {
 	
 	wave.x += sin((TIME * 20.0 * PI / (16.0 * speed)) + (position.x + d0) * 0.5 + (position.z + d1) * 0.5 + position.y) * intensity;
 	wave.z += sin((TIME * 20.0 * PI / (18.0 * speed)) + (position.z + d2) * 0.5 + (position.x + d3) * 0.5 + position.y) * intensity;
-	wave.y += sin((TIME * 20.0 * PI / (10.0 * speed)) + (position.z + d2)       + (position.x + d3)                   ) * intensity / 2.0;
+	wave.y += sin((TIME * 20.0 * PI / (10.0 * speed)) + (position.z + d2)       + (position.x + d3)                   ) * intensity * 0.5;
 	#endif
 	
 	return wave * magnitude;
@@ -232,7 +239,7 @@ void main() {
 	viewSpacePosition  = gbufferModelView * position;
 	
 //#include "include/PostCalculations.vsh"
-	vec3 sunVector = normalize(sunPosition);    //Engine-time overrides will happen by modifying sunVector
+	vec3 sunVector = normalize(sunPosition); //Engine-time overrides will happen by modifying sunVector
 	
 	lightVector = sunVector * mix(1.0, -1.0, float(dot(sunVector, upPosition) < 0.0));
 	
@@ -258,7 +265,7 @@ void main() {
 	vec3(1.00, 0.50, 0.00);
 	
 	colorSunlight  = sunlightDay * timeDay + sunlightNight * timeNight + sunlightHorizon * timeHorizon;
-	colorSunlight *= mix(vec3(1.0), sunlightHorizon, timeHorizon);
+//	colorSunlight *= mix(vec3(1.0), sunlightHorizon, timeHorizon);
 	
 	
 	const vec3 skylightDay =

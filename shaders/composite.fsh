@@ -36,7 +36,6 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
-#include "/lib/Encoding.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
@@ -66,7 +65,7 @@ float GetMaterialID(in vec2 coord) {
 	return texture2D(colortex3, texcoord).b;
 }
 
-vec2 GetDitherred2DNoise(in vec2 coord, in float n) {    // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
+vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
 	coord *= vec2(viewWidth, viewHeight);
 	coord  = mod(coord, vec2(n));
 	coord /= noiseTextureResolution;
@@ -88,8 +87,8 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	float depthLOD	= 2.0 * clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	float sampleLOD	= depthLOD * 5.0 / 2.0;
 	
-	position = WorldSpaceToShadowSpace(ViewSpaceToWorldSpace(position)) * 0.5 + 0.5;    // Convert the view-space position to shadow-map coordinates (unbiased)
-	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz;     // Convert the normal from view-space to shadow-view-space
+	position = WorldSpaceToShadowSpace(ViewSpaceToWorldSpace(position)) * 0.5 + 0.5; // Convert the view-space position to shadow-map coordinates (unbiased)
+	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz;  // Convert the normal from view-space to shadow-view-space
 	
 	const float brightness  = 30.0 * radius * radius * SUN_LIGHT_LEVEL;
 	const float interval    = 1.0 / quality;
@@ -110,13 +109,13 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 			samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
 			samplePos.z = samplePos.z * 4.0 - 1.5;    // Undo z-shrinking
 			
-			vec4 position  = shadowProjectionInverse * ( position * 2.0 - 1.0);    // Re-declaring "position" here overrides "position" with a new vec4, but only in the context of the current iterration. Without the declaration, our changes would roll-over to the next iteration because "position"'s scope is the entire function.
+			vec4 position  = shadowProjectionInverse * ( position * 2.0 - 1.0); // Re-declaring "position" here overrides "position" with a new vec4, but only in the context of the current iterration. Without the declaration, our changes would roll-over to the next iteration because "position"'s scope is the entire function.
 			     samplePos = shadowProjectionInverse * (samplePos * 2.0 - 1.0);
 			
 			vec3 sampleDiff = position.xyz - samplePos.xyz;
 			
 			float distanceCoeff = max(length(sampleDiff), radius);
-			      distanceCoeff = 1.0 / square(distanceCoeff);    // Inverse-square law
+			      distanceCoeff = 1.0 / square(distanceCoeff); // Inverse-square law
 			
 			vec3 sampleDir    = normalize(sampleDiff);
 			vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
@@ -125,7 +124,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 			float shadowNormalCoeff = max(0.0, dot(shadowNormal, sampleDir));
 			
 			viewNormalCoeff   = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
-	//		viewNormalCoeff   = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0;    // This effect tends to make trees look like crud at low composite0 sizes
+	//		viewNormalCoeff   = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0; // This effect tends to make trees look like crud at low composite0 sizes
 			
 			vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
 			
@@ -135,7 +134,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	
 	GI /= sampleCount;
 	
-	return GI * lightMult * brightness;    // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
+	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
 
 float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
@@ -152,7 +151,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 		
 		vec3 samplePosition = BiasShadowProjection(WorldSpaceToShadowSpace(ViewSpaceToWorldSpace(vec4(ray, 1.0)))).xyz * 0.5 + 0.5;
 		
-		fog += shadow2D(shadow, samplePosition).x * rayIncrement ;// * CalculateFogFactor(ray, FOGPOW);
+		fog += shadow2D(shadow, samplePosition).x * rayIncrement;
 		
 		weight += rayIncrement;
 		

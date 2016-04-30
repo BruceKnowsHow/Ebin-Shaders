@@ -15,13 +15,13 @@ varying vec2 texcoord;
 #include "/lib/Util.glsl"
 
 
-vec3 ComputeBloomTile(const int scale, vec2 offset) {    // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
+vec3 ComputeBloomTile(const int scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
 	// Each bloom tile uses (1.0 / scale + pixelSize * 2.0) texcoord-units of the screen
 	
 	vec2  pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	
 	vec2 coord  = texcoord;
-	     coord -= offset + pixelSize;    // A pixel is added to the offset to give the bloom tile a padding
+	     coord -= offset + pixelSize; // A pixel is added to the offset to give the bloom tile a padding
 	     coord *= scale;
 	
 	vec2 padding = pixelSize * scale;
@@ -31,7 +31,7 @@ vec3 ComputeBloomTile(const int scale, vec2 offset) {    // Computes a single bl
 		return vec3(0.0);
 	
 	
-	const float range       = 2.0 * scale;    // Sample radius has to be adjusted based on the scale of the bloom tile
+	const float range       = 2.0 * scale; // Sample radius has to be adjusted based on the scale of the bloom tile
 	const float interval    = 1.0 * scale;
 	      float maxLength   = length(vec2(range));
 	
@@ -42,7 +42,7 @@ vec3 ComputeBloomTile(const int scale, vec2 offset) {    // Computes a single bl
 		for (float j = -range; j <= range; j += interval) {
 			float weight  = 1.0 - length(vec2(i, j)) / maxLength;
 			      weight *= weight;
-			      weight  = cubesmooth(weight);    // Apply a faux-gaussian falloff
+			      weight  = cubesmooth(weight); // Apply a faux-gaussian falloff
 			
 			vec2 offset = vec2(i, j) * pixelSize;
 			

@@ -33,7 +33,6 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
-#include "/lib/Encoding.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
@@ -149,15 +148,15 @@ void main() {
 	Mask mask;
 	CalculateMasks(mask, GetMaterialID(texcoord), true);
 	
-	vec3  diffuse           = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0));    // These ternary statements avoid redundant texture lookups for sky pixels
+	vec3  diffuse           = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
 	vec3  normal            = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
 	float depth             = (mask.sky < 0.5 ?              GetDepth(texcoord) : 1.0);
-	float depth1            = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0);    // Going to append a "1" onto the end of anything that represents first-layer transparency
+	float depth1            = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0); // Going to append a "1" onto the end of anything that represents first-layer transparency
 	
 	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition.xyz)), 1.0); return; }    // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition.xyz)), 1.0); return; } // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
 	
 	#ifdef DEFERRED_SHADING
 	float torchLightmap     = GetTorchLightmap(texcoord);

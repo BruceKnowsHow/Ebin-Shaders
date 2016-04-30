@@ -25,7 +25,6 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
-#include "/lib/Encoding.glsl"
 #include "/lib/Masks.glsl"
 
 
@@ -61,22 +60,22 @@ vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
 void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	if (mask.hand > 0.5) return;
 	
-	vec4 position = vec4(vec3(texcoord, depth) * 2.0 - 1.0, 1.0);    // Signed [-1.0 to 1.0] screen space position
+	vec4 position = vec4(vec3(texcoord, depth) * 2.0 - 1.0, 1.0); // Signed [-1.0 to 1.0] screen space position
 	
-	vec4 previousPosition      = gbufferModelViewInverse * gbufferProjectionInverse * position;    // Un-project and un-rotate
-	     previousPosition     /= previousPosition.w;    // Linearize
-	     previousPosition.xyz += cameraPosition - previousCameraPosition;    // Add the world-space difference from the previous frame
-	     previousPosition      = gbufferPreviousProjection * gbufferPreviousModelView * previousPosition;    // Re-rotate and re-project using the previous frame matrices
-	     previousPosition.st  /= previousPosition.w;    // Un-linearize, swizzle to avoid correcting irrelivant components
+	vec4 previousPosition      = gbufferModelViewInverse * gbufferProjectionInverse * position; // Un-project and un-rotate
+	     previousPosition     /= previousPosition.w; // Linearize
+	     previousPosition.xyz += cameraPosition - previousCameraPosition; // Add the world-space difference from the previous frame
+	     previousPosition      = gbufferPreviousProjection * gbufferPreviousModelView * previousPosition; // Re-rotate and re-project using the previous frame matrices
+	     previousPosition.st  /= previousPosition.w; // Un-linearize, swizzle to avoid correcting irrelivant components
 	
 	const float intensity = MOTION_BLUR_INTENSITY * 0.5;
 	const float maxVelocity = MAX_MOTION_BLUR_AMOUNT * 0.1;
 	
-	vec2 velocity = (position.st - previousPosition.st) * MOTION_BLUR_INTENSITY;    // Screen-space motion vector
+	vec2 velocity = (position.st - previousPosition.st) * MOTION_BLUR_INTENSITY; // Screen-space motion vector
 	     velocity = clamp(velocity, vec2(-maxVelocity), vec2(maxVelocity));
 	
 	#ifdef VARIABLE_MOTION_BLUR_SAMPLES
-	float sampleCount = length(velocity * vec2(viewWidth, viewHeight)) * VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT;    // There will be exactly 1 sample for every pixel when the sample coefficient is 1.0
+	float sampleCount = length(velocity * vec2(viewWidth, viewHeight)) * VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT; // There should be exactly 1 sample for every pixel when the sample coefficient is 1.0
 	      sampleCount = floor(clamp(sampleCount, 1.0, MAX_MOTION_BLUR_SAMPLE_COUNT));
 	#else
 	const float sampleCount = CONSTANT_MOTION_BLUR_SAMPLE_COUNT;
@@ -157,7 +156,7 @@ void main() {
 	CalculateMasks(mask, GetMaterialID(texcoord), true);
 	
 	float depth = GetDepth(texcoord);
-	vec3  color = DecodeColor(texture2D(colortex0, texcoord).rgb);
+	vec3  color = GetColor(texcoord);
 	
 	#ifdef MOTION_BLUR
 	MotionBlur(color, depth, mask);

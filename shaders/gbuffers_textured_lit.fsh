@@ -35,7 +35,6 @@ varying vec3 worldPosition;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
-#include "/lib/Encoding.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/CalculateFogFactor.glsl"
 #ifdef FORWARD_SHADING
@@ -74,7 +73,7 @@ void GetWaveDifferentials(in vec3 position, out vec2 diff) {
 	GetWaveDifferential(diff, position.xz, 1.40, 0.015, 1.5, vec2( 0.60,-0.50));
 }
 
-vec2 smoothNoiseCoord(in vec2 coord) {    // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
+vec2 smoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
 	return floor(coord) + cubesmooth(fract(coord)) + 0.5;
 }
 
@@ -109,7 +108,7 @@ float GetFractalWaves(vec3 position) {
 	return waves / totalAmplitude;
 }
 
-void GetFractalWaveDifferentials(in vec3 position, out vec2 diff) {    // Get finite wave differentials for the world-space X and Z coordinates
+void GetFractalWaveDifferentials(in vec3 position, out vec2 diff) { // Get finite wave differentials for the world-space X and Z coordinates
 	float a  = GetFractalWaves(position);
 	float aX = GetFractalWaves(position + vec3(0.1, 0.0, 0.0));
 	float aY = GetFractalWaves(position + vec3(0.0, 0.0, 0.1));
@@ -130,7 +129,7 @@ vec3 GetWaveNormals(in vec3 position) {
 	      viewVectorCoeff  = sqrt(viewVectorCoeff);
 	
 	normal.xy = diff * viewVectorCoeff;
-	normal.z  = sqrt(1.0 - pow2(normal.x) - pow2(normal.y));    // Solve the equation "length(normal.xyz) = 1.0" for normal.z
+	normal.z  = sqrt(1.0 - pow2(normal.x) - pow2(normal.y)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 	
 	return normal;
 }
@@ -147,7 +146,7 @@ vec3 GetNormal() {
 void main() {
 	if (CalculateFogFactor(viewSpacePosition.xyz, FOG_POWER) >= 1.0) discard;
 	
-	vec4 diffuse  = GetDiffuse();  if (diffuse.a < 0.1000003) discard;    // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
+	vec4 diffuse  = GetDiffuse();  if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
 	vec3 normal   = GetNormal();
 	
 	#ifdef DEFERRED_SHADING

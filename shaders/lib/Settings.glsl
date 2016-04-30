@@ -64,7 +64,7 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 #define RECALCULATE_DISPLACED_NORMALS
 
-#define FORWARD_SHADING
+//#define FORWARD_SHADING
 
 
 

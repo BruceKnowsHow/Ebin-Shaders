@@ -50,7 +50,7 @@ void main() {
 	
 	
 //#include "include/PostCalculations.vsh"
-	vec3 sunVector = normalize(sunPosition);    //Engine-time overrides will happen by modifying sunVector
+	vec3 sunVector = normalize(sunPosition); //Engine-time overrides will happen by modifying sunVector
 	
 	lightVector = sunVector * mix(1.0, -1.0, float(dot(sunVector, upPosition) < 0.0));
 	
