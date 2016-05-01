@@ -80,38 +80,39 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	
 	float sunlight = ComputeDirectSunlight(position, normalShading);
 	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
-	#endif
 	
-	if (lightMult < 0.05 && GI_Boost) return vec3(0.0);
+	if (lightMult < 0.05) return vec3(0.0);
+	#endif
 	
 	float depthLOD	= 2.0 * clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	float sampleLOD	= depthLOD * 5.0 / 2.0;
 	
 	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;
 	
-	position = shadowProjection * shadowViewPosition * 0.5 + 0.5; // "position" now represents shadow-map position (unbiased)
-	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz;  // Convert the normal from view-space to shadow-view-space
+	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position
+	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal from view-space to shadow-view-space
 	
 	const float brightness  = 30.0 * radius * radius * SUN_LIGHT_LEVEL;
 	const float interval    = 1.0 / quality;
-	const float scale       = radius / 512.0;
+	const float scale       = radius / 256.0;
 	const float sampleCount = pow(1.0 / interval * 2.0 + 1.0, 2.0);
+	
+	noise *= interval * scale;
 	
 	vec3 GI = vec3(0.0);
 	
 	for(float x = -1.0; x <= 1.0; x += interval) {
 		for(float y = -1.0; y <= 1.0; y += interval) {
-			vec2 offset  = vec2(x, y) + noise * interval;
-			     offset *= scale;
+			vec2 offset = vec2(x, y) * scale + noise;
 			
 			vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
 			
-			vec2 mapPos = BiasShadowMap(samplePos.xy * 2.0 - 1.0) * 0.5 + 0.5;
+			vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
 			
 			samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
-			samplePos.z = samplePos.z * 4.0 - 1.5;    // Undo z-shrinking
+			samplePos.z = samplePos.z * 8.0 - 4.0;    // Convert range from unsigned to signed and undo z-shrinking
 			
-			samplePos = shadowProjectionInverse * (samplePos * 2.0 - 1.0); // Convert sample position to shadow-view-space for a linear comparison against the pixel's position
+			samplePos = shadowProjectionInverse * samplePos; // Convert sample position to shadow-view-space for a linear comparison against the pixel's position
 			
 			vec3 sampleDiff = shadowViewPosition.xyz - samplePos.xyz;
 			
