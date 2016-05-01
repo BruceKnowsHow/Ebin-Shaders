@@ -47,8 +47,8 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 #define PLAYER_SHADOW
 
 #define FOG_ENABLED
-#define FOG_POWER 3.0                         // [1 2 3 4 6 8]
-#define VOLUMETRIC_FOG_POWER 2.0              // [1 2 3 4]
+#define FOG_POWER 3.0                         // [1.0 2.0 3.0 4.0 6.0 8.0]
+#define VOLUMETRIC_FOG_POWER 2.0              // [1.0 2.0 3.0 4.0]
 #define ATMOSPHERIC_SCATTERING_AMOUNT 1.00    // [0.00 0.25 0.50 0.75 1.00 2.00 4.00]
 
 #define GI_TRANSLUCENCE 0.2    // [0.0 0.2 0.4 0.6 0.8 1.0]
