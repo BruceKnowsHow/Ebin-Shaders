@@ -70,3 +70,15 @@ float sum(in vec2 x) {
 float sum(in vec3 x) {
 	return dot(x, vec3(1.0));
 }
+
+float length(in vec2 x) {
+	return sqrt(dot(x, x));
+}
+
+float length(in vec3 x) {
+	return sqrt(dot(x, x));
+}
+
+float length(in vec4 x) {
+	return sqrt(dot(x, x));
+}
