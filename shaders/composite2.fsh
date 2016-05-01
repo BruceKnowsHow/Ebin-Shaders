@@ -95,7 +95,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 		
 		if (diff >= 0) {
 			if (doRefinements) {
-				float error = length(rayStep) * refinementCoeff;
+				float error = firstStepSize * pow(rayGrowth, i) * refinementCoeff;
 				
 				if(diff <= error * 2.0 && refinements <= maxRefinements) {
 					ray -= rayStep * refinementCoeff;

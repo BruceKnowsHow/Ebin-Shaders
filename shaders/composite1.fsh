@@ -103,11 +103,11 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			float weight  = 1.0 - abs(depth - sampleDepth);
 			      weight *= dot(normal, sampleNormal);
 			      weight  = pow(weight, 32);
-			      weight  = max(0.000000001, weight);
+			      weight  = max(0.1e-8, weight);
 			
 			float FogWeight = 1.0 - abs(depth - sampleDepth) * 10.0;
 			      FogWeight = pow(FogWeight, 32);
-			      FogWeight = max(0.000000001, FogWeight);
+			      FogWeight = max(0.1e-8, FogWeight);
 			
 			GI  += DecodeColor(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb) * weight;
 			Fog += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).a * FogWeight;

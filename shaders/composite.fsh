@@ -125,8 +125,8 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 			float viewNormalCoeff   = max(0.0, dot(     -normal, sampleDir));
 			float shadowNormalCoeff = max(0.0, dot(shadowNormal, sampleDir));
 			
-			viewNormalCoeff   = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
-	//		viewNormalCoeff   = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0; // This effect tends to make trees look like crud at low composite0 sizes
+			viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
+	//		viewNormalCoeff = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0; // This effect tends to make trees look like crud at low composite0 sizes
 			
 			vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
 			
@@ -162,7 +162,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 		rayIncrement *= 1.01; // Increase the step-size so that the sample-count decreases as the ray gets farther from the viewer
 	}
 	
-	fog /= max(weight, 0.00000001);
+	fog /= max(weight, 0.1e-8);
 	fog  = pow(fog, VOLUMETRIC_FOG_POWER);
 	
 	return fog;

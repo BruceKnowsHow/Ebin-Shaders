@@ -1,6 +1,6 @@
 #version 120
 
-#define SHADOW_MAP_BIAS 0.8
+#define SHADOW_MAP_BIAS 0.80
 #define EXTENDED_SHADOW_DISTANCE
 //#define FORWARD_SHADING
 #define CUSTOM_TIME_CYCLE
@@ -30,6 +30,8 @@ varying vec3 vertNormal;
 #define WAVING_LEAVES
 #define WAVING_WATER
 #define PLAYER_SHADOW
+
+const bool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
 
 
 vec4 GetWorldSpacePositionShadow() {
@@ -121,21 +123,40 @@ vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
 	return wave;
 }
 
-vec4 BiasShadowProjection(in vec4 position) {
-	float biasCoeff = length(position.xy);
+float pow8(in float x) {
+	x *= x;
+	x *= x;
+	return x * x;
+}
+
+float root8(in float x) {
+	return sqrt(sqrt(sqrt(x)));
+}
+
+float length8(in vec2 x) {
+	return root8(pow8(x.x) + pow8(x.y));
+}
+
+float GetShadowBias(in vec2 shadowProjection) {
+	if (!biasShadowMap) return 1.0;
 	
 	#ifdef EXTENDED_SHADOW_DISTANCE
-		vec2 pos = abs(position.xy * 1.165);
-		biasCoeff = pow(pow(pos.x, 8) + pow(pos.y, 8), 1.0 / 8.0);
+		shadowProjection *= 1.165;
+		
+		return length8(shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
+	#else
+		return length (shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
 	#endif
+}
+
+vec4 BiasShadowProjection(in vec4 position) {
+	float biasCoeff = GetShadowBias(position.xy);
 	
-	biasCoeff = biasCoeff * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
+	position.xy /= biasCoeff;
 	
 	position.z  += 0.002 * max(0.0, 1.0 - dot(vertNormal, vec3(0.0, 0.0, 1.0))); // Offset the z-coordinate to fix shadow acne
 	position.z  += 0.0005 / (abs(position.x) + 1.0);
 	position.z  += 0.002 * pow(biasCoeff * 2.0, 2.0);
-	
-	position.xy /= biasCoeff;
 	
 	position.z  /= 4.0; // Shrink the domain of the z-buffer. This counteracts the noticable issue where far terrain would not have shadows cast, especially when the sun was near the horizon
 	

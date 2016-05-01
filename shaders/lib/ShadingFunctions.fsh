@@ -1,5 +1,5 @@
-struct Shading {     // Contains scalar light levels without any color
-	float normal;    // Coefficient of light intensity based on the dot product of the normal vector and the light vector
+struct Shading {      // Contains scalar light levels without any color
+	float normal;     // Coefficient of light intensity based on the dot product of the normal vector and the light vector
 	float sunlight;
 	float skylight;
 	float torchlight;
@@ -22,6 +22,8 @@ vec4 WorldSpaceToShadowSpace(in vec4 worldSpacePosition) {
 }
 
 float GetShadowBias(in vec2 shadowProjection) {
+	if (!biasShadowMap) return 1.0;
+	
 	#ifdef EXTENDED_SHADOW_DISTANCE
 		shadowProjection *= 1.165;
 		
@@ -40,13 +42,13 @@ vec2 BiasShadowMap(in vec2 shadowProjection) {
 	return shadowProjection / GetShadowBias(shadowProjection);
 }
 
-vec4 BiasShadowProjection(in vec4 position, out float biasCoeff) {
+vec3 BiasShadowProjection(in vec3 position, out float biasCoeff) {
 	biasCoeff = GetShadowBias(position.xy);
-	return position / vec4(vec2(biasCoeff), 4.0, 1.0);    // Apply bias to position.xy, shrink z-buffer
+	return position / vec3(vec2(biasCoeff), 4.0); // Apply bias to position.xy, shrink z-buffer
 }
 
-vec4 BiasShadowProjection(in vec4 position) {
-	return position / vec4(vec2(GetShadowBias(position.xy)), 4.0, 1.0);
+vec3 BiasShadowProjection(in vec3 position) {
+	return position / vec3(vec2(GetShadowBias(position.xy)), 4.0);
 }
 
 float GetNormalShading(in vec3 normal, in Mask mask) {
@@ -62,10 +64,10 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	
 	float biasCoeff;
 	
-	position = ViewSpaceToWorldSpace(position);
-	position = WorldSpaceToShadowSpace(position);
-	position = BiasShadowProjection(position, biasCoeff); 
-	position = position * 0.5 + 0.5;
+	position     = ViewSpaceToWorldSpace(position);
+	position     = WorldSpaceToShadowSpace(position);
+	position.xyz = BiasShadowProjection(position.xyz, biasCoeff); 
+	position.xyz = position.xyz * 0.5 + 0.5;
 	
 	if (position.x < 0.0 || position.x > 1.0
 	||  position.y < 0.0 || position.y > 1.0
@@ -78,24 +80,24 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		
 		const float range       = 1.0;
 		const float interval    = 1.0;
-		const float sampleCount = pow(range / interval * 2.0 + 1.0, 2.0);    // Calculating the sample count outside of the for-loop is generally faster.
+		const float sampleCount = pow(range / interval * 2.0 + 1.0, 2.0); // Calculating the sample count outside of the for-loop is generally faster.
 		
 		for (float i = -range; i <= range; i += interval)
 			for (float j = -range; j <= range; j += interval)
 				sunlight += shadow2D(shadow, vec3(position.xy + vec2(i, j) * spread, position.z)).x;
 		
-		sunlight /= sampleCount;    // Average the samples by dividing the sum by the sample count.
+		sunlight /= sampleCount; // Average the samples by dividing the sum by the sample count.
 	#else
 		float sunlight = shadow2D(shadow, position.xyz).x;
 	#endif
 	
-	sunlight *= sunlight;    // Fatten the shadow up to soften its penumbra (default hardware-filtered penumbra does not have a satisfying penumbra curve)
+	sunlight = pow2(sunlight); // Fatten the shadow up to soften its penumbra (default hardware-filtered penumbra does not have a satisfying penumbra curve)
 	
 	return sunlight;
 }
 
 vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in vec4 ViewSpacePosition) {
-	diffuse = pow(diffuse, vec3(2.2));    // Put diffuse into a linear color space (diffuse should not be previously gamma-adjusted)
+	diffuse = pow(diffuse, vec3(2.2)); // Put diffuse into a linear color space (diffuse should not be previously gamma-adjusted)
 	
 	Shading shading;
 	shading.normal = GetNormalShading(normal, mask);
