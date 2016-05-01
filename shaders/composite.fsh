@@ -153,7 +153,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 	while (length(ray) < length(viewSpacePosition.xyz)) {
 		ray.xyz += rayStep * rayIncrement; // Increment raymarch
 		
-		vec3 samplePosition = BiasShadowProjection(ViewSpaceToShadowSpace * ray).xyz * 0.5 + 0.5; // Convert ray to shadow-space, bias it, unsign it (reduce the range from [-1.0 to 1.0] to [0.0 to 1.0]) to convert it to lookup-coordinates
+		vec3 samplePosition = BiasShadowProjection((ViewSpaceToShadowSpace * ray).xyz) * 0.5 + 0.5; // Convert ray to shadow-space, bias it, unsign it (reduce the range from [-1.0 to 1.0] to [0.0 to 1.0]) to convert it to lookup-coordinates
 		
 		fog += shadow2D(shadow, samplePosition).x * rayIncrement; // Increment fog
 		
