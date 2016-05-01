@@ -68,10 +68,10 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	     previousPosition      = gbufferPreviousProjection * gbufferPreviousModelView * previousPosition; // Re-rotate and re-project using the previous frame matrices
 	     previousPosition.st  /= previousPosition.w; // Un-linearize, swizzle to avoid correcting irrelivant components
 	
-	const float intensity = MOTION_BLUR_INTENSITY * 0.5;
+	const float intensity = MOTION_BLUR_INTENSITY;
 	const float maxVelocity = MAX_MOTION_BLUR_AMOUNT * 0.1;
 	
-	vec2 velocity = (position.st - previousPosition.st) * MOTION_BLUR_INTENSITY; // Screen-space motion vector
+	vec2 velocity = (position.st - previousPosition.st) * intensity; // Screen-space motion vector
 	     velocity = clamp(velocity, vec2(-maxVelocity), vec2(maxVelocity));
 	
 	#ifdef VARIABLE_MOTION_BLUR_SAMPLES
@@ -89,14 +89,8 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	
 	color *= 0.001;
 	
-	for(float i = -sampleCount * 0.5; i < 0.0; i++) {
-		vec2 coord = texcoord + sampleStep * i;
-		
-		color += pow(texture2D(colortex0, clamp(coord, minCoord, maxCoord)).rgb, vec3(2.2));
-	}
-	
-	for(float i = 1.0; i <= sampleCount * 0.5; i++) {
-		vec2 coord = texcoord + sampleStep * i;
+	for(float i = 1.0; i <= sampleCount; i++) {
+		vec2 coord = texcoord - sampleStep * i;
 		
 		color += pow(texture2D(colortex0, clamp(coord, minCoord, maxCoord)).rgb, vec3(2.2));
 	}
