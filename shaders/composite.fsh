@@ -89,7 +89,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	
 	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;
 	
-	position = shadowViewPosition * 0.5 + 0.5; // "position" now represents shadow-map position (unbiased)
+	position = shadowProjection * shadowViewPosition * 0.5 + 0.5; // "position" now represents shadow-map position (unbiased)
 	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz;  // Convert the normal from view-space to shadow-view-space
 	
 	const float brightness  = 30.0 * radius * radius * SUN_LIGHT_LEVEL;
