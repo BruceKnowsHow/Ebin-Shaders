@@ -57,14 +57,17 @@ void main() {
 	
 	float sunUp   = dot(sunVector, normalize(upPosition));
 	
-	timeDay     = sin( sunUp * PI * 0.5);
-	timeNight   = sin(-sunUp * PI * 0.5);
-	timeHorizon = pow(1 + timeDay * timeNight, 4.0);
+	timeDay      = sin( sunUp * PI * 0.5);
+	timeNight    = sin(-sunUp * PI * 0.5);
+	timeHorizon  = pow(1 + timeDay * timeNight, 4.0);
 	
 	float horizonClip = max(0.0, 0.9 - timeHorizon) / 0.9;
 	
 	timeDay = clamp01(timeDay * horizonClip);
 	timeNight = clamp01(timeNight * horizonClip);
+	
+	float timeSunrise  = timeHorizon * timeDay;
+	float timeMoonrise = timeHorizon * timeNight;
 	
 	vec3 sunlightDay =
 	vec3(1.0, 1.0, 1.0);
@@ -72,11 +75,13 @@ void main() {
 	vec3 sunlightNight =
 	vec3(0.43, 0.65, 1.0) * 0.025;
 	
-	vec3 sunlightHorizon =
+	vec3 sunlightSunrise =
 	vec3(1.00, 0.50, 0.00);
 	
-	colorSunlight  = sunlightDay * timeDay + sunlightNight * timeNight + sunlightHorizon * timeHorizon;
-//	colorSunlight *= mix(vec3(1.0), sunlightHorizon, timeHorizon);
+	vec3 sunlightMoonrise =
+	vec3(0.90, 1.00, 1.00);
+	
+	colorSunlight  = sunlightDay * timeDay + sunlightNight * timeNight + sunlightSunrise * timeSunrise + sunlightMoonrise * timeMoonrise;
 	
 	
 	const vec3 skylightDay =

@@ -1,46 +1,44 @@
-	vec3 sunVector = normalize(sunPosition);    //Engine-time overrides will happen by modifying sunVector
+	vec3 sunVector = normalize(sunPosition); //Engine-time overrides will happen by modifying sunVector
 	
 	lightVector = sunVector * mix(1.0, -1.0, float(dot(sunVector, upPosition) < 0.0));
 	
 	
 	float sunUp   = dot(sunVector, normalize(upPosition));
 	
-	timeDay     = sqrt(sqrt(clamp01( sunUp)));
-	timeNight   = sqrt(sqrt(clamp01(-sunUp)));
-	timeHorizon = (1.0 - timeDay) * (1.0 - timeNight);
+	timeDay      = sin( sunUp * PI * 0.5);
+	timeNight    = sin(-sunUp * PI * 0.5);
+	timeHorizon  = pow(1 + timeDay * timeNight, 4.0);
 	
+	float horizonClip = max(0.0, 0.9 - timeHorizon) / 0.9;
 	
-	const vec3 sunlightDay =
+	timeDay = clamp01(timeDay * horizonClip);
+	timeNight = clamp01(timeNight * horizonClip);
+	
+	float timeSunrise  = timeHorizon * timeDay;
+	float timeMoonrise = timeHorizon * timeNight;
+	
+	vec3 sunlightDay =
 	vec3(1.0, 1.0, 1.0);
 	
-	const vec3 sunlightNight =
-	vec3(1.0, 1.0, 1.0);
+	vec3 sunlightNight =
+	vec3(0.43, 0.65, 1.0) * 0.025;
 	
-	const vec3 sunlightHorizon =
-	vec3(1.0, 1.0, 1.0);
+	vec3 sunlightSunrise =
+	vec3(1.00, 0.50, 0.00);
 	
-	colorSunlight = sunlightDay * timeDay + sunlightNight * timeNight + sunlightHorizon * timeHorizon;
+	vec3 sunlightMoonrise =
+	vec3(0.90, 1.00, 1.00);
+	
+	colorSunlight  = sunlightDay * timeDay + sunlightNight * timeNight + sunlightSunrise * timeSunrise + sunlightMoonrise * timeMoonrise;
 	
 	
 	const vec3 skylightDay =
-	vec3(1.0, 1.0, 1.0);
+	vec3(0.24, 0.58, 1.00);
 	
 	const vec3 skylightNight =
-	vec3(1.0, 1.0, 1.0);
+	vec3(0.25, 0.5, 1.0) * 0.025;
 	
 	const vec3 skylightHorizon =
-	vec3(1.0, 1.0, 1.0);
+	vec3(0.29, 0.48, 1.0) * 0.01;
 	
 	colorSkylight = skylightDay * timeDay + skylightNight * timeNight + skylightHorizon * timeHorizon;
-	
-	
-	const vec3 horizoncolorDay =
-	vec3(1.0, 1.0, 1.0);
-	
-	const vec3 horizoncolorNight =
-	vec3(1.0, 1.0, 1.0);
-	
-	const vec3 horizoncolorHorizon =
-	vec3(1.0, 1.0, 1.0);
-	
-	colorHorizon = horizoncolorDay * timeDay + horizoncolorNight * timeNight + horizoncolorHorizon * timeHorizon;
