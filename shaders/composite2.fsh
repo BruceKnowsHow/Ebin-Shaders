@@ -126,7 +126,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
 	
-	vec3 reflectedSky = CalculateSky(reflect(viewSpacePosition.xyz, normal));
+	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 	
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
 		reflection = reflectedSky;
@@ -135,7 +135,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 		
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz);
 		
-		CompositeFog(reflection, reflectionVector, GetFog(reflectedCoord.st));
+		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetFog(reflectedCoord.st));
 		
 		#ifdef REFLECTION_EDGE_FALLOFF
 		float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
@@ -156,18 +156,20 @@ void main() {
 	Mask mask;
 	CalculateMasks(mask, texture2D(colortex3, texcoord).b, true);
 	
-	vec3  color             = GetColor(texcoord);
-	vec3  normal            = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
-	float depth             = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise it would be included in these ternary conditions
+	vec3  color  = GetColor(texcoord);
+	vec3  normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
+	float depth  = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise it would be included in these ternary conditions
 	
-	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
+	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
+	
 	
 	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); return; }
 	
 	if (mask.water > 0.5)
 		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
-	CompositeFog(color, viewSpacePosition.xyz, GetFog(texcoord));
+	CompositeFog(color, viewSpacePosition, GetFog(texcoord));
+	
 	
 	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
 }

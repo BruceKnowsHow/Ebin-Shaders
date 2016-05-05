@@ -26,6 +26,7 @@ varying vec2 texcoord;
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/Masks.glsl"
+#include "/lib/CalculateFogFactor.glsl"
 
 
 vec3 GetColor(in vec2 coord) {
@@ -158,8 +159,12 @@ void main() {
 	Mask mask;
 	CalculateMasks(mask, GetMaterialID(texcoord), true);
 	
+	
 	float depth = GetDepth(texcoord);
 	vec3  color = GetColor(texcoord);
+	
+	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
+	
 	
 	#ifdef MOTION_BLUR
 	MotionBlur(color, depth, mask);
@@ -170,6 +175,7 @@ void main() {
 	color = mix(color, pow(bloom[0], vec3(BLOOM_CURVE)), BLOOM_AMOUNT);
 	
 	SetSaturationLevel(color, 1.07);
+	
 	
 	gl_FragColor = vec4(Uncharted2Tonemap(color), 1.0);
 }

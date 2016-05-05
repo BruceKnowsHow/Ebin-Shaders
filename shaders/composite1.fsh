@@ -131,7 +131,7 @@ float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1
 	float depth = length(underwaterVector.xyz) * UdotN;
 	      depth = exp(-depth * 0.35);
 	
-	float fogFactor = CalculateFogFactor(viewSpacePosition1.xyz, 10.0);
+	float fogFactor = CalculateFogFactor(viewSpacePosition1, 10.0);
 	
 	return 1.0 - clamp(depth - fogFactor, 0.0, 1.0);
 }
@@ -156,7 +156,7 @@ void main() {
 	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition.xyz)), 1.0); return; } // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); return; } // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
 	
 	#ifdef DEFERRED_SHADING
 	float torchLightmap     = GetTorchLightmap(texcoord);

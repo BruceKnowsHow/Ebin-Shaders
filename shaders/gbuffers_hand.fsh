@@ -137,14 +137,14 @@ vec3 GetWaveNormals(in vec3 position) {
 
 vec3 GetNormal() {
 	if (abs(materialIDs - 4.0) < 0.5)
-		return normalize(GetWaveNormals(worldPosition.xyz) * tbnMatrix);
+		return normalize(GetWaveNormals(worldPosition) * tbnMatrix);
 	else
 		return normalize((texture2D(normals, texcoord).xyz * 2.0 - 1.0) * tbnMatrix);
 }
 
 
 void main() {
-	if (CalculateFogFactor(viewSpacePosition.xyz, FOG_POWER) >= 1.0) discard;
+	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
 	vec4 diffuse  = GetDiffuse();  if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
 	vec3 normal   = GetNormal();

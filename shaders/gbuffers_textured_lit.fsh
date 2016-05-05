@@ -144,7 +144,7 @@ vec3 GetNormal() {
 
 
 void main() {
-	if (CalculateFogFactor(viewSpacePosition.xyz, FOG_POWER) >= 1.0) discard;
+	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
 	vec4 diffuse  = GetDiffuse();  if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
 	vec3 normal   = GetNormal();

@@ -1,13 +1,13 @@
-float CalculateFogFactor(in vec3 position, in float power) {
+float CalculateFogFactor(in vec4 viewSpacePosition, in float power) {
 	#ifndef FOG_ENABLED
 	return 0.0;
 	#endif
 	
-	float fogFactor = length(position);
-		  fogFactor = max(fogFactor - gl_Fog.start, 0.0);
+	float fogFactor  = length(viewSpacePosition.xyz);
+		  fogFactor  = max(fogFactor - gl_Fog.start, 0.0);
 		  fogFactor /= far - gl_Fog.start;
-		  fogFactor = pow(fogFactor, power);
-		  fogFactor = clamp(fogFactor, 0.0, 1.0);
+		  fogFactor  = pow(fogFactor, power);
+		  fogFactor  = clamp(fogFactor, 0.0, 1.0);
 	
 	return fogFactor;
 }
