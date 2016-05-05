@@ -76,7 +76,7 @@ float sum(in vec3 x) {
 }
 
 float sum(in vec4 x) {
-	return dot(x, vec3(1.0));
+	return dot(x, vec4(1.0));
 }
 
 
