@@ -183,14 +183,14 @@ void main() {
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	vec2  noise2D           = GetDitherred2DNoise(texcoord, 2.0 / COMPOSITE0_SCALE) * 2.0 - 1.0;
 	
-	float Fog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
+	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
 	
 	if (mask.water > 0.5)
-		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, Fog); return; }
+		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); return; }
 	
 	vec3 normal = GetNormal(texcoord);
 	
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, GI_QUALITY * 4.0, noise2D, mask);
 	
-	gl_FragData[0] = vec4(EncodeColor(GI), Fog);
+	gl_FragData[0] = vec4(EncodeColor(GI), volFog);
 }

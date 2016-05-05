@@ -82,11 +82,11 @@ float GetSkyLightmap(in vec2 coord) {
 	return texture2D(colortex3, texcoord).g;
 }
 
-void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float Fog) {
+void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float volFog) {
 	GI = vec3(0.0);
-	Fog = 0.0;
+	volFog = 0.0;
 	
-	if (mask.sky > 0.5) { Fog = 1.0; return; }
+	if (mask.sky > 0.5) { volFog = 1.0; return; }
 	
 	depth = ExpToLinearDepth(depth);
 	
@@ -110,7 +110,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			      FogWeight = max(0.1e-8, FogWeight);
 			
 			GI  += DecodeColor(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb) * weight;
-			Fog += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).a * FogWeight;
+			volFog += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).a * FogWeight;
 			
 			totalWeights   += weight;
 			totalFogWeight += FogWeight;
@@ -118,7 +118,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 	}
 	
 	GI  /= totalWeights;
-	Fog /= totalFogWeight;
+	volFog /= totalFogWeight;
 }
 
 #include "/lib/Sky.fsh"
@@ -168,8 +168,8 @@ void main() {
 	#endif
 	
 	
-	vec3 GI; float Fog;
-	BilateralUpsample(normal, depth, mask, GI, Fog);
+	vec3 GI; float volFog;
+	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
 	composite += GI * colorSunlight * pow(diffuse, vec3(2.2));
 	
@@ -177,5 +177,5 @@ void main() {
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
-	gl_FragData[1] = vec4(EncodeColor(GI), Fog);
+	gl_FragData[1] = vec4(EncodeColor(GI), volFog);
 }
