@@ -52,12 +52,6 @@ float GetMaterialID(in vec2 coord) {
 	return texture2D(colortex3, texcoord).b;
 }
 
-vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
-    vec4 screenSpace = gbufferProjection * vec4(viewSpacePosition, 1.0);
-    
-    return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
-}
-
 void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	if (mask.hand > 0.5) return;
 	

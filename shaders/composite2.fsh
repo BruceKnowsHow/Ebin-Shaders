@@ -59,6 +59,12 @@ vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
     return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
 }
 
+vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
+    vec4 screenSpace = gbufferProjection * viewSpacePosition;
+    
+    return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
+}
+
 vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
@@ -71,7 +77,7 @@ float GetVolumetricFog(in vec2 coord) {
 
 bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const float rayGrowth, const int maxSteps, const int maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
 	vec3 rayStep = rayDirection * firstStepSize;
-	vec3 ray = startingViewPosition + rayStep;
+	vec4 ray = vec4(startingViewPosition + rayStep, 1.0);
 	
 	screenSpacePosition = ViewSpaceToScreenSpace(ray);
 	
@@ -98,7 +104,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 				float error = firstStepSize * pow(rayGrowth, i) * refinementCoeff;
 				
 				if(diff <= error * 2.0 && refinements <= maxRefinements) {
-					ray -= rayStep * refinementCoeff;
+					ray.xyz -= rayStep * refinementCoeff;
 					refinementCoeff = 1.0 / exp2(++refinements);
 				} else if (diff <= error * 4.0 && refinements > maxRefinements) {
 					screenSpacePosition.z = sampleDepth;
@@ -109,7 +115,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 				return true;
 		}
 		
-		ray += rayStep * refinementCoeff;
+		ray.xyz += rayStep * refinementCoeff;
 		
 		rayStep *= rayGrowth;
 		
@@ -133,7 +139,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	else {
 		reflection = GetColor(reflectedCoord.st);
 		
-		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz);
+		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 		
 		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
 		
