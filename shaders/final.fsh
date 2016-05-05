@@ -145,6 +145,15 @@ vec3 Uncharted2Tonemap(in vec3 color) {
 	return pow(color, vec3(1.0 / 2.2));
 }
 
+void SetSaturationLevel(inout vec3 color, in float level) {
+	const vec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
+	
+	float luminance = dot(color, lumaCoeff);
+	
+	color = mix(vec3(luminance), color, level);
+}
+
+
 void main() {
 	Mask mask;
 	CalculateMasks(mask, GetMaterialID(texcoord), true);
@@ -159,6 +168,8 @@ void main() {
 	vec3[8] bloom = GetBloom();
 	
 	color = mix(color, pow(bloom[0], vec3(BLOOM_CURVE)), BLOOM_AMOUNT);
+	
+	SetSaturationLevel(color, 1.07);
 	
 	gl_FragColor = vec4(Uncharted2Tonemap(color), 1.0);
 }

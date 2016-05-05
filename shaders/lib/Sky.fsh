@@ -1,20 +1,31 @@
+float CalculateSunlow(in vec3 viewSpacePosition) {
+	float sunglow = max(0.0, dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
+	      sunglow = pow(sunglow, 8.0) * 5.0;
+	
+	return sunglow;
+}
+
+
 vec3 CalculateSkyGradient(in vec3 viewSpacePosition) {
 	float radius = max(176.0, far * sqrt(2.0));
 	const float horizonLevel = 72.0;
 	
-	vec3 worldPosition = (gbufferModelViewInverse * vec4(normalize(viewSpacePosition.xyz), 0.0)).xyz;
-	     worldPosition.y = radius * worldPosition.y / length(worldPosition.xz) + cameraPosition.y - horizonLevel;    // Reproject the world vector to have a consistent horizon height
+	vec3 worldPosition    = (gbufferModelViewInverse * vec4(normalize(viewSpacePosition.xyz), 0.0)).xyz;
+	     worldPosition.y  = radius * worldPosition.y / length(worldPosition.xz) + cameraPosition.y - horizonLevel;    // Reproject the world vector to have a consistent horizon height
 	     worldPosition.xz = normalize(worldPosition.xz) * radius;
 	
 	float dotUP = dot(normalize(worldPosition), vec3(0.0, 1.0, 0.0));
 	
-	float horizonCoeff  = dotUP * 0.65;
-	      horizonCoeff  = abs(horizonCoeff);
-	      horizonCoeff  = pow(1.0 - horizonCoeff, 3.0) / 0.65 * 5.0 + 0.35;
+	float horizonCoeff = dotUP * 0.65;
+	      horizonCoeff = abs(horizonCoeff);
+	      horizonCoeff = pow(1.0 - horizonCoeff, 4.0) / 0.65 * 5.0;
 	
-	vec3 color = colorSkylight * horizonCoeff;
+	float sunglow = CalculateSunlow(viewSpacePosition);
 	
-	return color * 0.75;
+	vec3 color  = horizonCoeff * pow(colorSkylight, vec3((10.0 - horizonCoeff) / 5.5)); // Sky desaturates as it approaches the horizon
+	     color += sunglow * pow(colorSkylight, vec3(1.4));
+	
+	return color;
 }
 
 vec3 CalculateSunspot(in vec3 viewSpacePosition) {
@@ -54,9 +65,9 @@ void CompositeFog(inout vec3 color, in vec3 viewSpacePosition, in float fogVolum
 vec3 CalculateSky(in vec3 viewSpacePosition) {
 	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz) * far;
 	
-	vec3  gradient   = CalculateSkyGradient(viewSpacePosition);
-	vec3  sunspot    = CalculateSunspot(viewSpacePosition);
-	vec3  atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
+	vec3 gradient   = CalculateSkyGradient(viewSpacePosition);
+	vec3 sunspot    = CalculateSunspot(viewSpacePosition);
+	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
 	
 	return (gradient + sunspot + atmosphere) * SKY_BRIGHTNESS;
 }
