@@ -1,3 +1,7 @@
+
+// Start of #include "/lib/Settings.glsl"
+
+
 const int   shadowMapResolution      = 2048;  // [1024 2048 3072 4096]
 const float sunPathRotation          = 40.0;  // [-60.0 -50.0 -40.0 -30.0 -20.0 -10.0 0.0 10.0 20.0 30.0 40.0 50.0 60.0]
 const float shadowDistance           = 140.0;
@@ -13,7 +17,7 @@ const int colortex3Format = RGB8;
 const int colortex4Format = RGBA16;
 const int colortex5Format = RGB16;
 
-const int noiseTextureResolution = 64;
+const int   noiseTextureResolution = 64;
 const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 
@@ -95,3 +99,6 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 #define TIME frameTimeCounter
 
 const bool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
+
+
+// End of #include "/lib/Settings.glsl"

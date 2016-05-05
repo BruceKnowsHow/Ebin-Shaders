@@ -158,7 +158,7 @@ void main() {
 	
 	vec3  color  = GetColor(texcoord);
 	vec3  normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
-	float depth  = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise it would be included in these ternary conditions
+	float depth  = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise color would be included in these ternary conditions
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	

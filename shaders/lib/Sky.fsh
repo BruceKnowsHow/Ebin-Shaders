@@ -1,3 +1,11 @@
+
+// Start of #include "/lib/Sky.fsh"
+
+// Prerequisites:
+// 
+// varying vec3 lightVector;
+
+
 float CalculateSunlow(in vec4 viewSpacePosition) {
 	float sunglow = max(0.0, dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
 	      sunglow = pow(sunglow, 8.0) * 5.0;
@@ -71,3 +79,6 @@ vec3 CalculateSky(in vec4 viewSpacePosition) {
 	
 	return (gradient + sunspot + atmosphere) * SKY_BRIGHTNESS;
 }
+
+
+// End of #include "/lib/Sky.fsh"

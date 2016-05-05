@@ -1,3 +1,7 @@
+
+// Start of #include "/lib/Masks.glsl"
+
+
 struct Mask {
 	float materialIDs;
 	float matIDs;
@@ -55,3 +59,6 @@ void CalculateMasks(inout Mask mask, in float materialIDs, const bool encoded) {
 	mask.hand   = GetMaterialMask(  5, mask.matIDs);
 	mask.sky    = GetMaterialMask(255, mask.matIDs);
 }
+
+
+// End of #include "/lib/Masks.glsl"

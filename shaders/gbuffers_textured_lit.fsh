@@ -11,9 +11,9 @@ uniform sampler2DShadow shadow;
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
-uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
+uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
 
 uniform float frameTimeCounter;

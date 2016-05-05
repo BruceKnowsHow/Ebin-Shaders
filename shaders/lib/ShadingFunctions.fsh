@@ -1,3 +1,18 @@
+
+// Start of #include "/lib/ShadingFunctions.fsh"
+
+// Prerequisites:
+// 
+// uniform sampler2DShadow shadow;
+// 
+// uniform mat4 gbufferModelViewInverse;
+// uniform mat4 shadowModelView;
+// uniform mat4 shadowProjection;
+// 
+// #include "/lib/Settings.glsl"
+// #include "/lib/Util.glsl"
+
+
 struct Shading {      // Contains scalar light levels without any color
 	float normal;     // Coefficient of light intensity based on the dot product of the normal vector and the light vector
 	float sunlight;
@@ -132,3 +147,6 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 	
 	return composite;
 }
+
+
+// End of #include "/lib/ShadingFunctions.fsh"
