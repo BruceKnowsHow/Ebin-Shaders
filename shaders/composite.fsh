@@ -78,7 +78,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	#ifdef GI_BOOST
 	float normalShading = GetNormalShading(normal, mask);
 
-	float sunlight = ComputeDirectSunlight(position, normalShading);
+	float sunlight = ComputeDirectSunlight(position, normalShading, false);
 	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
 
 	if (lightMult < 0.05) return vec3(0.0);
@@ -229,7 +229,7 @@ vec3 ComputePoissonGlobalIllumination(in vec4 position, in vec3 normal, const in
 	#ifdef GI_BOOST
 	float normalShading = GetNormalShading(normal, mask);
 
-	float sunlight = ComputeDirectSunlight(position, normalShading);
+	float sunlight = ComputeDirectSunlight(position, normalShading, false);
 	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
 
 	if (lightMult < 0.05) return vec3(0.0);

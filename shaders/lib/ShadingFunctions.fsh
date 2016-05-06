@@ -85,7 +85,7 @@ float GetNormalShading(in vec3 normal, in Mask mask) {
 	return shading;
 }
 
-float ComputeDirectSunlight(in vec4 position, in float normalShading) {
+float ComputeDirectSunlight(in vec4 position, in float normalShading, in bool filter) {
 	if (normalShading <= 0.0) return 0.0;
 
 	float biasCoeff;
@@ -102,9 +102,8 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	    ) return 1.0;
 
 	#if defined PCSS
-
-		float vpsSpread = 0.4 / (biasCoeff);
-		float avgDepth = 0.0;  //FIXME: It can't constant
+		float vpsSpread = 0.4 / biasCoeff;
+		float avgDepth = 0.0;
 		float minDepth = 11.0;
 		int c;
 
@@ -120,7 +119,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 				float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
 
 				minDepth = min(minDepth, depthSample);
-				avgDepth += pow(clamp(position.z - depthSample, 0.0, 0.15), 1.7);
+				avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
 				c++;
 			}
 		}
@@ -131,18 +130,18 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		float penumbraSize = avgDepth;
 
 		int count = 0;
-		float spread = penumbraSize * 0.01 * vpsSpread + 0.08 / shadowMapResolution;
+		float spread = penumbraSize * 0.03 * vpsSpread + 0.15 / shadowMapResolution;
 
 		biasCoeff *= 1.0 + avgDepth * 40.0;
 
 		//PCF Blur
-		for (float i = -3.0; i <= 3.0; i += 1.0) {
-			for (float j = -3.0; j <= 3.0; j += 1.0) {
+		for (float i = -2.0; i <= 2.0; i += 1.0) {
+			for (float j = -2.0; j <= 2.0; j += 1.0) {
 				float angle = noise.x * 3.14159 * 2.0;
 				mat2 rotation = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)); //Random Rotation Matrix
 
 				vec2 coord = vec2(i, j) * rotation;
-				sunlight += shadow2DLod(shadow, vec3(position.st + coord * spread, position.z), 0).x;
+				sunlight += shadow2DLod(shadow, vec3(coord * spread + position.st, position.z), 0).x;
 				count++;
 			}
 		}
@@ -177,7 +176,7 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 	shading.normal = GetNormalShading(normal, mask);
 
 	shading.sunlight  = shading.normal;
-	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal);
+	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal, true);
 
 	shading.torchlight = 1.0 - pow(torchLightmap, 4.0);
 	shading.torchlight = 1.0 / pow(shading.torchlight, 2.0) - 1.0;
