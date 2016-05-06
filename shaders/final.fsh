@@ -168,8 +168,9 @@ void main() {
 	
 	color = mix(color, pow(bloom[0], vec3(BLOOM_CURVE)), BLOOM_AMOUNT);
 	
-	SetSaturationLevel(color, 1.07);
+	color = Uncharted2Tonemap(color);
 	
+	SetSaturationLevel(color, 1.15);
 	
-	gl_FragColor = vec4(Uncharted2Tonemap(color), 1.0);
+	gl_FragColor = vec4(color, 1.0);
 }

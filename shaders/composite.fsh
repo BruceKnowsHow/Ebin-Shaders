@@ -139,6 +139,155 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
 
+const vec2[81] samples128 = vec2[81](
+vec2(-1.0, -1.0),
+vec2(-1.0, -0.75),
+vec2(-1.0, -0.5),
+vec2(-1.0, -0.25),
+vec2(-1.0, 0.0),
+vec2(-1.0, 0.25),
+vec2(-1.0, 0.5),
+vec2(-1.0, 0.75),
+vec2(-1.0, 1.0),
+vec2(-0.75, -1.0),
+vec2(-0.75, -0.75),
+vec2(-0.75, -0.5),
+vec2(-0.75, -0.25),
+vec2(-0.75, 0.0),
+vec2(-0.75, 0.25),
+vec2(-0.75, 0.5),
+vec2(-0.75, 0.75),
+vec2(-0.75, 1.0),
+vec2(-0.5, -1.0),
+vec2(-0.5, -0.75),
+vec2(-0.5, -0.5),
+vec2(-0.5, -0.25),
+vec2(-0.5, 0.0),
+vec2(-0.5, 0.25),
+vec2(-0.5, 0.5),
+vec2(-0.5, 0.75),
+vec2(-0.5, 1.0),
+vec2(-0.25, -1.0),
+vec2(-0.25, -0.75),
+vec2(-0.25, -0.5),
+vec2(-0.25, -0.25),
+vec2(-0.25, 0.0),
+vec2(-0.25, 0.25),
+vec2(-0.25, 0.5),
+vec2(-0.25, 0.75),
+vec2(-0.25, 1.0),
+vec2(0.0, -1.0),
+vec2(0.0, -0.75),
+vec2(0.0, -0.5),
+vec2(0.0, -0.25),
+vec2(0.0, 0.0),
+vec2(0.0, 0.25),
+vec2(0.0, 0.5),
+vec2(0.0, 0.75),
+vec2(0.0, 1.0),
+vec2(0.25, -1.0),
+vec2(0.25, -0.75),
+vec2(0.25, -0.5),
+vec2(0.25, -0.25),
+vec2(0.25, 0.0),
+vec2(0.25, 0.25),
+vec2(0.25, 0.5),
+vec2(0.25, 0.75),
+vec2(0.25, 1.0),
+vec2(0.5, -1.0),
+vec2(0.5, -0.75),
+vec2(0.5, -0.5),
+vec2(0.5, -0.25),
+vec2(0.5, 0.0),
+vec2(0.5, 0.25),
+vec2(0.5, 0.5),
+vec2(0.5, 0.75),
+vec2(0.5, 1.0),
+vec2(0.75, -1.0),
+vec2(0.75, -0.75),
+vec2(0.75, -0.5),
+vec2(0.75, -0.25),
+vec2(0.75, 0.0),
+vec2(0.75, 0.25),
+vec2(0.75, 0.5),
+vec2(0.75, 0.75),
+vec2(0.75, 1.0),
+vec2(1.0, -1.0),
+vec2(1.0, -0.75),
+vec2(1.0, -0.5),
+vec2(1.0, -0.25),
+vec2(1.0, 0.0),
+vec2(1.0, 0.25),
+vec2(1.0, 0.5),
+vec2(1.0, 0.75),
+vec2(1.0, 1.0)
+);
+
+vec3 ComputePoissonGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, const in float quality, in vec2 noise, in Mask mask) {
+	float lightMult = 1.0;
+	
+	#ifdef GI_BOOST
+	float normalShading = GetNormalShading(normal, mask);
+	
+	float sunlight = ComputeDirectSunlight(position, normalShading);
+	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
+	
+	if (lightMult < 0.05) return vec3(0.0);
+	#endif
+	
+	float depthLOD	= 2.0 * clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
+	float sampleLOD	= depthLOD * 5.0 / 2.0;
+	
+	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;
+	
+	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position
+	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal from view-space to shadow-view-space
+	
+	const float brightness  = 40.0 * radius * radius * SUN_LIGHT_LEVEL;
+	const float interval    = 1.0 / quality;
+	const float scale       = radius / 256.0;
+	const float sampleCount = 81;
+	
+	noise *= interval * scale;
+	
+	vec3 GI = vec3(0.0);
+	
+	for(int i = 0; i < 81; i++) {
+			vec2 offset = samples128[i] * scale + noise;
+			
+			vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
+			
+			vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
+			
+			samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
+			samplePos.z = samplePos.z * 8.0 - 4.0;    // Convert range from unsigned to signed and undo z-shrinking
+			
+			samplePos = shadowProjectionInverse * samplePos; // Convert sample position to shadow-view-space for a linear comparison against the pixel's position
+			
+			vec3 sampleDiff = shadowViewPosition.xyz - samplePos.xyz;
+			
+			float distanceCoeff = max(length(sampleDiff), radius);
+			      distanceCoeff = 1.0 / square(distanceCoeff); // Inverse-square law
+			
+			vec3 sampleDir    = normalize(sampleDiff);
+			vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
+			
+			float viewNormalCoeff   = max(0.0, dot(     -normal, sampleDir));
+			float shadowNormalCoeff = max(0.0, dot(shadowNormal, sampleDir));
+			
+			viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
+	//		viewNormalCoeff = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0; // This effect tends to make trees look like crud at low composite0 sizes
+			
+			vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
+			
+			GI += flux * viewNormalCoeff * sqrt(shadowNormalCoeff) * distanceCoeff;
+	}
+	
+	GI /= sampleCount;
+	
+	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
+}
+
 float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 	#ifdef VOLUMETRIC_FOG
 	float fog    = 0.0;
