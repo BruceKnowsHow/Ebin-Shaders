@@ -47,7 +47,8 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 #define SHADOW_MAP_BIAS 0.80     // [0.00 0.60 0.70 0.80 0.85 0.90]
 #define EXTENDED_SHADOW_DISTANCE
-#define SOFT_SHADOWS
+//#define SOFT_SHADOWS
+#define PCSS
 #define PLAYER_SHADOW
 
 #define FOG_ENABLED
@@ -73,7 +74,7 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 
 /* Option unwravelling */
-#ifdef GI_BOOST 
+#ifdef GI_BOOST
 	#define GI_Boost true
 #else
 	#define GI_Boost false
