@@ -53,7 +53,7 @@ float ExpToLinearDepth(in float depth) {
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
-	
+
 	return position;
 }
 
@@ -74,68 +74,68 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, const in float quality, in vec2 noise, in Mask mask) {
 	float lightMult = 1.0;
-	
+
 	#ifdef GI_BOOST
 	float normalShading = GetNormalShading(normal, mask);
-	
+
 	float sunlight = ComputeDirectSunlight(position, normalShading);
 	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
-	
+
 	if (lightMult < 0.05) return vec3(0.0);
 	#endif
-	
+
 	float depthLOD	= 2.0 * clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	float sampleLOD	= depthLOD * 5.0 / 2.0;
-	
+
 	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;
-	
+
 	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position
 	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal from view-space to shadow-view-space
-	
+
 	const float brightness  = 30.0 * radius * radius * SUN_LIGHT_LEVEL;
 	const float interval    = 1.0 / quality;
 	const float scale       = radius / 256.0;
 	const float sampleCount = pow(1.0 / interval * 2.0 + 1.0, 2.0);
-	
+
 	noise *= interval * scale;
-	
+
 	vec3 GI = vec3(0.0);
-	
+
 	for(float x = -1.0; x <= 1.0; x += interval) {
 		for(float y = -1.0; y <= 1.0; y += interval) {
 			vec2 offset = vec2(x, y) * scale + noise;
-			
+
 			vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
-			
+
 			vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
-			
+
 			samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
 			samplePos.z = samplePos.z * 8.0 - 4.0;    // Convert range from unsigned to signed and undo z-shrinking
-			
+
 			samplePos = shadowProjectionInverse * samplePos; // Convert sample position to shadow-view-space for a linear comparison against the pixel's position
-			
+
 			vec3 sampleDiff = shadowViewPosition.xyz - samplePos.xyz;
-			
+
 			float distanceCoeff = max(length(sampleDiff), radius);
 			      distanceCoeff = 1.0 / square(distanceCoeff); // Inverse-square law
-			
+
 			vec3 sampleDir    = normalize(sampleDiff);
 			vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
-			
+
 			float viewNormalCoeff   = max(0.0, dot(     -normal, sampleDir));
 			float shadowNormalCoeff = max(0.0, dot(shadowNormal, sampleDir));
-			
+
 			viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
 	//		viewNormalCoeff = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0; // This effect tends to make trees look like crud at low composite0 sizes
-			
+
 			vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
-			
+
 			GI += flux * viewNormalCoeff * sqrt(shadowNormalCoeff) * distanceCoeff;
 		}
 	}
-	
+
 	GI /= sampleCount;
-	
+
 	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
 
@@ -225,66 +225,66 @@ vec2(1.0, 1.0)
 
 vec3 ComputePoissonGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, const in float quality, in vec2 noise, in Mask mask) {
 	float lightMult = 1.0;
-	
+
 	#ifdef GI_BOOST
 	float normalShading = GetNormalShading(normal, mask);
-	
+
 	float sunlight = ComputeDirectSunlight(position, normalShading);
 	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
-	
+
 	if (lightMult < 0.05) return vec3(0.0);
 	#endif
-	
+
 	float depthLOD	= 2.0 * clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	float sampleLOD	= depthLOD * 5.0 / 2.0;
-	
+
 	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;
-	
+
 	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position
 	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal from view-space to shadow-view-space
-	
+
 	const float brightness  = 40.0 * radius * radius * SUN_LIGHT_LEVEL;
 	const float interval    = 1.0 / quality;
 	const float scale       = radius / 256.0;
 	const float sampleCount = 81;
-	
+
 	noise *= interval * scale;
-	
+
 	vec3 GI = vec3(0.0);
-	
+
 	for(int i = 0; i < 81; i++) {
 			vec2 offset = samples128[i] * scale + noise;
-			
+
 			vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
-			
+
 			vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
-			
+
 			samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
 			samplePos.z = samplePos.z * 8.0 - 4.0;    // Convert range from unsigned to signed and undo z-shrinking
-			
+
 			samplePos = shadowProjectionInverse * samplePos; // Convert sample position to shadow-view-space for a linear comparison against the pixel's position
-			
+
 			vec3 sampleDiff = shadowViewPosition.xyz - samplePos.xyz;
-			
+
 			float distanceCoeff = max(length(sampleDiff), radius);
 			      distanceCoeff = 1.0 / square(distanceCoeff); // Inverse-square law
-			
+
 			vec3 sampleDir    = normalize(sampleDiff);
 			vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
-			
+
 			float viewNormalCoeff   = max(0.0, dot(     -normal, sampleDir));
 			float shadowNormalCoeff = max(0.0, dot(shadowNormal, sampleDir));
-			
+
 			viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
 	//		viewNormalCoeff = viewNormalCoeff * (1.0 - mask.leaves) + mask.leaves * 2.0; // This effect tends to make trees look like crud at low composite0 sizes
-			
+
 			vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
-			
+
 			GI += flux * viewNormalCoeff * sqrt(shadowNormalCoeff) * distanceCoeff;
 	}
-	
+
 	GI /= sampleCount;
-	
+
 	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
 
@@ -292,28 +292,28 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 	#ifdef VOLUMETRIC_FOG
 	float fog    = 0.0;
 	float weight = 0.0;
-	
+
 	float rayIncrement = gl_Fog.start / 64.0;
 	vec3  rayStep      = normalize(viewSpacePosition.xyz + vec3(0.0, 0.0, noise));
 	vec4  ray          = vec4(rayStep * gl_Fog.start, 1.0);
-	
+
 	mat4 ViewSpaceToShadowSpace = shadowProjection * shadowModelView * gbufferModelViewInverse; // Compose matrices outside of the loop to save computations
-	
+
 	while (length(ray) < length(viewSpacePosition.xyz)) {
 		ray.xyz += rayStep * rayIncrement; // Increment raymarch
-		
+
 		vec3 samplePosition = BiasShadowProjection((ViewSpaceToShadowSpace * ray).xyz) * 0.5 + 0.5; // Convert ray to shadow-space, bias it, unsign it (reduce the range from [-1.0 to 1.0] to [0.0 to 1.0]) to convert it to lookup-coordinates
-		
+
 		fog += shadow2D(shadow, samplePosition).x * rayIncrement; // Increment fog
-		
+
 		weight += rayIncrement;
-		
+
 		rayIncrement *= 1.01; // Increase the step-size so that the sample-count decreases as the ray gets farther from the viewer
 	}
-	
+
 	fog /= max(weight, 0.1e-8);
 	fog  = pow(fog, VOLUMETRIC_FOG_POWER);
-	
+
 	return fog;
 	#else
 	return 1.0;
@@ -324,22 +324,22 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 void main() {
 	Mask mask;
 	CalculateMasks(mask, GetMaterialID(texcoord), true);
-	
+
 	if (mask.sky > 0.5)
 		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); return; }
-	
+
 	float depth             = GetDepth(texcoord);
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	vec2  noise2D           = GetDitherred2DNoise(texcoord, 2.0 / COMPOSITE0_SCALE) * 2.0 - 1.0;
-	
+
 	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
-	
+
 	if (mask.water > 0.5)
 		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); return; }
-	
+
 	vec3 normal = GetNormal(texcoord);
-	
+
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, GI_QUALITY * 4.0, noise2D, mask);
-	
+
 	gl_FragData[0] = vec4(EncodeColor(GI), volFog);
 }

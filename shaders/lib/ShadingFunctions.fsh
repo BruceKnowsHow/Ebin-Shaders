@@ -4,6 +4,7 @@
 // Prerequisites:
 //
 // uniform sampler2DShadow shadow;
+// uniform sampler2D shadowtex1;
 //
 // uniform mat4 gbufferModelViewInverse;
 // uniform mat4 shadowModelView;
@@ -66,6 +67,16 @@ vec3 BiasShadowProjection(in vec3 position) {
 	return position / vec3(vec2(GetShadowBias(position.xy)), 4.0);
 }
 
+vec3 	CalculateNoisePattern1(vec2 offset, float size) {
+	vec2 coord = texcoord.st;
+
+	coord *= vec2(viewWidth, viewHeight);
+	coord = mod(coord + offset, vec2(size));
+	coord /= noiseTextureResolution;
+
+	return texture2D(noisetex, coord).xyz;
+}
+
 float GetNormalShading(in vec3 normal, in Mask mask) {
 	float shading = dot(normal, lightVector);
 	      shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
@@ -91,7 +102,53 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	    ) return 1.0;
 
 	#if defined PCSS
-		sunlight = shadow2D(shadow, position.xyz).x;
+
+		float vpsSpread = 0.4 / (1-biasCoeff);
+		float avgDepth = 0.0;  //FIXME: It can't constant
+		float minDepth = 11.0;
+		int c;
+
+		vec2 noise = CalculateNoisePattern1(vec2(0.0), 64.0).xy;
+
+		//Blocker Search
+		for(int i = -1; i <= 1; i++) {
+			for(int j = -1; j <= 1; j++) {
+				vec2 angle = noise * 3.14159 * 2.0;
+				mat2 rotation = mat2(cos(angle.x), -sin(angle.x), sin(angle.y), cos(angle.y)); //Random Rotation Matrix
+
+				vec2 lookupPosition = position.xy + (vec2(i, j) / shadowMapResolution) * rotation * vpsSpread;
+				float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
+
+				minDepth = min(minDepth, depthSample);
+				avgDepth += pow(clamp(position.z - depthSample, 0.0, 0.15), 1.7);
+				c++;
+			}
+		}
+
+		avgDepth /= c;
+		avgDepth = pow(avgDepth, 0.5);
+
+		float penumbraSize = avgDepth;
+
+		int count = 0;
+		float spread = penumbraSize * 0.05 * vpsSpread + 0.25 / shadowMapResolution;
+
+		biasCoeff *= 1.0 + avgDepth * 40.0;
+
+		//PCF Blur
+		for (float i = -3.0; i <= 3.0; i += 1.0) {
+			for (float j = -3.0; j <= 3.0; j += 1.0) {
+				float angle = noise.x * 3.14159 * 2.0;
+				mat2 rotation = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)); //Random Rotation Matrix
+
+				vec2 coord = vec2(i, j) * rotation;
+				sunlight += shadow2DLod(shadow, vec3(position.st + coord * spread, position.z), 0).x;
+				count++;
+			}
+		}
+
+		sunlight /= count;
+
 	#elif defined SOFT_SHADOWS
 		float spread   = 1.0 * (1.0 - biasCoeff) / shadowMapResolution;
 
