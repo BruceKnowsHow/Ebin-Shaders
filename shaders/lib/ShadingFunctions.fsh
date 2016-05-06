@@ -103,7 +103,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 
 	#if defined PCSS
 
-		float vpsSpread = 0.4 / (1-biasCoeff);
+		float vpsSpread = 0.4 / (biasCoeff);
 		float avgDepth = 0.0;  //FIXME: It can't constant
 		float minDepth = 11.0;
 		int c;
@@ -131,7 +131,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		float penumbraSize = avgDepth;
 
 		int count = 0;
-		float spread = penumbraSize * 0.05 * vpsSpread + 0.25 / shadowMapResolution;
+		float spread = penumbraSize * 0.02 * vpsSpread + 0.25 / shadowMapResolution;
 
 		biasCoeff *= 1.0 + avgDepth * 40.0;
 
