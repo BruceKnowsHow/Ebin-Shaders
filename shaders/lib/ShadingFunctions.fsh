@@ -85,7 +85,7 @@ float GetNormalShading(in vec3 normal, in Mask mask) {
 	return shading;
 }
 
-float ComputeDirectSunlight(in vec4 position, in float normalShading, in bool filter) {
+float ComputeDirectSunlight(in vec4 position, in float normalShading, const in bool filter) {
 	if (normalShading <= 0.0) return 0.0;
 
 	float biasCoeff;
@@ -100,6 +100,8 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading, in bool fi
 	||  position.y < 0.0 || position.y > 1.0
 	||  position.z < 0.0 || position.z > 1.0
 	    ) return 1.0;
+
+	if(!filter) return shadow2D(shadow, position.xyz).x;
 
 	#if defined PCSS
 		float vpsSpread = 0.4 / biasCoeff;
@@ -130,7 +132,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading, in bool fi
 		float penumbraSize = avgDepth;
 
 		int count = 0;
-		float spread = penumbraSize * 0.03 * vpsSpread + 0.15 / shadowMapResolution;
+		float spread = penumbraSize * 0.02 * vpsSpread + 0.15 / shadowMapResolution;
 
 		biasCoeff *= 1.0 + avgDepth * 40.0;
 
