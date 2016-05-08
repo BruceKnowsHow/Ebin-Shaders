@@ -71,7 +71,7 @@ vec3 CalculateNoisePattern1(vec2 offset, float size) {
 	vec2 coord = texcoord.st;
 	
 	coord *= vec2(viewWidth, viewHeight);
-	coord = mod(coord + offset, vec2(size));
+	coord  = mod(coord + offset, vec2(size));
 	coord /= noiseTextureResolution;
 	
 	return texture2D(noisetex, coord).xyz;
@@ -128,11 +128,10 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading, const in b
 		}
 		
 		avgDepth /= sampleCount;
-		avgDepth = sqrt(avgDepth);
+		avgDepth  = sqrt(avgDepth);
 		
 		float penumbraSize = avgDepth;
 		
-		int count = 0;
 		float spread = penumbraSize * 0.02 * vpsSpread + 0.15 / shadowMapResolution;
 		
 		range       = 2.0;
@@ -147,7 +146,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading, const in b
 			}
 		}
 		
-		sunlight /= count;
+		sunlight /= sampleCount;
 		
 	#elif defined SOFT_SHADOWS
 		float spread   = 1.0 * (1.0 - biasCoeff) / shadowMapResolution;
