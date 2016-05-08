@@ -106,45 +106,44 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading, const in b
 	#if defined PCSS
 		float vpsSpread = 0.4 / biasCoeff;
 		float avgDepth = 0.0;
-		float minDepth = 11.0;
-		int c;
 		
 		vec2 noise = CalculateNoisePattern1(vec2(0.0), 64.0).xy;
 		
+		vec2 angle = noise * 3.14159 * 2.0;
+		
+		mat2 rotation = mat2(cos(angle.x), -sin(angle.x),
+		                     sin(angle.y),  cos(angle.y)); //Random Rotation Matrix
+		
+		float range       = 1.0;
+		float sampleCount = pow(range * 2.0 + 1.0, 2.0);
+		
 		//Blocker Search
-		for(int i = -1; i <= 1; i++) {
-			for(int j = -1; j <= 1; j++) {
-				vec2 angle = noise * 3.14159 * 2.0;
-				mat2 rotation = mat2(cos(angle.x), -sin(angle.x), sin(angle.y), cos(angle.y)); //Random Rotation Matrix
-				
+		for(int i = -range; i <= range; i++) {
+			for(int j = -range; j <= range; j++) {
 				vec2 lookupPosition = position.xy + (vec2(i, j) / shadowMapResolution) * rotation * vpsSpread;
 				float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
 				
-				minDepth = min(minDepth, depthSample);
 				avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
-				c++;
 			}
 		}
 		
-		avgDepth /= c;
-		avgDepth = pow(avgDepth, 0.5);
+		avgDepth /= sampleCount;
+		avgDepth = sqrt(avgDepth);
 		
 		float penumbraSize = avgDepth;
 		
 		int count = 0;
 		float spread = penumbraSize * 0.02 * vpsSpread + 0.15 / shadowMapResolution;
 		
-		biasCoeff *= 1.0 + avgDepth * 40.0;
+		range       = 2.0;
+		sampleCount = pow(range * 2.0 + 1.0, 2.0);
 		
 		//PCF Blur
-		for (float i = -2.0; i <= 2.0; i += 1.0) {
-			for (float j = -2.0; j <= 2.0; j += 1.0) {
-				float angle = noise.x * 3.14159 * 2.0;
-				mat2 rotation = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)); //Random Rotation Matrix
-				
+		for (float i = -range; i <= range; i++) {
+			for (float j = -range; j <= range; j++) {
 				vec2 coord = vec2(i, j) * rotation;
+				
 				sunlight += shadow2DLod(shadow, vec3(coord * spread + position.st, position.z), 0).x;
-				count++;
 			}
 		}
 		
