@@ -85,7 +85,7 @@ float GetNormalShading(in vec3 normal, in Mask mask) {
 	return shading;
 }
 
-float ComputeDirectSunlight(in vec4 position, in float normalShading, const in bool filter) {
+float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	if (normalShading <= 0.0) return 0.0;
 
 	float biasCoeff;
@@ -100,8 +100,6 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading, const in b
 	||  position.y < 0.0 || position.y > 1.0
 	||  position.z < 0.0 || position.z > 1.0
 	    ) return 1.0;
-
-	if(!filter) return shadow2D(shadow, position.xyz).x;
 
 	#if defined PCSS
 		float vpsSpread = 0.4 / biasCoeff;
@@ -137,8 +135,8 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading, const in b
 
 		float spread = penumbraSize * 0.02 * vpsSpread + 0.15 / shadowMapResolution;
 
-		range       = 2;
-		sampleCount = pow(float(range) * 2.0 + 1.0, 2.0);
+		range       = 2.0;
+		sampleCount = pow(range * 2.0 + 1.0, 2.0);
 
 		//PCF Blur
 		for (float i = -range; i <= range; i++) {
@@ -179,7 +177,7 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 	shading.normal = GetNormalShading(normal, mask);
 
 	shading.sunlight  = shading.normal;
-	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal, true);
+	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal);
 
 	shading.torchlight = 1.0 - pow(torchLightmap, 4.0);
 	shading.torchlight = 1.0 / pow(shading.torchlight, 2.0) - 1.0;
