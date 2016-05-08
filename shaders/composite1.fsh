@@ -64,7 +64,7 @@ float ExpToLinearDepth(in float depth) {
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
-
+	
 	return position;
 }
 
@@ -87,38 +87,38 @@ float GetSkyLightmap(in vec2 coord) {
 void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float volFog) {
 	GI = vec3(0.0);
 	volFog = 0.0;
-
+	
 	if (mask.sky > 0.5) { volFog = 1.0; return; }
-
+	
 	depth = ExpToLinearDepth(depth);
-
+	
 	float totalWeights   = 0.0;
 	float totalFogWeight = 0.0;
-
+	
 	for(float i = -0.5; i <= 0.5; i++) {
 		for(float j = -0.5; j <= 0.5; j++) {
 			vec2 offset = vec2(i, j) / vec2(viewWidth, viewHeight);
-
+			
 			float sampleDepth  = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x);
 			vec3  sampleNormal = GetNormal(texcoord + offset * 8.0);
-
+			
 			float weight  = 1.0 - abs(depth - sampleDepth);
 			      weight *= dot(normal, sampleNormal);
 			      weight  = pow(weight, 32);
 			      weight  = max(0.1e-8, weight);
-
+			
 			float FogWeight = 1.0 - abs(depth - sampleDepth) * 10.0;
 			      FogWeight = pow(FogWeight, 32);
 			      FogWeight = max(0.1e-8, FogWeight);
-
+			
 			GI  += DecodeColor(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb) * weight;
 			volFog += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).a * FogWeight;
-
+			
 			totalWeights   += weight;
 			totalFogWeight += FogWeight;
 		}
 	}
-
+	
 	GI  /= totalWeights;
 	volFog /= totalFogWeight;
 }
@@ -127,20 +127,20 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 
 float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal) {
 	vec3 underwaterVector = viewSpacePosition.xyz - viewSpacePosition1.xyz;
-
+	
 	float UdotN = abs(dot(normalize(underwaterVector.xyz), normal));
-
+	
 	float depth = length(underwaterVector.xyz) * UdotN;
 	      depth = exp(-depth * 0.35);
-
+	
 	float fogFactor = CalculateFogFactor(viewSpacePosition1, 10.0);
-
+	
 	return 1.0 - clamp(depth - fogFactor, 0.0, 1.0);
 }
 
 void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in Mask mask) {
 	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.1) * colorSkylight;
-
+	
 	if (mask.water > 0.5)
 		color = mix(color, waterVolumeColor, ComputeSkyAbsorbance(viewSpacePosition, viewSpacePosition1, normal));
 }
@@ -149,35 +149,35 @@ void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewS
 void main() {
 	Mask mask;
 	CalculateMasks(mask, GetMaterialID(texcoord), true);
-
-	vec3  diffuse           = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
-	vec3  normal            = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
-	float depth             = (mask.sky < 0.5 ?              GetDepth(texcoord) : 1.0);
-	float depth1            = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0); // Going to append a "1" onto the end of anything that represents first-layer transparency
-
+	
+	vec3  diffuse = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
+	vec3  normal  = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
+	float depth   = (mask.sky < 0.5 ?              GetDepth(texcoord) : 1.0);
+	float depth1  = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
+	
 	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
-
+	
 	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); return; } // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
-
+	
 	#ifdef DEFERRED_SHADING
-	float torchLightmap     = GetTorchLightmap(texcoord);
-	float skyLightmap       = GetSkyLightmap(texcoord);
-
+	float torchLightmap = GetTorchLightmap(texcoord);
+	float skyLightmap   = GetSkyLightmap(texcoord);
+	
 	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, viewSpacePosition);
 	#else
 	vec3 composite = DecodeColor(texture2D(colortex2, texcoord).rgb);
 	#endif
-
-
+	
+	
 	vec3 GI; float volFog;
 	BilateralUpsample(normal, depth, mask, GI, volFog);
-
+	
 	composite += GI * colorSunlight * pow(diffuse, vec3(2.2));
-
-
+	
+	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
-
+	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(EncodeColor(GI), volFog);
 }
