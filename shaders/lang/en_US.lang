@@ -111,5 +111,11 @@ option.FORWARD_SHADING.comment=Computes shading on blocks that are underwater, b
 
 option.DEBUG=Debug Mode
 
-option.STAGE_VIEW=Debug Shader View
-option.STAGE_VIEW.comment=The shader stage you're debugging. -1: gbuffers_textured_lit.fsh. 0: composite.fsh. 1: composite1.fsh. 2: composite2.fsh. 3: composite3.fsh. 7: final.fsh
+option.DEBUG_VIEW=Debug Shader View
+option.DEBUG_VIEW.comment=The shader stage you're debugging. -1: gbuffers_textured_lit.fsh. 0: composite.fsh. 1: composite1.fsh. 2: composite2.fsh. 3: composite3.fsh. 7: final.fsh
+
+option.DEBUG_MULTIPLYER=Debug Multiplyer
+option.DEBUG_MULTIPLYER.comment=The constant to multiply your debug variable by to make it more visible
+
+option.DEBUG_CURVE=Debug Curve
+option.DEBUG_CURVE.comment=The constant to curve your debug variable by to make it more visible
