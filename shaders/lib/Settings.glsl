@@ -22,6 +22,7 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 
 
+// GUI Settings
 #define EXPOSURE            1.0  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0  8.0]
 #define SUN_LIGHT_LEVEL     1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define SKY_LIGHT_LEVEL     1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
@@ -47,8 +48,7 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 #define SHADOW_MAP_BIAS 0.80     // [0.00 0.60 0.70 0.80 0.85 0.90]
 #define EXTENDED_SHADOW_DISTANCE
-//#define SOFT_SHADOWS
-#define PCSS
+#define SHADOW_TYPE 2 // [1 2 3]
 #define PLAYER_SHADOW
 
 #define FOG_ENABLED
@@ -73,7 +73,7 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 
 
-/* Option unwravelling */
+// Option unwravelling
 #ifdef GI_BOOST
 	#define GI_Boost true
 #else
@@ -96,6 +96,11 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 	#define Volumetric_Fog false
 #endif
 
+
+
+
+
+// Global variables
 #define PI 3.1415926
 #define TIME frameTimeCounter
 

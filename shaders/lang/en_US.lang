@@ -60,8 +60,8 @@ option.SHADOW_MAP_BIAS.comment=Higher values make nearby shadows look better, at
 option.EXTENDED_SHADOW_DISTANCE=Extended Shadow Distance
 option.EXTENDED_SHADOW_DISTANCE.comment=Makes shadows visible at extremely far distances, accentuates shadow artifacts in some situations
 
-option.SOFT_SHADOWS=Soft Shadows
-option.SOFT_SHADOWS.comment=Softens shadow edges. Medium performance cost!
+option.SHADOW_TYPE=Shadow Type
+option.SHADOW_TYPE.comment=1: Hard shadows. 2: Uniformly soft shadows. 3: Softness based on distance from shadow caster. Medium performance cost!
 
 option.PLAYER_SHADOW=Player Shadow
 option.PLAYER_SHADOW.comment=Whether or not the player casts a shadow

@@ -2,14 +2,14 @@
 // Start of #include "/lib/ShadingFunctions.fsh"
 
 // Prerequisites:
-//
+// 
 // uniform sampler2DShadow shadow;
 // uniform sampler2D shadowtex1;
-//
+// 
 // uniform mat4 gbufferModelViewInverse;
 // uniform mat4 shadowModelView;
 // uniform mat4 shadowProjection;
-//
+// 
 // #include "/lib/Settings.glsl"
 // #include "/lib/Util.glsl"
 
@@ -101,8 +101,8 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	||  position.z < 0.0 || position.z > 1.0
 	    ) return 1.0;
 	
-	#if defined PCSS
-		float vpsSpread = 0.9 / biasCoeff;
+	#if SHADOW_TYPE == 3 // Variable softness
+		float vpsSpread = 0.5 / biasCoeff;
 		
 		vec2 randomAngle = CalculateNoisePattern1(vec2(0.0), 64.0).xy * 3.14159 * 2.0;
 		
@@ -145,7 +145,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		
 		sunlight /= sampleCount;
 		
-	#elif defined SOFT_SHADOWS
+	#elif SHADOW_TYPE == 2 // Fixed softness
 		float spread   = 1.0 * (1.0 - biasCoeff) / shadowMapResolution;
 		
 		const float range       = 1.0;
@@ -159,7 +159,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		sunlight /= sampleCount; // Average the samples by dividing the sum by the sample count.
 		
 		sunlight = pow2(sunlight);
-	#else
+	#else // Hard
 		sunlight = shadow2D(shadow, position.xyz).x;
 		
 		sunlight = pow2(sunlight); // Fatten the shadow up to soften its penumbra (default hardware-filtered penumbra does not have a satisfying penumbra curve)
