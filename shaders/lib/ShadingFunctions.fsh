@@ -129,7 +129,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 
 		avgDepth /= sampleCount;
 		avgDepth  = sqrt(avgDepth);
-		Debug = vec3(avgDepth);
+		
 		float penumbraSize = avgDepth;
 		
 		float spread = penumbraSize * 0.02 * vpsSpread + 0.15 / shadowMapResolution;

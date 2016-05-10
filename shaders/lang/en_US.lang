@@ -110,3 +110,6 @@ option.FORWARD_SHADING.comment=Computes shading on blocks that are underwater, b
 
 
 option.DEBUG=Debug Mode
+
+option.STAGE_VIEW=Debug Shader View
+option.STAGE_VIEW.comment=The shader stage you're debugging. -1: gbuffers_textured_lit.fsh. 0: composite.fsh. 1: composite1.fsh. 2: composite2.fsh. 3: composite3.fsh. 7: final.fsh

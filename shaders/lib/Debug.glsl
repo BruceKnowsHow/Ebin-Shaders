@@ -1,7 +1,7 @@
 
 // Start of #include "/lib/Debug.glsl"
 
-// Drawbuffers | ShaderStage | Primary Passthrough Stage?
+//            Drawbuffers | ShaderStage | Primary Passthrough Stage?
 // 
 // gbuffers_textured_lit: 2306 | -1 | 
 // composite:             4    |  0 | No
