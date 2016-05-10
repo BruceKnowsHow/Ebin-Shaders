@@ -1,5 +1,10 @@
+
+
 option.EXPOSURE=Exposure
 option.EXPOSURE.comment=The brightness level of the entire scene
+
+option.SATURATION=Saturation
+option.SATURATION.comment=The saturation level of the entire scene
 
 option.SUN_LIGHT_LEVEL=Sun Light Level
 option.SUN_LIGHT_LEVEL.comment=The brightness level of sunlight

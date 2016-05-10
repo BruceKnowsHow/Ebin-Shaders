@@ -24,6 +24,7 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 // GUI Settings
 #define EXPOSURE            1.0  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0  8.0]
+#define SATURATION          1.15 // [0.00 0.50 1.00 1.15 1.30]
 #define SUN_LIGHT_LEVEL     1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define SKY_LIGHT_LEVEL     1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define AMBIENT_LIGHT_LEVEL 1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]

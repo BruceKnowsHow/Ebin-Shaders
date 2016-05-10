@@ -173,7 +173,7 @@ void main() {
 	
 	color = Uncharted2Tonemap(color);
 	
-	SetSaturationLevel(color, 1.15);
+	SetSaturationLevel(color, SATURATION);
 	
 	gl_FragData[0] = vec4(color, 1.0);
 	
