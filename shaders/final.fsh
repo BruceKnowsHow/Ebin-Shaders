@@ -1,5 +1,7 @@
 #version 120
 
+#define ShaderStage 7
+
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
@@ -22,6 +24,8 @@ uniform float near;
 uniform float far;
 
 varying vec2 texcoord;
+
+vec3 Debug;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
@@ -173,4 +177,6 @@ void main() {
 	SetSaturationLevel(color, 1.15);
 	
 	gl_FragColor = vec4(color, 1.0);
+	
+	#include "/lib/Debug.glsl"
 }

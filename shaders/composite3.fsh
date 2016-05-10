@@ -2,6 +2,8 @@
 
 /* DRAWBUFFERS:2 */
 
+#define ShaderStage 3
+
 const bool colortex0MipmapEnabled = true;
 
 uniform sampler2D colortex0;
@@ -10,6 +12,8 @@ uniform float viewWidth;
 uniform float viewHeight;
 
 varying vec2 texcoord;
+
+vec3 Debug;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
@@ -71,4 +75,6 @@ vec3 ComputeBloom() {
 
 void main() {
 	gl_FragData[0] = vec4(pow(ComputeBloom(), vec3(1.0 / 2.2)), 1.0);
+	
+	#include "/lib/Debug.glsl"
 }

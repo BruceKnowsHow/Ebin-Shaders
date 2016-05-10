@@ -2,11 +2,14 @@
 
 /* DRAWBUFFERS:2306 */
 
+#define ShaderStage -1
+
 uniform sampler2D texture;
 uniform sampler2D normals;
 uniform sampler2D noisetex;
 
 uniform sampler2DShadow shadow;
+uniform sampler2D shadowtex1;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -18,6 +21,9 @@ uniform mat4 shadowModelViewInverse;
 
 uniform float frameTimeCounter;
 uniform float far;
+
+uniform float viewWidth;
+uniform float viewHeight;
 
 varying vec3 color;
 varying vec2 texcoord;
@@ -33,6 +39,8 @@ varying float encodedMaterialIDs;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
+vec3 Debug;
+
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
@@ -40,9 +48,6 @@ varying vec3 worldPosition;
 #ifdef FORWARD_SHADING
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
-#endif
-#ifdef DEBUG
-#include "/lib/Debug.glsl"
 #endif
 
 
@@ -167,4 +172,6 @@ void main() {
 		gl_FragData[2] = vec4(EncodeNormal(normal).xy, 0.0, 1.0);
 		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
 	#endif
+	
+	#include "/lib/Debug.glsl"
 }

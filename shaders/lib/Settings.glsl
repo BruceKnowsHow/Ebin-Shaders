@@ -74,6 +74,10 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 
 //#define DEBUG
 
+#define STAGE_VIEW 1 // [-1 0 1 2 3 7]
+#define DEBUG_MULTIPLYER 1.0 // [1.0 5.0 25.0 100.0 1000.0]
+#define DEBUG_CURVE 1.0 // [0.4545 1.0 2.2]
+
 
 
 // Option unwravelling

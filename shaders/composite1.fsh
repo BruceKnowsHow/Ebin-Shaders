@@ -2,6 +2,8 @@
 
 /* DRAWBUFFERS:24 */
 
+#define ShaderStage 1
+
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
@@ -32,6 +34,8 @@ uniform float near;
 uniform float far;
 
 varying vec2 texcoord;
+
+vec3 Debug;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
@@ -180,4 +184,8 @@ void main() {
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(EncodeColor(GI), volFog);
+	
+//	Debug = vec3(length(texcoord));
+	
+	#include "/lib/Debug.glsl"
 }

@@ -2,6 +2,8 @@
 
 /* DRAWBUFFERS:4 */
 
+#define ShaderStage 0
+
 const bool shadowtex1Mipmap    = true;
 const bool shadowcolor0Mipmap  = true;
 const bool shadowcolor1Mipmap  = true;
@@ -33,6 +35,8 @@ uniform float near;
 uniform float far;
 
 varying vec2 texcoord;
+
+vec3 Debug;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
