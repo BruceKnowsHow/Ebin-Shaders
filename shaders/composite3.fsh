@@ -13,10 +13,9 @@ uniform float viewHeight;
 
 varying vec2 texcoord;
 
-vec3 Debug;
-
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/DebugSetup.glsl"
 
 
 vec3 ComputeBloomTile(const int scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
@@ -76,5 +75,5 @@ vec3 ComputeBloom() {
 void main() {
 	gl_FragData[0] = vec4(pow(ComputeBloom(), vec3(1.0 / 2.2)), 1.0);
 	
-	#include "/lib/Debug.glsl"
+	exit();
 }

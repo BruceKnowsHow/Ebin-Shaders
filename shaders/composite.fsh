@@ -36,14 +36,13 @@ uniform float far;
 
 varying vec2 texcoord;
 
-vec3 Debug;
-
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 #include "/lib/ShadingFunctions.fsh"
+#include "/lib/DebugSetup.glsl"
 
 
 float GetDepth(in vec2 coord) {
@@ -180,7 +179,7 @@ void main() {
 	CalculateMasks(mask, GetMaterialID(texcoord), true);
 
 	if (mask.sky > 0.5)
-		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); return; }
+		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); }
 
 	float depth             = GetDepth(texcoord);
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
@@ -189,11 +188,13 @@ void main() {
 	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
 
 	if (mask.water > 0.5)
-		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); return; }
+		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); exit(); }
 
 	vec3 normal = GetNormal(texcoord);
 
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, GI_QUALITY * 4.0, noise2D, mask);
 
 	gl_FragData[0] = vec4(EncodeColor(GI), volFog);
+	
+	exit();
 }

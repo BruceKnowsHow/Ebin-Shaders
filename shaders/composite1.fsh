@@ -35,14 +35,13 @@ uniform float far;
 
 varying vec2 texcoord;
 
-vec3 Debug;
-
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
 #include "/lib/CalculateFogFactor.glsl"
+#include "/lib/DebugSetup.glsl"
 
 
 vec3 GetDiffuse(in vec2 coord) {
@@ -162,7 +161,7 @@ void main() {
 	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); return; } // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); exit(); } // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
 	
 	#ifdef DEFERRED_SHADING
 	float torchLightmap = GetTorchLightmap(texcoord);
@@ -185,7 +184,5 @@ void main() {
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(EncodeColor(GI), volFog);
 	
-//	Debug = vec3(length(texcoord));
-	
-	#include "/lib/Debug.glsl"
+	exit();
 }

@@ -2,6 +2,8 @@
 
 /* DRAWBUFFERS:2306 */
 
+#define ShaderStage -1
+
 uniform sampler2D texture;
 uniform sampler2D normals;
 uniform sampler2D noisetex;
@@ -37,12 +39,11 @@ varying float encodedMaterialIDs;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
-vec3 Debug;
-
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/CalculateFogFactor.glsl"
+#include "/lib/DebugSetup.glsl"
 #ifdef FORWARD_SHADING
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
@@ -143,7 +144,7 @@ vec3 GetWaveNormals(in vec3 position) {
 
 vec3 GetNormal() {
 	if (abs(materialIDs - 4.0) < 0.5)
-		return normalize(GetWaveNormals(worldPosition) * tbnMatrix);
+		return normalize(GetWaveNormals(worldPosition.xyz) * tbnMatrix);
 	else
 		return normalize((texture2D(normals, texcoord).xyz * 2.0 - 1.0) * tbnMatrix);
 }
@@ -170,4 +171,6 @@ void main() {
 		gl_FragData[2] = vec4(EncodeNormal(normal).xy, 0.0, 1.0);
 		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
 	#endif
+	
+	exit();
 }

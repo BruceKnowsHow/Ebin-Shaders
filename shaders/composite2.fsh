@@ -29,13 +29,12 @@ uniform float far;
 
 varying vec2 texcoord;
 
-vec3 Debug;
-
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
+#include "/lib/DebugSetup.glsl"
 
 
 vec3 GetColor(in vec2 coord) {
@@ -173,7 +172,7 @@ void main() {
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); return; }
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); }
 	
 	if (mask.water > 0.5)
 		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
@@ -183,5 +182,5 @@ void main() {
 	
 	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
 	
-	#include "/lib/Debug.glsl"
+	exit();
 }

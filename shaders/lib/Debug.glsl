@@ -19,9 +19,6 @@
 		#else
 			gl_FragColor   = vec4(Debug, 1.0);
 		#endif
-		
-		return;
-		
 	#elif ShaderStage > STAGE_VIEW
 		#if   ShaderStage == 0
 			discard;
@@ -47,8 +44,6 @@
 			#endif
 			
 		#endif
-		
-		return;
 	#endif
 #endif
 

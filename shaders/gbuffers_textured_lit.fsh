@@ -39,12 +39,12 @@ varying float encodedMaterialIDs;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
-vec3 Debug;
-
+#include "/lib/MenuInitializer.glsl"
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/CalculateFogFactor.glsl"
+#include "/lib/DebugSetup.glsl"
 #ifdef FORWARD_SHADING
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
@@ -173,5 +173,5 @@ void main() {
 		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
 	#endif
 	
-	#include "/lib/Debug.glsl"
+	exit();
 }

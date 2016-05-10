@@ -25,12 +25,11 @@ uniform float far;
 
 varying vec2 texcoord;
 
-vec3 Debug;
-
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
+#include "/lib/DebugSetup.glsl"
 
 
 vec3 GetColor(in vec2 coord) {
@@ -178,5 +177,5 @@ void main() {
 	
 	gl_FragColor = vec4(color, 1.0);
 	
-	#include "/lib/Debug.glsl"
+	exit();
 }
