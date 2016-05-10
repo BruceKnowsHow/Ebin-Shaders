@@ -105,22 +105,25 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	    ) return 1.0;
 	
 	#if SHADOW_TYPE == 3 // Variable softness
-		float vpsSpread = 0.5 / biasCoeff;
+		float vpsSpread = 0.4 / biasCoeff;
 		
 		vec2 randomAngle = CalculateNoisePattern1(vec2(0.0), 64.0).xy * 3.14159 * 2.0;
 		
-		mat2 randomRotation = mat2(cos(randomAngle.x), -sin(randomAngle.x),
+		mat2 blockerRotation = mat2(cos(randomAngle.x), -sin(randomAngle.x),
 		                           sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix for blocker, high noise
+															 
+		mat2 pcfRotation = mat2(cos(randomAngle.x), -sin(randomAngle.x),
+													 	sin(randomAngle.x),  cos(randomAngle.x)); //Random Rotation Matrix for blocker, high noise
 		
-		float range       = 0.5;
+		float range       = 1;
 		float sampleCount = pow(range * 2.0 + 1.0, 2.0);
 		
 		float avgDepth = 0.0;
 		//Blocker Search
 		for(float i = -range; i <= range; i++) {
 			for(float j = -range; j <= range; j++) {
-				vec2 lookupPosition = position.xy + vec2(i, j) / shadowMapResolution * randomRotation * vpsSpread * 2.0;
-				float depthSample = texture2D(shadowtex1, lookupPosition).x;
+				vec2 lookupPosition = position.xy + vec2(i, j) / shadowMapResolution * blockerRotation * vpsSpread;
+				float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
 				
 				avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
 			}
@@ -137,7 +140,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		//PCF Blur
 		for (float i = -range; i <= range; i++) {
 			for (float j = -range; j <= range; j++) {
-				vec2 coord = vec2(i, j);
+				vec2 coord = vec2(i, j) * pcfRotation;
 				
 				sunlight += shadow2DLod(shadow, vec3(coord * spread + position.st, position.z), 0).x;
 			}
