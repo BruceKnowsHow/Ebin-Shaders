@@ -39,11 +39,12 @@ varying float encodedMaterialIDs;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
+#include "/lib/MenuInitializer.glsl"
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/DebugSetup.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/CalculateFogFactor.glsl"
-#include "/lib/DebugSetup.glsl"
 #ifdef FORWARD_SHADING
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"

@@ -49,6 +49,8 @@ void main() {
 	#endif
 	
 	
+	
+	
 //#include "include/PostCalculations.vsh"
 	vec3 sunVector = normalize(sunPosition); //Engine-time overrides will happen by modifying sunVector
 	

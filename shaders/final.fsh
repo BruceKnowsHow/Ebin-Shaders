@@ -27,9 +27,9 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/DebugSetup.glsl"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
-#include "/lib/DebugSetup.glsl"
 
 
 vec3 GetColor(in vec2 coord) {
@@ -175,7 +175,7 @@ void main() {
 	
 	SetSaturationLevel(color, 1.15);
 	
-	gl_FragColor = vec4(color, 1.0);
+	gl_FragData[0] = vec4(color, 1.0);
 	
 	exit();
 }

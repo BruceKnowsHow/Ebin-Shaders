@@ -13,18 +13,15 @@
 
 
 #ifdef DEBUG
-	#if ShaderStage == STAGE_VIEW
-		#if   ShaderStage != 7
-			gl_FragData[0] = vec4(Debug, 1.0);
-		#else
-			gl_FragColor   = vec4(Debug, 1.0);
-		#endif
-	#elif ShaderStage > STAGE_VIEW
+	#if ShaderStage == DEBUG_VIEW
+		gl_FragData[0] = vec4(pow(Debug * DEBUG_MULTIPLYER, vec3(DEBUG_CURVE)), 1.0);
+		
+	#elif ShaderStage > DEBUG_VIEW
 		#if   ShaderStage == 0
 			discard;
 			
 		#elif ShaderStage == 1
-			#if STAGE_VIEW != 0
+			#if DEBUG_VIEW != 0
 				gl_FragData[0] = vec4(texture2D(colortex2, texcoord).rgb, 1.0);
 			#else
 				gl_FragData[0] = vec4(texture2D(colortex4, texcoord).rgb, 1.0);
@@ -37,10 +34,10 @@
 			discard;
 			
 		#elif ShaderStage == 7
-			#if STAGE_VIEW != 3
-				gl_FragColor   = vec4(pow(texture2D(colortex0, texcoord).rgb * DEBUG_MULTIPLYER, vec3(DEBUG_CURVE)), 1.0);
+			#if DEBUG_VIEW != 3
+				gl_FragData[0] = vec4(texture2D(colortex0, texcoord).rgb, 1.0);
 			#else
-				gl_FragColor   = vec4(pow(texture2D(colortex2, texcoord).rgb * DEBUG_MULTIPLYER, vec3(DEBUG_CURVE)), 1.0);
+				gl_FragData[0] = vec4(texture2D(colortex2, texcoord).rgb, 1.0);
 			#endif
 			
 		#endif

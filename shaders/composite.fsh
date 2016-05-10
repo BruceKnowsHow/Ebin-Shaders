@@ -38,11 +38,11 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/DebugSetup.glsl"
 #include "/lib/GlobalCompositeVariables.fsh"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 #include "/lib/ShadingFunctions.fsh"
-#include "/lib/DebugSetup.glsl"
 
 
 float GetDepth(in vec2 coord) {
