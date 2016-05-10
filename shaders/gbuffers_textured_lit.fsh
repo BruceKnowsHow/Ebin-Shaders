@@ -41,6 +41,9 @@ varying vec3 worldPosition;
 #include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
 #endif
+#ifdef DEBUG
+#include "/lib/Debug.glsl"
+#endif
 
 
 vec4 GetDiffuse() {

@@ -107,3 +107,6 @@ option.RECALCULATE_DISPLACED_NORMALS.comment=Whether or not surface normals are 
 
 option.FORWARD_SHADING=Forward Shading Pipeline
 option.FORWARD_SHADING.comment=Computes shading on blocks that are underwater, behind glass, etc. High performance impact!
+
+
+option.DEBUG=Debug Mode

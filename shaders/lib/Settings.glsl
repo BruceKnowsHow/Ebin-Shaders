@@ -72,6 +72,9 @@ const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
 //#define FORWARD_SHADING
 
 
+//#define DEBUG
+
+
 
 // Option unwravelling
 #ifdef GI_BOOST
