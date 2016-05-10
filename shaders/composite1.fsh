@@ -4,6 +4,10 @@
 
 #define ShaderStage 1
 
+const bool shadowtex1Mipmap  = true;
+
+const bool shadowtex1Nearest = true;
+
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;

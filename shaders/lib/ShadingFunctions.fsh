@@ -112,27 +112,24 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		mat2 randomRotation = mat2(cos(randomAngle.x), -sin(randomAngle.x),
 		                           sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix for blocker, high noise
 		
-		float range       = 2.0;
+		float range       = 0.5;
 		float sampleCount = pow(range * 2.0 + 1.0, 2.0);
 		
 		float avgDepth = 0.0;
-		
 		//Blocker Search
 		for(float i = -range; i <= range; i++) {
 			for(float j = -range; j <= range; j++) {
-				vec2 lookupPosition = position.xy + (vec2(i, j) / shadowMapResolution) * randomRotation * vpsSpread;
+				vec2 lookupPosition = position.xy + vec2(i, j) / shadowMapResolution * randomRotation * vpsSpread * 4.0;
 				float depthSample = texture2D(shadowtex1, lookupPosition).x;
 				
 				avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
 			}
-		}
-
+		} 
+		
 		avgDepth /= sampleCount;
 		avgDepth  = sqrt(avgDepth);
 		
-		float penumbraSize = avgDepth;
-		
-		float spread = penumbraSize * 0.02 * vpsSpread + 0.15 / shadowMapResolution;
+		float spread = avgDepth * 0.02 * vpsSpread + 0.15 / shadowMapResolution;
 		
 		range       = 2.0;
 		sampleCount = pow(range * 2.0 + 1.0, 2.0);
