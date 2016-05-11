@@ -174,7 +174,7 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 	#include "lib/Poisson.glsl"
 	
 	for(int i = 0; i <= SAMPLES; i++) {
-		vec2 offset = (samples256[i] * 25 + noise) / 2048;
+		vec2 offset = (samples256[i] * 50 + noise) / 2048;
 		
 		vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
 		
@@ -185,7 +185,7 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 		
 		vec3 sampleDiff = position.xyz - samplePos.xyz;
 		
-		float distanceCoeff = length(sampleDiff) * 10000.0;
+		float distanceCoeff = max(length(sampleDiff), 0.005) * 20000.0;
 		      distanceCoeff = 1.0 / square(distanceCoeff); // Inverse-square law
 		
 		vec3 sampleDir    = normalize(sampleDiff);
@@ -203,7 +203,7 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 	
 	GI /= SAMPLES * radius;
 	
-	return GI * lightMult * brightness * 1000; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
+	return GI * lightMult * brightness * 12000; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
 
 float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
