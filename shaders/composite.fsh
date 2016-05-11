@@ -173,7 +173,7 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 	#define SAMPLES 256
 	#include "lib/Poisson.glsl"
 	
-	for(float i = 0.0; i <= SAMPLES; i++) {
+	for(int i = 0.0; i <= SAMPLES; i++) {
 		vec2 offset = samples256[i] * scale + noise;
 			
 		vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
