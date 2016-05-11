@@ -31,7 +31,7 @@ vec3 CalculateSkyGradient(in vec4 viewSpacePosition) {
 	float sunglow = CalculateSunlow(viewSpacePosition);
 	
 	vec3 color  = horizonCoeff * pow(colorSkylight, vec3((10.0 - horizonCoeff) / 5.5)); // Sky desaturates as it approaches the horizon
-	     color += sunglow * pow(colorSkylight, vec3(1.4));
+	     color += sunglow * pow(colorSkylight, vec3(1.3));
 	
 	return color;
 }
@@ -63,7 +63,7 @@ void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolum
 	vec4  skyComposite;
 	
 	skyComposite.a   = GetSkyAlpha(fogVolume, fogFactor);
-	skyComposite.rgb = (gradient + sunspot + atmosphere) * SKY_BRIGHTNESS;
+	skyComposite.rgb = (gradient + sunspot) * SKY_BRIGHTNESS;
 	
 	color += atmosphere * SKY_BRIGHTNESS;
 	color  = mix(color, skyComposite.rgb, skyComposite.a);
