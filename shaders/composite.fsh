@@ -174,7 +174,7 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 	#include "lib/Poisson.glsl"
 	
 	for(int i = 0; i <= SAMPLES; i++) {
-		vec2 offset = (samples256[i] * 50 + noise) / 2048;
+		vec2 offset = (samples256[i] * 25 + noise) / 2048;
 			
 		vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
 			
@@ -198,9 +198,9 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 			
 		viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
 		
-		float falloff = length(samplePos.xyz - position.xyz);
-		falloff = max(falloff, 0.005);
-		falloff = 1.0 / (pow(falloff * (40000.0 / radius), 2.0) + 0.0001);
+		float falloff = length(shadowViewPosition.xyz - samplePos.xyz);
+		falloff = max(falloff, radius);
+		falloff = 1.0 / (pow(falloff * (1 / falloff), 2.0));
 		falloff = max(0.0, falloff - 9e-05);
 			
 		vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
@@ -208,7 +208,7 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 		GI += flux * viewNormalCoeff * sqrt(shadowNormalCoeff) * falloff;
 	}
 	
-	GI /= SAMPLES * 5 * radius;
+	GI /= SAMPLES * radius;
 	
 	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
