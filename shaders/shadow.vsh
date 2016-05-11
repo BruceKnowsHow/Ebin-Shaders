@@ -42,18 +42,7 @@ vec4 WorldSpaceToShadowProjection(in vec4 worldSpacePosition) {
 #include "/lib/Waving.vsh"
 #include "/lib/VertexDisplacements.vsh"
 #include "/lib/CalculateTBN.vsh"
-
-float GetShadowBias(in vec2 shadowProjection) {
-	if (!biasShadowMap) return 1.0;
-	
-	#ifdef EXTENDED_SHADOW_DISTANCE
-		shadowProjection *= 1.165;
-		
-		return length8(shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
-	#else
-		return length (shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
-	#endif
-}
+#include "/lib/BiasFunctions.glsl"
 
 vec4 BiasShadowProjection(in vec4 position) {
 	float biasCoeff = GetShadowBias(position.xy);

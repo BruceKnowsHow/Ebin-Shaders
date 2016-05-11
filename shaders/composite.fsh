@@ -205,12 +205,12 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 			
 		vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
 			
-		GI += flux * viewNormalCoeff * sqrt(shadowNormalCoeff) * falloff;
+		GI += flux * viewNormalCoeff * sqrt(shadowNormalCoeff) * distanceCoeff;
 	}
 	
 	GI /= SAMPLES * radius;
 	
-	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
+	return GI * lightMult * brightness * 100; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
 
 float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
