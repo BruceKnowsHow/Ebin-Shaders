@@ -1,8 +1,8 @@
 #version 120
+#define composite_fsh true
+#define ShaderStage 0
 
 /* DRAWBUFFERS:4 */
-
-#define ShaderStage 0
 
 const bool shadowtex1Mipmap    = true;
 const bool shadowcolor0Mipmap  = true;

@@ -1,6 +1,6 @@
 #version 120
-
-#define GBUFFERS_HAND_VERTEX
+#define hand_vsh true
+#define ShaderStage -10
 
 uniform mat4 gbufferProjectionInverse;
 

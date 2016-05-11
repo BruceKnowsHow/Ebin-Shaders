@@ -1,8 +1,8 @@
 #version 120
+#define composite2_fsh true
+#define ShaderStage 2
 
 /* DRAWBUFFERS:0 */
-
-#define ShaderStage 2
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;

@@ -1,8 +1,8 @@
 #version 120
+#define composite1_fsh true
+#define ShaderStage 1
 
 /* DRAWBUFFERS:24 */
-
-#define ShaderStage 1
 
 const bool shadowtex1Mipmap  = true;
 

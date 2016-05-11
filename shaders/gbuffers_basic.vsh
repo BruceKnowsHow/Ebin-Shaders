@@ -1,4 +1,6 @@
 #version 120
+#define basic_vsh true
+#define ShaderStage -10
 
 varying vec3 color;
 

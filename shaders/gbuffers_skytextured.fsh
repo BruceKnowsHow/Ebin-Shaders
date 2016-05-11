@@ -1,4 +1,6 @@
 #version 120
+#define skytextured_fsh true
+#define ShaderStage -1
 
 /* DRAWBUFFERS:23 */
 

@@ -1,8 +1,8 @@
 #version 120
+#define composite3_fsh true
+#define ShaderStage 3
 
 /* DRAWBUFFERS:2 */
-
-#define ShaderStage 3
 
 const bool colortex0MipmapEnabled = true;
 

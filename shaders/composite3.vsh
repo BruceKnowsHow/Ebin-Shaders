@@ -1,4 +1,7 @@
 #version 120
+#define composite3_vsh true
+#define ShaderStage 10
+
 //#define COMPOSITE0_VERTEX
 #define COMPOSITE3_VERTEX
 

@@ -1,5 +1,5 @@
 #version 120
-
+#define final_fsh true
 #define ShaderStage 7
 
 uniform sampler2D colortex0;

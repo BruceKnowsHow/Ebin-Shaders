@@ -1,4 +1,7 @@
 #version 120
+#define shadow_vsh true
+#define ShaderStage -10
+
 
 #define SHADOW_MAP_BIAS 0.80
 #define EXTENDED_SHADOW_DISTANCE

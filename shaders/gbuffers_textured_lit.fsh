@@ -1,8 +1,8 @@
 #version 120
+#define textured_lit_fsh true
+#define ShaderStage -1
 
 /* DRAWBUFFERS:2306 */
-
-#define ShaderStage -1
 
 uniform sampler2D texture;
 uniform sampler2D normals;

@@ -1,4 +1,6 @@
 #version 120
+#define shadow_fsh true
+#define ShaderStage -1
 
 uniform sampler2D texture;
 

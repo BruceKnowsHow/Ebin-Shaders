@@ -1,4 +1,6 @@
 #version 120
+#define textured_lit_vsh true
+#define ShaderStage -10
 
 //#define GBUFFERS_HAND_VERTEX
 
