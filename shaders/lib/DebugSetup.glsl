@@ -24,8 +24,6 @@ void debug(in vec4 x) {
 
 void exit() {
 	#include "/lib/Debug.glsl"
-	
-	return;
 }
 
 

@@ -241,7 +241,7 @@ void main() {
 	CalculateMasks(mask, GetMaterialID(texcoord), true);
 	
 	if (mask.sky > 0.5)
-		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); }
+		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); return; }
 	
 	float depth             = GetDepth(texcoord);
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
@@ -250,7 +250,7 @@ void main() {
 	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
 	
 	if (mask.water > 0.5)
-		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); exit(); }
+		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); exit(); return; }
 	
 	vec3 normal = GetNormal(texcoord);
 	
