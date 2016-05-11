@@ -9,6 +9,7 @@
 #define CUSTOM_TIME_CYCLE
 
 attribute vec4 mc_Entity;
+attribute vec4 at_tangent;
 
 uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
@@ -26,15 +27,8 @@ varying vec2 lightmapCoord;
 
 varying vec3 vertNormal;
 
-#define PI 3.1415926
-#define TIME frameTimeCounter
-
-//#define WAVING_GRASS
-#define WAVING_LEAVES
-#define WAVING_WATER
-#define PLAYER_SHADOW
-
-const bool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
+#include "/lib/Settings.glsl"
+#include "/lib/Util.glsl"
 
 
 vec4 GetWorldSpacePositionShadow() {
@@ -45,100 +39,9 @@ vec4 WorldSpaceToShadowProjection(in vec4 worldSpacePosition) {
 	return shadowProjection * shadowModelView * worldSpacePosition;
 }
 
-vec3 GetWavingGrass(in vec3 position, in float magnitude) {
-	vec3 wave = vec3(0.0);
-	
-	#ifdef WAVING_GRASS
-	const float speed = 1.0;
-	
-	float intensity = sin((TIME * 20.0 * PI / (28.0)) + position.x + position.z) * 0.1 + 0.1;
-	
-	float d0 = sin(TIME * 20.0 * PI / (122.0 * speed)) * 3.0 - 1.5 + position.z;
-	float d1 = sin(TIME * 20.0 * PI / (152.0 * speed)) * 3.0 - 1.5 + position.x;
-	float d2 = sin(TIME * 20.0 * PI / (122.0 * speed)) * 3.0 - 1.5 + position.x;
-	float d3 = sin(TIME * 20.0 * PI / (152.0 * speed)) * 3.0 - 1.5 + position.z;
-	
-	wave.x += sin((TIME * 20.0 * PI / (28.0 * speed)) + (position.x + d0) * 0.1 + (position.z + d1) * 0.1) * intensity;
-	wave.z += sin((TIME * 20.0 * PI / (28.0 * speed)) + (position.z + d2) * 0.1 + (position.x + d3) * 0.1) * intensity;
-	#endif
-	
-	return wave * magnitude;
-}
-
-vec3 GetWavingLeaves(in vec3 position, in float magnitude) {
-	vec3 wave = vec3(0.0);
-	
-	#ifdef WAVING_LEAVES
-	const float speed = 1.0;
-	
-	float intensity = (sin(((position.y + position.x)/2.0 + TIME * PI / ((88.0)))) * 0.05 + 0.15) * 0.35;
-	
-	float d0 = sin(TIME * 20.0 * PI / (122.0 * speed)) * 3.0 - 1.5;
-	float d1 = sin(TIME * 20.0 * PI / (152.0 * speed)) * 3.0 - 1.5;
-	float d2 = sin(TIME * 20.0 * PI / (192.0 * speed)) * 3.0 - 1.5;
-	float d3 = sin(TIME * 20.0 * PI / (142.0 * speed)) * 3.0 - 1.5;
-	
-	wave.x += sin((TIME * 20.0 * PI / (16.0 * speed)) + (position.x + d0) * 0.5 + (position.z + d1) * 0.5 + position.y) * intensity;
-	wave.z += sin((TIME * 20.0 * PI / (18.0 * speed)) + (position.z + d2) * 0.5 + (position.x + d3) * 0.5 + position.y) * intensity;
-	wave.y += sin((TIME * 20.0 * PI / (10.0 * speed)) + (position.z + d2)       + (position.x + d3)                   ) * intensity * 0.5;
-	#endif
-	
-	return wave * magnitude;
-}
-
-vec3 GetWavingWater(in vec3 position, in float magnitude) {
-	vec3 wave = vec3(0.0);
-	
-	#ifdef WAVING_WATER
-	float Distance = length(position.xz - cameraPosition.xz);
-	
-	float waveHeight = max(0.06 / max(Distance / 10.0, 1.0) - 0.006, 0.0);
-	
-	wave.y  = waveHeight * sin(PI * (TIME / 2.1 + position.x / 7.0  + position.z / 13.0));
-	wave.y += waveHeight * sin(PI * (TIME / 1.5 + position.x / 11.0 + position.z / 5.0 ));
-	wave.y -= waveHeight;
-//	wave.y *= float(position.y - floor(position.y) > 0.15 || position.y - floor(position.y) < 0.005);
-	#endif
-	
-	return wave * magnitude;
-}
-
-vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
-	worldSpacePosition += cameraPosition.xyz;
-	
-	vec3 wave = vec3(0.0);
-	
-	float skylightWeight = lightmapCoord.t;
-	float grassWeight    = float(fract(texcoord.t * 256.0) < 0.01);
-	
-	switch(int(mc_Entity.x)) {
-		case 31:
-		case 37:
-		case 38:
-		case 59:  wave += GetWavingGrass(worldSpacePosition, skylightWeight * grassWeight); break;
-		case 18:
-		case 161: wave += GetWavingLeaves(worldSpacePosition, skylightWeight); break;
-		case 8:
-		case 9:
-		case 111: wave += GetWavingWater(worldSpacePosition, 1.0); break;
-	}
-	
-	return wave;
-}
-
-float pow8(in float x) {
-	x *= x;
-	x *= x;
-	return x * x;
-}
-
-float root8(in float x) {
-	return sqrt(sqrt(sqrt(x)));
-}
-
-float length8(in vec2 x) {
-	return root8(pow8(x.x) + pow8(x.y));
-}
+#include "/lib/Waving.vsh"
+#include "/lib/VertexDisplacements.vsh"
+#include "/lib/CalculateTBN.vsh"
 
 float GetShadowBias(in vec2 shadowProjection) {
 	if (!biasShadowMap) return 1.0;

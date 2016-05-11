@@ -17,8 +17,7 @@ const int colortex3Format = RGB8;
 const int colortex4Format = RGBA16;
 const int colortex5Format = RGB16;
 
-const int   noiseTextureResolution = 64;
-const float noiseTextureResolutionInverse = 1.0 / noiseTextureResolution;
+const int noiseTextureResolution = 64;
 
 
 

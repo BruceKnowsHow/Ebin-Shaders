@@ -92,7 +92,7 @@ float GetFractalWaveHeight(in vec2 coord, const vec2 wavelength, const vec2 spee
 	rotate(coord, angle);
 	coord /= wavelength;
 	coord  = smoothNoiseCoord(coord);
-	coord *= noiseTextureResolutionInverse;
+	coord /= noiseTextureResolution;
 	
 	float wave = texture2D(noisetex, coord).x;
 	
