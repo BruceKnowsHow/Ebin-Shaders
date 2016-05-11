@@ -2,12 +2,6 @@
 #define shadow_vsh true
 #define ShaderStage -10
 
-
-#define SHADOW_MAP_BIAS 0.80
-#define EXTENDED_SHADOW_DISTANCE
-//#define FORWARD_SHADING
-#define CUSTOM_TIME_CYCLE
-
 attribute vec4 mc_Entity;
 attribute vec4 at_tangent;
 
