@@ -167,11 +167,17 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 	
 	vec3 GI = vec3(0.0);
 	
-	#define SAMPLES 256
+	#define POISSON_SAMPLES 256
 	#include "lib/Poisson.glsl"
 	
-	for(int i = 0; i <= SAMPLES; i++) {
-		vec2 offset = (samples256[i] * 40 + noise * 500) / 2048;
+	for(int i = 0; i <= POISSON_SAMPLES; i++) {
+		vec2 offset;
+		
+		#if POISSON_SAMPLES == 256
+			offset = (samples256[i] * 40 + noise * 500) / 2048;
+		#elif POISSON_SAMPLES == 128
+			offset = (samples128[i] * 40 + noise * 500) / 2048;
+		#endif
 		
 		vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
 		
@@ -196,7 +202,7 @@ vec3 ComputeGlobalIlluminationPoisson(in vec4 position, in vec3 normal, const in
 		GI += flux * viewNormalCoeff * shadowNormalCoeff * distanceCoeff;
 	}
 	
-	GI /= SAMPLES * radius;
+	GI /= POISSON_SAMPLES * radius;
 	
 	return GI * lightMult * brightness * 25000; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
 }
