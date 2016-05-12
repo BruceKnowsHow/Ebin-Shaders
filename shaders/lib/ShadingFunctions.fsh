@@ -3,8 +3,9 @@
 
 // Prerequisites:
 // 
-// uniform sampler2DShadow shadow;
 // uniform sampler2D shadowtex1;
+// uniform sampler2DShadow shadow;
+// uniform sampler2D noisetex;
 // 
 // uniform mat4 gbufferModelViewInverse;
 // uniform mat4 shadowModelView;

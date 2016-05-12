@@ -15,10 +15,10 @@ uniform sampler2D colortex4;
 uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
-uniform sampler2D noisetex;
 uniform sampler2D shadowcolor;
-uniform sampler2DShadow shadow;
 uniform sampler2D shadowtex1;
+uniform sampler2DShadow shadow;
+uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
