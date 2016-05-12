@@ -63,7 +63,7 @@ float GetNormalShading(in vec3 normal, in Mask mask) {
 */
 
 float GetNormalShading(in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
-	float shading = dot(normal, lightVector);
+	//float shading = dot(normal, lightVector);
 	
 	//Roughness valuie from texture. TODO: pass it in
 	float roughness = 0.9;
