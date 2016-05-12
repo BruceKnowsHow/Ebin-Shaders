@@ -66,7 +66,7 @@ option.EXTENDED_SHADOW_DISTANCE=Extended Shadow Distance
 option.EXTENDED_SHADOW_DISTANCE.comment=Makes shadows visible at extremely far distances, accentuates shadow artifacts in some situations
 
 option.SHADOW_TYPE=Shadow Type
-option.SHADOW_TYPE.comment=1: Hard shadows. 2: Uniformly soft shadows. 3: Softness based on distance from shadow caster. Medium performance cost!
+option.SHADOW_TYPE.comment=1: Hard shadows. 2: Uniformly soft shadows. 3: Softness based on distance from shadow caster. Higher values have a medium performance cost!
 
 option.PLAYER_SHADOW=Player Shadow
 option.PLAYER_SHADOW.comment=Whether or not the player casts a shadow
@@ -87,14 +87,17 @@ option.ATMOSPHERIC_SCATTERING_AMOUNT=Atmospheric Scattering Amount
 option.ATMOSPHERIC_SCATTERING_AMOUNT.comment=Blue-Purple "haze" effect. Independant of fog setting
 
 
+option.GI_MODE=GI Mode
+option.GI_MODE.comment=1: Better for natural terrain and general gameplay. 2: More Physically accurate. Higher values may have an unmeasured performance cost!
+
 option.GI_TRANSLUCENCE=GI Translucence
 option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "bounce through" surfaces, similar to subsurface scattering
 
 option.GI_RADIUS=GI Radius
 option.GI_RADIUS.comment=The radius of global illumination light bounces
 
-option.GI_QUALITY=GI Quality
-option.GI_QUALITY.comment=Higher values have a high performance cost!
+option.GI_SAMPLE_COUNT=GI Sample Count
+option.GI_SAMPLE_COUNT.comment=Higher values have a high performance cost!
 
 option.GI_BOOST=GI Boost
 option.GI_BOOST.comment=Disables global illumination computations in certain situations where they will have a minimal visual impact (mostly in sunlight). High performance benefit!

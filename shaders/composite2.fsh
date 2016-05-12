@@ -172,7 +172,7 @@ void main() {
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); }
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); return;}
 	
 	if (mask.water > 0.5)
 		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
