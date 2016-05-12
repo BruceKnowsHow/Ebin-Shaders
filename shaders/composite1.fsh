@@ -9,6 +9,7 @@ const bool shadowtex1Mipmap  = true;
 const bool shadowtex1Nearest = true;
 
 uniform sampler2D colortex0;
+uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
@@ -62,6 +63,10 @@ float GetDepth(in vec2 coord) {
 
 float GetTransparentDepth(in vec2 coord) {
 	return texture2D(depthtex1, coord).x;
+}
+
+float GetSmoothness(in vec2 coord) {
+	return texture2D(colortex1, texcoord).r;
 }
 
 float ExpToLinearDepth(in float depth) {
@@ -157,10 +162,11 @@ void main() {
 	Mask mask;
 	CalculateMasks(mask, GetMaterialID(texcoord));
 	
-	vec3  diffuse = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
-	vec3  normal  = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
-	float depth   = (mask.sky < 0.5 ?              GetDepth(texcoord) : 1.0);
-	float depth1  = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
+	vec3  diffuse    = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
+	vec3  normal     = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
+	float depth      = (mask.sky < 0.5 ?              GetDepth(texcoord) : 1.0);
+	float depth1     = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
+	float smoothness = (mask.sky < 0.5 ?         GetSmoothness(texcoord) : 0.0);
 	
 	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
@@ -171,7 +177,7 @@ void main() {
 	float torchLightmap = GetTorchLightmap(texcoord);
 	float skyLightmap   = GetSkyLightmap(texcoord);
 	
-	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, viewSpacePosition);
+	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition);
 	#else
 	vec3 composite = DecodeColor(texture2D(colortex2, texcoord).rgb);
 	#endif

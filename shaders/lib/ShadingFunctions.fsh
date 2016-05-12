@@ -176,11 +176,11 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	return sunlight;
 }
 
-vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in float roughness, in vec4 ViewSpacePosition) {
+vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
 	diffuse = pow(diffuse, vec3(2.2)); // Put diffuse into a linear color space (diffuse should not be previously gamma-adjusted)
 	
 	Shading shading;
-	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, roughness, mask);
+	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
 	
 	shading.sunlight  = shading.normal;
 	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal);
