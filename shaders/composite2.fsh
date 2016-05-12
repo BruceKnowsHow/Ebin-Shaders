@@ -163,7 +163,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 
 void main() {
 	Mask mask;
-	CalculateMasks(mask, texture2D(colortex3, texcoord).b, true);
+	CalculateMasks(mask, texture2D(colortex3, texcoord).b);
 	
 	vec3  color  = GetColor(texcoord);
 	vec3  normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels

@@ -155,7 +155,7 @@ void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewS
 
 void main() {
 	Mask mask;
-	CalculateMasks(mask, GetMaterialID(texcoord), true);
+	CalculateMasks(mask, GetMaterialID(texcoord));
 	
 	vec3  diffuse = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
 	vec3  normal  = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));

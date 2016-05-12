@@ -154,7 +154,7 @@ void SetSaturationLevel(inout vec3 color, in float level) {
 
 void main() {
 	Mask mask;
-	CalculateMasks(mask, GetMaterialID(texcoord), true);
+	CalculateMasks(mask, GetMaterialID(texcoord));
 	
 	
 	float depth = GetDepth(texcoord);

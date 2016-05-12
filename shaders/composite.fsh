@@ -235,7 +235,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 
 void main() {
 	Mask mask;
-	CalculateMasks(mask, GetMaterialID(texcoord), true);
+	CalculateMasks(mask, GetMaterialID(texcoord));
 	
 	if (mask.sky > 0.5)
 		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); return; }

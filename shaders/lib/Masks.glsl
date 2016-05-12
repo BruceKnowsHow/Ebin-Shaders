@@ -49,11 +49,11 @@ float GetMaterialMask(in float mask, in float materialID) {
 	return float(abs(materialID - mask) < 0.5);
 }
 
-void CalculateMasks(inout Mask mask, in float materialIDs, const bool encoded) {
+void CalculateMasks(inout Mask mask, in float materialIDs) {
 	mask.materialIDs = materialIDs;
 	mask.matIDs      = mask.materialIDs;
 	
-	if (encoded) DecodeMaterialIDs(mask.matIDs, mask.bit0, mask.bit1, mask.bit2, mask.bit3);
+	DecodeMaterialIDs(mask.matIDs, mask.bit0, mask.bit1, mask.bit2, mask.bit3);
 	
 	mask.grass  = GetMaterialMask(  2, mask.matIDs);
 	mask.leaves = GetMaterialMask(  3, mask.matIDs);
