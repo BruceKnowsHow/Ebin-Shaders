@@ -11,6 +11,8 @@
 // uniform mat4 shadowModelView;
 // uniform mat4 shadowProjection;
 // 
+// varying vec2 texcoord
+// 
 // uniform float viewWidth;
 // uniform float viewHeight;
 // 
@@ -43,14 +45,11 @@ vec4 WorldSpaceToShadowSpace(in vec4 worldSpacePosition) {
 
 #include "/lib/BiasFunctions.glsl"
 
-vec3 CalculateNoisePattern1(vec2 offset, float size) {
-	vec2 coord = texcoord.st;
-	
+vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
 	coord *= vec2(viewWidth, viewHeight);
-	coord  = mod(coord + offset, vec2(size));
+	coord  = mod(coord, vec2(n));
 	coord /= noiseTextureResolution;
-	
-	return texture2D(noisetex, coord).xyz;
+	return texture2D(noisetex, coord).xy;
 }
 
 float GetLambertianShading(in vec3 normal, in Mask mask) {
@@ -113,10 +112,10 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	#if SHADOW_TYPE == 3 // Variable softness
 		float vpsSpread = 0.4 / biasCoeff;
 		
-		vec2 randomAngle = CalculateNoisePattern1(vec2(0.0), 64.0).xy * 3.14159 * 2.0;
+		vec2 randomAngle = GetDitherred2DNoise(gl_FragCoord.st / vec2(viewWidth, viewHeight), 64.0).xy * PI * 2.0;
 		
 		mat2 blockerRotation = mat2(cos(randomAngle.x), -sin(randomAngle.x),
-		                           sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix for blocker, high noise
+		                            sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix for blocker, high noise
 															 
 		mat2 pcfRotation = mat2(cos(randomAngle.x), -sin(randomAngle.x),
 													 	sin(randomAngle.x),  cos(randomAngle.x)); //Random Rotation Matrix for blocker, high noise

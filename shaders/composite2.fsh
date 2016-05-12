@@ -80,15 +80,15 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 }
 
 vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
-    vec4 screenSpace = gbufferProjection * vec4(viewSpacePosition, 1.0);
-    
-    return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
+	vec4 screenSpace = gbufferProjection * vec4(viewSpacePosition, 1.0);
+	
+	return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
 }
 
 vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
-    vec4 screenSpace = gbufferProjection * viewSpacePosition;
-    
-    return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
+	vec4 screenSpace = gbufferProjection * viewSpacePosition;
+	
+	return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
 }
 
 vec3 GetNormal(in vec2 coord) {

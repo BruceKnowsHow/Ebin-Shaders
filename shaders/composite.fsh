@@ -68,13 +68,6 @@ float GetMaterialID(in vec2 coord) {
 	return texture2D(colortex3, texcoord).b;
 }
 
-vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
-	coord *= vec2(viewWidth, viewHeight);
-	coord  = mod(coord, vec2(n));
-	coord /= noiseTextureResolution;
-	return texture2D(noisetex, coord).xy;
-}
-
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
 	float lightMult = 1.0;
 	
