@@ -6,7 +6,6 @@
 
 uniform sampler2D texture;
 uniform sampler2D normals;
-uniform sampler2D specular;
 uniform sampler2D noisetex;
 
 uniform sampler2DShadow shadow;
@@ -53,33 +52,10 @@ varying vec3 worldPosition;
 
 
 vec4 GetDiffuse() {
-	vec4 diffuse  = vec4(color.rgb, 1.0);
+	vec4 diffuse = vec4(color.rgb, 1.0);
 	     diffuse *= texture2D(texture, texcoord);
 	
 	return diffuse;
-}
-
-void GetWaveDifferential(inout vec2 diff, in vec2 pos, in float wavelength, in float amplitude, in float speed, in vec2 direction) {
-	direction  = normalize(direction);
-	wavelength = 1.0 / wavelength * PI * 2.0;
-	
-	amplitude *= 0.1;
-	
-	float wave = wavelength * amplitude * cos(dot(pos, direction) * wavelength + TIME * speed);
-	
-	diff += wave * direction;
-}
-
-void GetWaveDifferentials(in vec3 position, out vec2 diff) {
-	diff = vec2(0.0);
-	
-	GetWaveDifferential(diff, position.xz, 1.00, 0.010, 2.0, vec2( 0.40, 0.80));
-	GetWaveDifferential(diff, position.xz, 5.00, 0.010, 3.0, vec2( 0.30, 0.10));
-	GetWaveDifferential(diff, position.xz, 1.00, 0.010, 5.0, vec2( 0.25, 0.16));
-	GetWaveDifferential(diff, position.xz, 2.00, 0.020, 4.0, vec2(-0.80, 0.56));
-	GetWaveDifferential(diff, position.xz, 3.50, 0.005, 2.1, vec2(-1.00, 0.10));
-	GetWaveDifferential(diff, position.xz, 0.79, 0.003, 2.5, vec2( 1.60, 0.10));
-	GetWaveDifferential(diff, position.xz, 1.40, 0.015, 1.5, vec2( 0.60,-0.50));
 }
 
 vec2 smoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
@@ -151,22 +127,17 @@ vec3 GetNormal() {
 		return normalize((texture2D(normals, texcoord).xyz * 2.0 - 1.0) * tbnMatrix);
 }
 
-vec2 GetSpecularity() {
-	return texture2D(specular, texcoord).rg;
-}
-
 
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
-	vec4 diffuse     = GetDiffuse();  if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
-	vec3 normal      = GetNormal();
-	vec2 specularity = GetSpecularity();
+	vec4 diffuse  = GetDiffuse();  if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
+	vec3 normal   = GetNormal();
 	
 	#ifdef DEFERRED_SHADING
 		gl_FragData[0] = vec4(diffuse.rgb, diffuse.a);
 		gl_FragData[1] = vec4(vertLightmap.st, encodedMaterialIDs, 1.0);
-		gl_FragData[2] = vec4(EncodeNormal(normal), specularity.rg);
+		gl_FragData[2] = vec4(EncodeNormal(normal), 0.0, 1.0);
 	#else
 		Mask mask;
 		CalculateMasks(mask, materialIDs, false);
@@ -175,7 +146,7 @@ void main() {
 		
 		gl_FragData[0] = vec4(EncodeColor(composite), diffuse.a);
 		gl_FragData[1] = vec4(vertLightmap.st, encodedMaterialIDs, 1.0);
-		gl_FragData[2] = vec4(EncodeNormal(normal).xy, specularity.rg);
+		gl_FragData[2] = vec4(EncodeNormal(normal).xy, 0.0, 1.0);
 		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
 	#endif
 	
