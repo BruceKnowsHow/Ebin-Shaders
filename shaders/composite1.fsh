@@ -9,7 +9,6 @@ const bool shadowtex1Mipmap  = true;
 const bool shadowtex1Nearest = true;
 
 uniform sampler2D colortex0;
-uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
@@ -66,7 +65,7 @@ float GetTransparentDepth(in vec2 coord) {
 }
 
 float GetSmoothness(in vec2 coord) {
-	return texture2D(colortex1, texcoord).b;
+	return texture2D(colortex0, texcoord).b;
 }
 
 float ExpToLinearDepth(in float depth) {
@@ -187,7 +186,6 @@ void main() {
 	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
 	composite += GI * colorSunlight * pow(diffuse, vec3(2.2));
-	
 	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
