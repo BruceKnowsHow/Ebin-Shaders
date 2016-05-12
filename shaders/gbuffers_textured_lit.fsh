@@ -6,6 +6,7 @@
 
 uniform sampler2D texture;
 uniform sampler2D normals;
+uniform sampler2D specular;
 uniform sampler2D noisetex;
 
 uniform sampler2DShadow shadow;
@@ -52,7 +53,7 @@ varying vec3 worldPosition;
 
 
 vec4 GetDiffuse() {
-	vec4 diffuse = vec4(color.rgb, 1.0);
+	vec4 diffuse  = vec4(color.rgb, 1.0);
 	     diffuse *= texture2D(texture, texcoord);
 	
 	return diffuse;
@@ -150,17 +151,22 @@ vec3 GetNormal() {
 		return normalize((texture2D(normals, texcoord).xyz * 2.0 - 1.0) * tbnMatrix);
 }
 
+vec2 GetSpecularity() {
+	return texture2D(specular, texcoord).rg;
+}
+
 
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
-	vec4 diffuse  = GetDiffuse();  if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
-	vec3 normal   = GetNormal();
+	vec4 diffuse     = GetDiffuse();  if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
+	vec3 normal      = GetNormal();
+	vec2 specularity = GetSpecularity();
 	
 	#ifdef DEFERRED_SHADING
 		gl_FragData[0] = vec4(diffuse.rgb, diffuse.a);
 		gl_FragData[1] = vec4(vertLightmap.st, encodedMaterialIDs, 1.0);
-		gl_FragData[2] = vec4(EncodeNormal(normal), 0.0, 1.0);
+		gl_FragData[2] = vec4(EncodeNormal(normal), specularity.rg);
 	#else
 		Mask mask;
 		CalculateMasks(mask, materialIDs, false);
@@ -169,7 +175,7 @@ void main() {
 		
 		gl_FragData[0] = vec4(EncodeColor(composite), diffuse.a);
 		gl_FragData[1] = vec4(vertLightmap.st, encodedMaterialIDs, 1.0);
-		gl_FragData[2] = vec4(EncodeNormal(normal).xy, 0.0, 1.0);
+		gl_FragData[2] = vec4(EncodeNormal(normal).xy, specularity.rg);
 		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
 	#endif
 	
