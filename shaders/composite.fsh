@@ -78,14 +78,14 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
 	float lightMult = 1.0;
 	
-#ifdef GI_BOOST
-	float normalShading = GetLambertianShading(normal, mask);
-	
-	float sunlight = ComputeDirectSunlight(position, normalShading);
-	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
-	
-	if (lightMult < 0.05) return vec3(0.0);
-#endif
+	#ifdef GI_BOOST
+		float normalShading = GetLambertianShading(normal, mask);
+		
+		float sunlight = ComputeDirectSunlight(position, normalShading);
+		lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
+		
+		if (lightMult < 0.05) return vec3(0.0);
+	#endif
 	
 	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	
@@ -150,33 +150,33 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 
 float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 	#ifdef VOLUMETRIC_FOG
-	float fog    = 0.0;
-	float weight = 0.0;
-	
-	float rayIncrement = gl_Fog.start / 64.0;
-	vec3  rayStep      = normalize(viewSpacePosition.xyz + vec3(0.0, 0.0, noise));
-	vec4  ray          = vec4(rayStep * gl_Fog.start, 1.0);
-	
-	mat4 ViewSpaceToShadowSpace = shadowProjection * shadowModelView * gbufferModelViewInverse; // Compose matrices outside of the loop to save computations
-	
-	while (length(ray) < length(viewSpacePosition.xyz)) {
-		ray.xyz += rayStep * rayIncrement; // Increment raymarch
+		float fog    = 0.0;
+		float weight = 0.0;
 		
-		vec3 samplePosition = BiasShadowProjection((ViewSpaceToShadowSpace * ray).xyz) * 0.5 + 0.5; // Convert ray to shadow-space, bias it, unsign it (reduce the range from [-1.0 to 1.0] to [0.0 to 1.0]) to convert it to lookup-coordinates
+		float rayIncrement = gl_Fog.start / 64.0;
+		vec3  rayStep      = normalize(viewSpacePosition.xyz + vec3(0.0, 0.0, noise));
+		vec4  ray          = vec4(rayStep * gl_Fog.start, 1.0);
 		
-		fog += shadow2D(shadow, samplePosition).x * rayIncrement; // Increment fog
+		mat4 ViewSpaceToShadowSpace = shadowProjection * shadowModelView * gbufferModelViewInverse; // Compose matrices outside of the loop to save computations
 		
-		weight += rayIncrement;
+		while (length(ray) < length(viewSpacePosition.xyz)) {
+			ray.xyz += rayStep * rayIncrement; // Increment raymarch
+			
+			vec3 samplePosition = BiasShadowProjection((ViewSpaceToShadowSpace * ray).xyz) * 0.5 + 0.5; // Convert ray to shadow-space, bias it, unsign it (reduce the range from [-1.0 to 1.0] to [0.0 to 1.0]) to convert it to lookup-coordinates
+			
+			fog += shadow2D(shadow, samplePosition).x * rayIncrement; // Increment fog
+			
+			weight += rayIncrement;
+			
+			rayIncrement *= 1.01; // Increase the step-size so that the sample-count decreases as the ray gets farther from the viewer
+		}
 		
-		rayIncrement *= 1.01; // Increase the step-size so that the sample-count decreases as the ray gets farther from the viewer
-	}
-	
-	fog /= max(weight, 0.1e-8);
-	fog  = pow(fog, VOLUMETRIC_FOG_POWER);
-	
-	return fog;
+		fog /= max(weight, 0.1e-8);
+		fog  = pow(fog, VOLUMETRIC_FOG_POWER);
+		
+		return fog;
 	#else
-	return 1.0;
+		return 1.0;
 	#endif
 }
 
