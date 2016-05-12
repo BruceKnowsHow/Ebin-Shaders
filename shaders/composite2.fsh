@@ -202,7 +202,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	color = mix(color, reflection, alpha);
 }
 
-vec3 pbrScreenSpaceRay(in vec3 origin, in vec3 direction, in float depth) {
+vec3 pbrScreenSpaceRay(in vec3 origin, in vec3 direction) {
 	vec3 curPos = origin;
 	vec2 curCoord = ViewSpaceToScreenSpace(curPos).xy;
 	direction = normalize(direction) * RAY_STEP_LENGTH;
@@ -225,8 +225,7 @@ vec3 pbrScreenSpaceRay(in vec3 origin, in vec3 direction, in float depth) {
 		
 		if (length(curPos - origin) > MAX_RAY_LENGTH) return vec3(-1.0);
 		
-		float depth        = texture2D(gdepthtex, curCoord).x;
-		float worldDepth   = CalculateViewSpacePosition(curCoord, depth).z;
+		float worldDepth   = CalculateViewSpacePosition(curCoord, GetDepth(curCoord)).z;
 		float rayDepth     = curPos.z;
 		float depthDiff    = (worldDepth - rayDepth);
 		float maxDepthDiff = length(direction) + RAY_DEPTH_BIAS;
@@ -237,7 +236,7 @@ vec3 pbrScreenSpaceRay(in vec3 origin, in vec3 direction, in float depth) {
 			return vec3(curCoord, length(travelled));
 			
 			// We just returned, these lines are irrelevant right? FIXME
-		//	direction = -1.0 * normalize(direction) * 0.15;
+			direction = -1.0 * normalize(direction) * 0.15;
 		//	forward = false;
 		}
 		
@@ -247,7 +246,7 @@ vec3 pbrScreenSpaceRay(in vec3 origin, in vec3 direction, in float depth) {
 	return vec3(-1.0);
 }
 
-vec3 pbrBounce(in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float depth) {
+vec3 pbrBounce(in vec4 viewSpacePosition, in vec3 normal, in float smoothness) {
 	int hitLayer = 0;
 	vec2 noiseCoord = vec2(texcoord.s * viewWidth / 64.0, texcoord.t * viewHeight / 64.0);
 	vec3 rayStart = viewSpacePosition.xyz;
@@ -268,7 +267,7 @@ vec3 pbrBounce(in vec4 viewSpacePosition, in vec3 normal, in float smoothness, i
 		if (dot(rayDir, normal) < 0.1)
 			rayDir = normalize(rayDir + normal);
 			
-			hitUV = pbrScreenSpaceRay(rayStart, rayDir, depth);
+			hitUV = pbrScreenSpaceRay(rayStart, rayDir);
 			
 			if (hitUV.z < RAY_STEP_LENGTH * 2.0)
 					hitUV.s = 100; // If the ray is pointing into the object, just sample the sky and be done with it
@@ -305,12 +304,12 @@ void main() {
 		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
 //	if (mask.water < 0.5) {
-	if (false) {
+	if (true) {
 		float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
 		vec3 sColor = mix(vec3(0.14), color, vec3(0.0));
 		vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
 		
-		vec3 bounce = pbrBounce(viewSpacePosition, normal, smoothness, depth);
+		vec3 bounce = pbrBounce(viewSpacePosition, normal, smoothness);
 		color = mix(color, bounce, fresnel * smoothness);
 	}
 	
