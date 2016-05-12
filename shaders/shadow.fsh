@@ -22,8 +22,8 @@ void main() {
 	
 	vec3 shadowNormal = vertNormal;
 	
-	#ifdef POISSON_GI
-		shadowNormal.z *= -1.0;
+	#if GI_MODE == 2
+		shadowNormal.z *= -1.0; // This is done here so that it can be avoided in the GI loop. Do not forget to correct for it.
 	#endif
 	
 	
