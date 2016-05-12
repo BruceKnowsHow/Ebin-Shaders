@@ -20,8 +20,9 @@ varying vec3 vertNormal;
 varying mat3 tbnMatrix;
 varying vec2 vertLightmap;
 
+varying float mcID;
 varying float materialIDs;
-varying float encodedMaterialIDs;
+varying vec4  materialIDs1;
 
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
@@ -48,7 +49,7 @@ vec2 GetDefaultLightmap(in vec2 lightmapCoord) { // Gets the lightmap from the d
 	return clamp((lightmapCoord * 1.032) - 0.032, 0.0, 1.0).st; // Default lightmap texture coordinates work somewhat as lightmaps, however they need to be adjusted to use the full range of 0.0-1.0
 }
 
-#include "/lib/Materials.vsh"
+#include "/lib/Materials.glsl"
 
 vec4 GetWorldSpacePosition() {
 	return gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
@@ -67,10 +68,12 @@ void main() {
 	color         = gl_Color.rgb;
 	texcoord      = gl_MultiTexCoord0.st;
 	lightmapCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).st;
+	mcID          = mc_Entity.x;
 	
 	vertLightmap       = GetDefaultLightmap(lightmapCoord);
-	materialIDs        = GetMaterialIDs(int(mc_Entity.x));
-	encodedMaterialIDs = EncodeMaterialIDs(materialIDs, 0.0, 0.0, 0.0, 0.0);
+	materialIDs        = GetMaterialIDs(int(mcID));
+	materialIDs1       = vec4(0.0, 0.0, 0.0, 0.0);
+//	encodedMaterialIDs = EncodeMaterialIDs(materialIDs, 0.0, 0.0, 0.0, 0.0);
 	
 	
 	vec4 position = GetWorldSpacePosition();

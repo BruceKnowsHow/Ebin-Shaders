@@ -16,6 +16,8 @@ struct Mask {
 	float water;
 	float hand;
 	float sky;
+	
+	float metallic;
 };
 
 void DecodeMaterialIDs(inout float matID, inout float bit0, inout float bit1, inout float bit2, inout float bit3) {
@@ -44,7 +46,7 @@ void DecodeMaterialIDs(inout float matID, inout float bit0, inout float bit1, in
 }
 
 float GetMaterialMask(in float mask, in float materialID) {
-	return float(abs(materialID - mask) < 0.1);
+	return float(abs(materialID - mask) < 0.5);
 }
 
 void CalculateMasks(inout Mask mask, in float materialIDs, const bool encoded) {
@@ -58,6 +60,8 @@ void CalculateMasks(inout Mask mask, in float materialIDs, const bool encoded) {
 	mask.water  = GetMaterialMask(  4, mask.matIDs);
 	mask.hand   = GetMaterialMask(  5, mask.matIDs);
 	mask.sky    = GetMaterialMask(255, mask.matIDs);
+	
+	mask.metallic = mask.bit0;
 }
 
 
