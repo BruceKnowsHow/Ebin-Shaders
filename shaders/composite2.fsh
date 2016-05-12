@@ -37,20 +37,21 @@ varying vec2 texcoord;
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 
+
+// Reflection stuff
 #define OFF 0
 #define ON 1
 
-//Adjustable variables. Tune these for performance
 #define MAX_RAY_LENGTH          100.0
-#define MAX_DEPTH_DIFFERENCE    1.5 //How much of a step between the hit pixel and anything else is allowed?
+#define MAX_DEPTH_DIFFERENCE    1.5 // How much of a step between the hit pixel and anything else is allowed?
 #define RAY_STEP_LENGTH         0.05
-#define RAY_DEPTH_BIAS          0.05   //Serves the same purpose as a shadow bias
-#define RAY_GROWTH              1.15    //Make this number smaller to get more accurate reflections at the cost of performance
-                                        //numbers less than 1 are not recommended as they will cause ray steps to grow
-                                        //shorter and shorter until you're barely making any progress
-#define NUM_RAYS                8   //The best setting in the whole shader pack. If you increase this value,
-                                    //more and more rays will be sent per pixel, resulting in better and better
-                                    //reflections. If you computer can handle 4 (or even 16!) I highly recommend it.
+#define RAY_DEPTH_BIAS          0.05 // Serves the same purpose as a shadow bias
+#define RAY_GROWTH              1.15  // Make this number smaller to get more accurate reflections at the cost of performance
+                                      // numbers less than 1 are not recommended as they will cause ray steps to grow
+                                      // shorter and shorter until you're barely making any progress
+#define NUM_RAYS                2   // The best setting in the whole shader pack. If you increase this value,
+                                    // more and more rays will be sent per pixel, resulting in better and better
+                                    // reflections. If you computer can handle 4 (or even 16!) I highly recommend it.
 
 #define DITHER_REFLECTION_RAYS OFF
 
@@ -108,13 +109,13 @@ float calculateDitherPattern() {
                                          11, 59,  7, 55, 10, 58,  6, 54,
                                          43, 27, 39, 23, 42, 26, 38, 22);
 
-  vec2 count = vec2(0.0f);
-       count.x = floor(mod(texcoord.s * viewWidth, 8.0f));
-       count.y = floor(mod(texcoord.t * viewHeight, 8.0f));
+  vec2 count;
+	   count.x = floor(mod(texcoord.s * viewWidth , 8.0));
+	   count.y = floor(mod(texcoord.t * viewHeight, 8.0));
+	
+	int dither = ditherPattern[int(count.x) + int(count.y) * 8];
 
-  int dither = ditherPattern[int(count.x) + int(count.y) * 8];
-
-	return float(dither) / 64.0f;
+	return float(dither) / 64.0;
 }
 
 #include "/lib/Sky.fsh"
@@ -206,9 +207,9 @@ vec3 pbrScreenSpaceRay(in vec3 origin, in vec3 direction, in float depth) {
 	vec2 curCoord = ViewSpaceToScreenSpace(curPos).xy;
 	direction = normalize(direction) * RAY_STEP_LENGTH;
 	
-	#if DITHER_REFLECTION_RAYS == ON
-		direction *= calculateDitherPattern();
-	#endif
+#if DITHER_REFLECTION_RAYS == ON
+	direction *= calculateDitherPattern();
+#endif
 	
 	bool forward = true;
 	bool can_collect = true;
@@ -217,26 +218,29 @@ vec3 pbrScreenSpaceRay(in vec3 origin, in vec3 direction, in float depth) {
 		curPos += direction;
 		curCoord = ViewSpaceToScreenSpace(curPos).xy;
 		
-		if(curCoord.x < 0 || curCoord.x > 1 || curCoord.y < 0 || curCoord.y > 1) {
-				//If we're here, the ray has gone off-screen so we can't reflect anything
-				return vec3(-1);
+		if (curCoord.x < 0.0 || curCoord.x > 1.0 ||
+		    curCoord.y < 0.0 || curCoord.y > 1.0) {
+			return vec3(-1.0); // If we're here, the ray has gone off-screen so we can't reflect anything
 		}
 		
-		if(length(curPos - origin) > MAX_RAY_LENGTH) {
-				return vec3(-1);
-		}
-		float depth = texture2D(gdepthtex, curCoord).x;
-		float worldDepth = CalculateViewSpacePosition(curCoord, depth).z;
-		float rayDepth = curPos.z;
-		float depthDiff = (worldDepth - rayDepth);
-		float maxDepthDiff = sqrt(dot(direction, direction)) + RAY_DEPTH_BIAS;
+		if (length(curPos - origin) > MAX_RAY_LENGTH) return vec3(-1.0);
 		
-		if(depthDiff > 0 && depthDiff < maxDepthDiff) {
+		float depth        = texture2D(gdepthtex, curCoord).x;
+		float worldDepth   = CalculateViewSpacePosition(curCoord, depth).z;
+		float rayDepth     = curPos.z;
+		float depthDiff    = (worldDepth - rayDepth);
+		float maxDepthDiff = length(direction) + RAY_DEPTH_BIAS;
+		
+		if (depthDiff > 0.0 && depthDiff < maxDepthDiff) {
 			vec3 travelled = origin - curPos;
-			return vec3(curCoord, sqrt(dot(travelled, travelled)));
-			direction = -1 * normalize(direction) * 0.15;
-			forward = false;
-		} 
+			
+			return vec3(curCoord, length(travelled));
+			
+			// We just returned, these lines are irrelevant right? FIXME
+		//	direction = -1.0 * normalize(direction) * 0.15;
+		//	forward = false;
+		}
+		
 		direction *= RAY_GROWTH;
 	}
 	return vec3(-1);
@@ -256,32 +260,28 @@ vec3 pbrBounce(in vec4 viewSpacePosition, in vec3 normal, in float smoothness, i
 	//trace the number of rays defined previously
 	for(int i = 0; i < NUM_RAYS; i++) {
 		noiseSample = texture2DLod(noisetex, noiseCoord * (i + 1), 0).rgb * 2 - 1;
-		reflectDir = normalize(noiseSample * (1.0 - smoothness) * 0.5 + normal);
+		reflectDir  = normalize(noiseSample * (1.0 - smoothness) * 0.5 + normal);
 		reflectDir *= sign(dot(normal, reflectDir));
-		rayDir = reflect(normalize(rayStart), reflectDir);
-
-		if(dot(rayDir, normal) < 0.1) {
-			rayDir += normal;
-			rayDir = normalize(rayDir);
-		}
-
+		rayDir      = reflect(normalize(rayStart), reflectDir);
+		
+		if (dot(rayDir, normal) < 0.1)
+			rayDir = normalize(rayDir + normal);
+			
 			hitUV = pbrScreenSpaceRay(rayStart, rayDir, depth);
-
-			if(hitUV.z < RAY_STEP_LENGTH * 2) {
-					// If the ray is pointing into the object, just sample the sky and be done with it
-					hitUV.s = 100;
-			}
-
-			if(hitUV.s > -0.1 && hitUV.s < 1.1 && hitUV.t > -0.1 && hitUV.t < 1.1) {
-					vec3 reflection_sample = DecodeColor(texture2DLod(colortex2, hitUV.st, 0).rgb);
-
-					retColor += reflection_sample;
+			
+			if (hitUV.z < RAY_STEP_LENGTH * 2.0)
+					hitUV.s = 100; // If the ray is pointing into the object, just sample the sky and be done with it
+			
+			if (hitUV.s > -0.1 && hitUV.s < 1.1 && hitUV.t > -0.1 && hitUV.t < 1.1) {
+				vec3 reflection_sample = DecodeColor(texture2DLod(colortex2, hitUV.st, 0).rgb);
+				
+				retColor += reflection_sample;
 			} else {
-					vec3 reflected_sky_color = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0)) * 0.1;
-					retColor += reflected_sky_color;
+				vec3 reflected_sky_color = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0)) * 0.1;
+				retColor += reflected_sky_color;
 			}
 	}
-
+	
 	return retColor / NUM_RAYS;
 }
 
@@ -289,24 +289,25 @@ void main() {
 	Mask mask;
 	CalculateMasks(mask, texture2D(colortex3, texcoord).b);
 	
-	vec3  color  = GetColor(texcoord);
+	vec3 color = GetColor(texcoord);
+	
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); return;}
+	
 	vec3  normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
 	float depth  = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise color would be included in these ternary conditions
 	float smoothness = GetSmoothness(texcoord);
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
-	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
-	vec3 sColor = mix(vec3(0.14), color, vec3(0.0));
-	vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
-	
-	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); return;}
 	
 	if (mask.water > 0.5)
 		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
 	if (mask.water < 0.5) {
+		float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
+		vec3 sColor = mix(vec3(0.14), color, vec3(0.0));
+		vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
+		
 		vec3 bounce = pbrBounce(viewSpacePosition, normal, smoothness, depth);
 		color = mix(color, bounce, fresnel * smoothness);
 	}
