@@ -91,20 +91,23 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	float depthLOD	= 2.0 * clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	float sampleLOD	= depthLOD * 2.5;
 	
-	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;
+	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;    // For linear comparisons (GI_MODE = 1)
 	
-	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position
-	normal   = -(shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
+	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position. Position can also be used for exponential comparisons (GI_MODE = 2)
+	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
+	normal  *= (GI_MODE == 1 ? vec3(-1.0) : vec3(-1.0, -1.0,  1.0));
 	
-	const float brightness  = 30.0 * pow(radius, 2) * SUN_LIGHT_LEVEL;
-	const float scale       = radius / 256.0;
+	const float brightness  = (GI_MODE == 1 ? 30.0 : 0.0001) * pow(radius, 2) * SUN_LIGHT_LEVEL;
+	const float scale       = radius / (GI_MODE == 1 ? 256.0 : 1024);
 	
 	vec3 GI = vec3(0.0);
+	
+	if (GI_MODE == 1) noise = vec2(0.0);
 	
 	#include "lib/Samples.glsl"
 	
 	for(int i = 0; i < GI_SAMPLE_COUNT; i++) {
-		vec2 offset = samples[i] * scale;
+		vec2 offset = (samples[i] + noise) * scale;
 		
 		vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
 		
