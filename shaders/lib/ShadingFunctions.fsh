@@ -52,41 +52,37 @@ vec3 CalculateNoisePattern1(vec2 offset, float size) {
 	return texture2D(noisetex, coord).xyz;
 }
 
-/*
-float GetNormalShading(in vec3 normal, in Mask mask) {
+float GetLambertianShading(in vec3 normal, in Mask mask) {
 	float shading = dot(normal, lightVector);
 	      shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
 	      shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
 	
 	return shading;
 }
-*/
 
-float GetNormalShading(in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in Mask mask) {
 	//float shading = dot(normal, lightVector);
 	
-	//Roughness valuie from texture. TODO: pass it in
-	float roughness = 0.9;
 	vec3 lightColor = colorSunlight;
 	
 	normal = normalize(normal);
-  vec3 eyeDir = normalize(viewSpacePosition.xyz);
+	vec3 eyeDir = normalize(viewSpacePosition.xyz);
 	
 	float NdotL = dot(normal, lightVector);
-  float NdotV = dot(normal, eyeDir);
+	float NdotV = dot(normal, eyeDir);
 	
 	float angleVN = acos(NdotV);
-  float angleLN = acos(NdotL);
+	float angleLN = acos(NdotL);
 	
 	float alpha = max(angleVN, angleLN);
-  float beta = min(angleVN, angleLN);
-  float gamma = dot(eyeDir - normal * dot(eyeDir, normal), lightVector - normal * dot(lightVector, normal));
+	float beta = min(angleVN, angleLN);
+	float gamma = dot(eyeDir - normal * dot(eyeDir, normal), lightVector - normal * dot(lightVector, normal));
 	
 	float roughnessSquared = square(roughness);
 	
 	float A = 1.0 - 0.5 * (roughnessSquared / (roughnessSquared + 0.57));
-  float B = 0.45 * (roughnessSquared / (roughnessSquared + 0.09));
-  float C = sin(alpha) * tan(beta);
+	float B = 0.45 * (roughnessSquared / (roughnessSquared + 0.09));
+	float C = sin(alpha) * tan(beta);
 	
 	float L1 = max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
 	
@@ -96,7 +92,6 @@ float GetNormalShading(in vec4 viewSpacePosition, in vec3 normal, in Mask mask) 
 	
 	return L1;
 }
-
 
 float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	if (normalShading <= 0.0) return 0.0;
@@ -181,11 +176,11 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	return sunlight;
 }
 
-vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in vec4 ViewSpacePosition) {
+vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in float roughness, in vec4 ViewSpacePosition) {
 	diffuse = pow(diffuse, vec3(2.2)); // Put diffuse into a linear color space (diffuse should not be previously gamma-adjusted)
 	
 	Shading shading;
-	shading.normal = GetNormalShading(ViewSpacePosition, normal, mask);
+	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, roughness, mask);
 	
 	shading.sunlight  = shading.normal;
 	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal);

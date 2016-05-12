@@ -80,7 +80,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	float lightMult = 1.0;
 	
 	#ifdef GI_BOOST
-	float normalShading = GetNormalShading(position, normal, mask);
+	float normalShading = GetLambertianShading(normal, mask);
 	
 	float sunlight = ComputeDirectSunlight(position, normalShading);
 	lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
