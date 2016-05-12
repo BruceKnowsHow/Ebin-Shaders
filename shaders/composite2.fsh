@@ -304,7 +304,7 @@ void main() {
 		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
 //	if (mask.water < 0.5) {
-	if (true) {
+	if (false) {
 		float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
 		vec3 sColor = mix(vec3(0.14), color, vec3(0.0));
 		vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
