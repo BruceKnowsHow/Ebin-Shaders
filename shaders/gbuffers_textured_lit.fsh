@@ -14,7 +14,6 @@ uniform sampler2D shadowtex1;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
@@ -134,12 +133,6 @@ vec2 GetSpecularity() {
 }
 
 #include "/lib/Materials.glsl"
-
-vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
-	vec4 screenSpace = gbufferProjection * viewSpacePosition;
-	
-	return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
-}
 
 
 void main() {
