@@ -243,7 +243,8 @@ vec3 pbrScreenSpaceRay(in vec3 origin, in vec3 direction, in float depth) {
 		
 		direction *= RAY_GROWTH;
 	}
-	return vec3(-1);
+	
+	return vec3(-1.0);
 }
 
 vec3 pbrBounce(in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float depth) {
