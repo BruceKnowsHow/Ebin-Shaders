@@ -94,7 +94,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		//Blocker Search
 		for(float i = -range; i <= range; i++) {
 			for(float j = -range; j <= range; j++) {
-				vec2 lookupPosition = position.xy + vec2(i, j) / shadowMapResolution * blockerRotation * vpsSpread;
+				vec2 lookupPosition = position.xy + vec2(i, j) * 8 / shadowMapResolution * blockerRotation * vpsSpread;
 				float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
 				
 				avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
@@ -104,7 +104,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		avgDepth /= sampleCount;
 		avgDepth  = sqrt(avgDepth);
 		
-		float spread = avgDepth * 0.02 * vpsSpread + 0.15 / shadowMapResolution;
+		float spread = avgDepth * 0.02 * vpsSpread + 0.45 / shadowMapResolution;
 		
 		range       = 2.0;
 		sampleCount = pow(range * 2.0 + 1.0, 2.0);
