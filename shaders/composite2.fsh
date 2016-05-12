@@ -49,7 +49,7 @@ varying vec2 texcoord;
 #define RAY_GROWTH              1.15  // Make this number smaller to get more accurate reflections at the cost of performance
                                       // numbers less than 1 are not recommended as they will cause ray steps to grow
                                       // shorter and shorter until you're barely making any progress
-#define NUM_RAYS                2   // The best setting in the whole shader pack. If you increase this value,
+#define NUM_RAYS                4   // The best setting in the whole shader pack. If you increase this value,
                                     // more and more rays will be sent per pixel, resulting in better and better
                                     // reflections. If you computer can handle 4 (or even 16!) I highly recommend it.
 
@@ -303,7 +303,8 @@ void main() {
 	if (mask.water > 0.5)
 		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
-	if (mask.water < 0.5) {
+//	if (mask.water < 0.5) {
+	if (false) {
 		float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
 		vec3 sColor = mix(vec3(0.14), color, vec3(0.0));
 		vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
