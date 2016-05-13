@@ -16,6 +16,8 @@ uniform mat4 gbufferProjectionInverse;
 
 uniform vec3 cameraPosition;
 
+uniform float rainStrength;
+
 uniform float near;
 uniform float far;
 
@@ -137,17 +139,37 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
 	
+	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
+	vec3 sColor = mix(vec3(1.0), color, vec3(mask.metallic));
+	vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
+	
 	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0)) * 0.2;
 	
-	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 80, 15, reflectedCoord, reflectedViewSpacePosition))
-		reflection = reflectedSky;
-	else {	
+	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 80, 15, reflectedCoord, reflectedViewSpacePosition)) {
+		if(mask.water > 0.5) {
+			reflection = reflectedSky;
+		} else {
+			//Some blinn-phong for the sun on things other than water to make it look nicer.
+			vec3 halfVector = normalize(lightVector - normalize(viewSpacePosition.xyz));
+			float HdotN = max(0.0, dot(halfVector, normal));
+			
+			HdotN = clamp(HdotN * (1.0 + smoothness * 0.01), 0.0, 1.0);
+			
+			vec3 highlight = vec3(pow(HdotN, smoothness * 8000.0 + 10.0));
+			vec3 blinnFresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - HdotN, 5);
+			
+			highlight *= blinnFresnel;
+			highlight *=  1.0 - rainStrength;
+			
+			reflection = (highlight * 15) + reflectedSky;
+		}
+	} else {	
 		
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 		
 		float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 1.0;
 		float lod = rayLength * (1.0 - smoothness);
-		reflection = GetColorLod(reflectedCoord.st, lod / 1);
+		reflection = GetColorLod(reflectedCoord.st, lod);
 		
 		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
 		
@@ -158,10 +180,6 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 			reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
 		#endif
 	}
-	
-	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
-	vec3 sColor = mix(vec3(1.0), color, vec3(mask.metallic));
-	vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
 	
 	color = mix(color * (1.0 - mask.metallic), reflection, fresnel * smoothness);
 }
