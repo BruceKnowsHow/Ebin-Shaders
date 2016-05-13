@@ -6,13 +6,11 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D gdepthtex;
-uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferPreviousModelView;
 uniform mat4 gbufferPreviousProjection;
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferProjectionInverse;
 
 uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
@@ -20,16 +18,12 @@ uniform vec3 previousCameraPosition;
 uniform float viewWidth;
 uniform float viewHeight;
 
-uniform float near;
-uniform float far;
-
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #include "/lib/DebugSetup.glsl"
 #include "/lib/Masks.glsl"
-#include "/lib/CalculateFogFactor.glsl"
 
 
 vec3 GetColor(in vec2 coord) {
@@ -38,10 +32,6 @@ vec3 GetColor(in vec2 coord) {
 
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
-}
-
-float ExpToLinearDepth(in float depth) {
-	return 2.0 * near * (far + near - depth * (far - near));
 }
 
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {

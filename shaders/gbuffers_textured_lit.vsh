@@ -12,7 +12,6 @@ uniform vec3 sunPosition;
 uniform vec3 upPosition;
 
 uniform vec3  cameraPosition;
-uniform float rainStrength;
 uniform float frameTimeCounter;
 
 varying vec3 color;
@@ -76,8 +75,8 @@ void main() {
 	
 	CalculateTBN(position.xyz, tbnMatrix, vertNormal);
 	
-	worldPosition     = position.xyz + cameraPosition;
 	viewSpacePosition = gbufferModelView * position;
+	worldPosition     = position.xyz + cameraPosition;
 	
 	
 #ifdef FORWARD_SHADING

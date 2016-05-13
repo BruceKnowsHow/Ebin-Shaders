@@ -21,18 +21,14 @@ uniform sampler2D shadowcolor1;
 uniform sampler2D shadowtex1;
 uniform sampler2DShadow shadow;
 
-uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
-uniform mat4 shadowModelViewInverse;
 
 uniform float viewWidth;
 uniform float viewHeight;
-uniform float near;
-uniform float far;
 
 varying vec2 texcoord;
 
@@ -41,16 +37,11 @@ varying vec2 texcoord;
 #include "/lib/DebugSetup.glsl"
 #include "/lib/GlobalCompositeVariables.glsl"
 #include "/lib/Masks.glsl"
-#include "/lib/CalculateFogFactor.glsl"
 #include "/lib/ShadingFunctions.fsh"
 
 
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
-}
-
-float ExpToLinearDepth(in float depth) {
-	return 2.0 * near * (far + near - depth * (far - near));
 }
 
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {

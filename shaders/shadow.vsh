@@ -13,7 +13,6 @@ uniform mat4 shadowModelViewInverse;
 uniform vec3 cameraPosition;
 
 uniform float frameTimeCounter;
-uniform float sunAngle;
 
 varying vec4 color;
 varying vec2 texcoord;
@@ -51,6 +50,7 @@ vec4 BiasShadowProjection(in vec4 position) {
 	
 	return position;
 }
+
 
 void main() {
 	color         = gl_Color;

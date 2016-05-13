@@ -9,22 +9,13 @@ uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D gdepthtex;
-uniform sampler2D noisetex;
 
-uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
-uniform mat4 shadowModelView;
-uniform mat4 shadowProjection;
-uniform mat4 shadowProjectionInverse;
-uniform mat4 shadowModelViewInverse;
 
 uniform vec3 cameraPosition;
-uniform vec3 upPosition;
 
-uniform float viewWidth;
-uniform float viewHeight;
 uniform float near;
 uniform float far;
 
@@ -37,26 +28,6 @@ varying vec2 texcoord;
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 
-const bool colortex2MipmapEnabled = true;
-
-
-// Reflection stuff
-#define OFF 0
-#define ON 1
-
-#define MAX_RAY_LENGTH          100.0
-#define MAX_DEPTH_DIFFERENCE    1.5 // How much of a step between the hit pixel and anything else is allowed?
-#define RAY_STEP_LENGTH         0.05
-#define RAY_DEPTH_BIAS          0.05 // Serves the same purpose as a shadow bias
-#define RAY_GROWTH              1.15  // Make this number smaller to get more accurate reflections at the cost of performance
-                                      // numbers less than 1 are not recommended as they will cause ray steps to grow
-                                      // shorter and shorter until you're barely making any progress
-#define NUM_RAYS                4   // The best setting in the whole shader pack. If you increase this value,
-                                    // more and more rays will be sent per pixel, resulting in better and better
-                                    // reflections. If you computer can handle 4 (or even 16!) I highly recommend it.
-
-#define DITHER_REFLECTION_RAYS OFF
-
 
 vec3 GetColor(in vec2 coord) {
 	return DecodeColor(texture2D(colortex2, coord).rgb);
@@ -68,18 +39,6 @@ vec3 GetColorLod(in vec2 coord, in float lod) {
 
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
-}
-
-float GetSmoothness(in vec2 coord) {
-	return pow(texture2D(colortex0, texcoord).b, 2.2);
-}
-
-vec3 fresnel(vec3 R0, float vdoth) {
-    return R0 + (vec3(1.0) - R0) * max(0.0, pow(1.0 - vdoth, 5));
-}
-
-float ExpToLinearDepth(in float depth) {
-	return 2.0 * near * (far + near - depth * (far - near));
 }
 
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
@@ -105,27 +64,16 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
 
-float GetVolumetricFog(in vec2 coord) {
-	return texture2D(colortex4, coord).a;
+float GetSmoothness(in vec2 coord) {
+	return pow(texture2D(colortex0, texcoord).b, 2.2);
 }
 
-float calculateDitherPattern() {
-  const int[64] ditherPattern = int[64] ( 1, 49, 13, 61,  4, 52, 16, 64,
-                                         33, 17, 45, 29, 36, 20, 48, 32,
-                                          9, 57,  5, 53, 12, 60,  8, 56,
-                                         41, 25, 37, 21, 44, 28, 40, 24,
-                                          3, 51, 15, 63,  2, 50, 14, 62,
-                                         35, 19, 47, 31, 34, 18, 46, 30,
-                                         11, 59,  7, 55, 10, 58,  6, 54,
-                                         43, 27, 39, 23, 42, 26, 38, 22);
+vec3 fresnel(vec3 R0, float vdoth) {
+    return R0 + (vec3(1.0) - R0) * max(0.0, pow(1.0 - vdoth, 5));
+}
 
-  vec2 count;
-	   count.x = floor(mod(texcoord.s * viewWidth , 8.0));
-	   count.y = floor(mod(texcoord.t * viewHeight, 8.0));
-	
-	int dither = ditherPattern[int(count.x) + int(count.y) * 8];
-
-	return float(dither) / 64.0;
+float GetVolumetricFog(in vec2 coord) {
+	return texture2D(colortex4, coord).a;
 }
 
 #include "/lib/Sky.fsh"
@@ -216,6 +164,7 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 	color = mix(color * (1.0 - mask.metallic), reflection, fresnel * smoothness);
 }
 
+
 void main() {
 	Mask mask;
 	CalculateMasks(mask, texture2D(colortex3, texcoord).b);
@@ -224,8 +173,8 @@ void main() {
 	
 	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); return;}
 	
-	vec3  normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
-	float depth  = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise color would be included in these ternary conditions
+	vec3  normal     = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
+	float depth      = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise color would be included in these ternary conditions
 	float smoothness = GetSmoothness(texcoord) * 0.8;
 	
 	if(mask.water > 0.5)
