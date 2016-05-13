@@ -1,5 +1,5 @@
 
-// Start of #include "/lib/GlobalCompositeVariables.fsh"
+// Start of #include "/lib/GlobalCompositeVariables.glsl"
 
 
 varying vec3 lightVector;
@@ -13,4 +13,4 @@ varying vec3 colorSkylight;
 varying vec3 colorHorizon;
 
 
-// End of #include "/lib/GlobalCompositeVariables.fsh"
+// End of #include "/lib/GlobalCompositeVariables.glsl"

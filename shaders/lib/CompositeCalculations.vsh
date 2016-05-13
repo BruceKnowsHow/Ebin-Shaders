@@ -1,3 +1,16 @@
+
+// Start of #include "/lib/CompositeCalculations.vsh"
+
+// Prerequisites:
+// 
+// uniform vec3 sunPosition;
+// uniform vec3 upPosition;
+// 
+// #include "/lib/Util.glsl"
+// #include "/lib/GlobalCompositeVariables.glsl"
+
+
+// {
 	vec3 sunVector = normalize(sunPosition); //Engine-time overrides will happen by modifying sunVector
 	
 	lightVector = sunVector * mix(1.0, -1.0, float(dot(sunVector, upPosition) < 0.0));
@@ -42,3 +55,7 @@
 	vec3(0.29, 0.48, 1.0) * 0.01;
 	
 	colorSkylight = skylightDay * timeDay + skylightNight * timeNight + skylightHorizon * timeHorizon;
+// }
+
+
+// End of #include "/lib/CompositeCalculations.vsh"
