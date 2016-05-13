@@ -80,5 +80,14 @@ vec3 CalculateSky(in vec4 viewSpacePosition) {
 	return (gradient + sunspot + atmosphere) * SKY_BRIGHTNESS;
 }
 
+vec3 CalculateReflectedSky(in vec4 viewSpacePosition) {
+	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz) * far;
+	
+	vec3 gradient   = CalculateSkyGradient(viewSpacePosition);
+	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
+	
+	return (gradient + atmosphere) * SKY_BRIGHTNESS;
+}
+
 
 // End of #include "/lib/Sky.fsh"
