@@ -140,7 +140,7 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 	vec3  reflection;
 	
 	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
-	vec3 sColor = mix(vec3(1.0), color, vec3(mask.metallic));
+	vec3 sColor = mix(vec3(0.15), color, vec3(mask.metallic));
 	vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0)) * 0.2;
@@ -150,15 +150,14 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 		vec3 halfVector = normalize(lightVector - normalize(viewSpacePosition.xyz));
 		float HdotN = max(0.0, dot(halfVector, normal));
 			
-		HdotN = clamp(HdotN * (1.0 + smoothness * 0.01), 0.0, 1.0);
+		HdotN = clamp(HdotN, 0.0, 1.0);
 			
-		vec3 highlight = vec3(pow(HdotN, smoothness * 800 + 10.0));
-		vec3 blinnFresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - HdotN, 5);
+		vec3 highlight = vec3(pow(HdotN, smoothness * 1000 + 10.0));
 			
-		highlight *= blinnFresnel;
+		highlight *= fresnel;
 		highlight *=  1.0 - rainStrength;
 			
-		reflection = (highlight * 15) + reflectedSky;
+		reflection = (highlight) + reflectedSky;
 	} else {	
 		
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
