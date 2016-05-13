@@ -146,7 +146,7 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0)) * 0.2;
 	
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 80, 15, reflectedCoord, reflectedViewSpacePosition)) {
-		//Some blinn-phong for the sun on things other than water to make it look nicer.
+		//Some Cook Torrance for the sun on things other than water to make it look nicer.
 			
 		reflection = reflectedSky;
 	} else {	
