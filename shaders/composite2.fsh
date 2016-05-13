@@ -145,8 +145,8 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 		
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 		
-		float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 3.0;
-		float lod = pow(rayLength * (1.0 - smoothness), 1.2);
+		float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 1.0;
+		float lod = max(pow(rayLength, 1.2), 1) * (1.0 - smoothness);
 		reflection = GetColorLod(reflectedCoord.st, lod);
 		
 		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
@@ -160,7 +160,7 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 	}
 	
 	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
-	vec3 sColor = mix(vec3(0.14), color, vec3(mask.metallic));
+	vec3 sColor = mix(vec3(1.0), color, vec3(mask.metallic));
 	vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
 	
 	color = mix(color * (1.0 - mask.metallic), reflection, fresnel * smoothness);
