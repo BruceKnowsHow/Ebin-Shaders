@@ -28,6 +28,8 @@ varying vec2 texcoord;
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 
+const bool colortex2MipmapEnabled = true;
+
 
 vec3 GetColor(in vec2 coord) {
 	return DecodeColor(texture2D(colortex2, coord).rgb);
@@ -175,7 +177,7 @@ void main() {
 	
 	vec3  normal     = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
 	float depth      = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise color would be included in these ternary conditions
-	float smoothness = GetSmoothness(texcoord) * 0.8;
+	float smoothness = GetSmoothness(texcoord) * 0.7;
 	
 	if(mask.water > 0.5)
 		smoothness = 0.85;
