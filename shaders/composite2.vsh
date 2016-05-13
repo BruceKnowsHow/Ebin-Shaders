@@ -2,35 +2,14 @@
 #define composite2_vsh true
 #define ShaderStage 10
 
-//#define COMPOSITE0_VERTEX
-//#define COMPOSITE3_VERTEX
-
-#define COMPOSITE0_SCALE 0.40
-
-uniform float viewWidth;
-uniform float viewHeight;
-
-varying vec2 texcoord;
-
-//#include include/PostHeader.vsh"
 uniform vec3 sunPosition;
 uniform vec3 upPosition;
 
-varying vec3 lightVector;
+varying vec2 texcoord;
 
-varying float timeDay;
-varying float timeNight;
-varying float timeHorizon;
-
-varying vec3 colorSunlight;
-varying vec3 colorSkylight;
-
-float clamp01(in float x) {
-	return clamp(x, 0.0, 1.0);
-}
-
-#define PI 3.14159
-//#include include/PostHeader.vsh"
+#include "/lib/Settings.glsl"
+#include "/lib/Util.glsl"
+#include "/lib/GlobalCompositeVariables.glsl"
 
 
 void main() {

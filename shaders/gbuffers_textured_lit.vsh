@@ -8,6 +8,9 @@ attribute vec4 at_tangent;
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 
+uniform vec3 sunPosition;
+uniform vec3 upPosition;
+
 uniform vec3  cameraPosition;
 uniform float rainStrength;
 uniform float frameTimeCounter;
@@ -27,22 +30,11 @@ varying vec4  materialIDs1;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
-
-//#include include/PostHeader.vsh"
-uniform vec3 sunPosition;
-uniform vec3 upPosition;
-
-varying vec3 lightVector;
-
-varying float timeDay;
-varying float timeNight;
-varying float timeHorizon;
-
-varying vec3 colorSunlight;
-varying vec3 colorSkylight;
-
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#ifdef FORWARD_SHADING
+#include "/lib/GlobalCompositeVariables.glsl"
+#endif
 
 
 vec2 GetDefaultLightmap(in vec2 lightmapCoord) { // Gets the lightmap from the default lighting engine, ignoring any texture pack lightmap. First channel is torch lightmap, second channel is sky lightmap.

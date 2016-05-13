@@ -3,7 +3,11 @@
 
 // Prerequisites:
 // 
+// uniform vec3 sunPosition;
+// uniform vec3 upPosition;
 // 
+// #include "/lib/Util.glsl"
+// #include "/lib/GlobalCompositeVariables.glsl"
 
 
 // {
