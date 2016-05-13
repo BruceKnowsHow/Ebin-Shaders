@@ -37,6 +37,8 @@ varying vec2 texcoord;
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 
+const bool colortex2MipmapEnabled = true;
+
 
 // Reflection stuff
 #define OFF 0
@@ -60,12 +62,20 @@ vec3 GetColor(in vec2 coord) {
 	return DecodeColor(texture2D(colortex2, coord).rgb);
 }
 
+vec3 GetColorLod(in vec2 coord, in float lod) {
+	return DecodeColor(texture2DLod(colortex2, coord, lod).rgb);
+}
+
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
 
 float GetSmoothness(in vec2 coord) {
 	return pow(texture2D(colortex0, texcoord).b, 2.2);
+}
+
+vec3 fresnel(vec3 R0, float vdoth) {
+    return R0 + (vec3(1.0) - R0) * max(0.0, pow(1.0 - vdoth, 5));
 }
 
 float ExpToLinearDepth(in float depth) {
@@ -170,36 +180,40 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 	return false;
 }
 
-void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
 	
-	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
+	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0)) * 0.2;
 	
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
 		reflection = reflectedSky;
-	else {
-		reflection = GetColor(reflectedCoord.st);
+	else {	
 		
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
+		
+		float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 3.0;
+		float lod = pow(rayLength * (1.0 - smoothness), 1.2);
+		reflection = GetColorLod(reflectedCoord.st, lod);
 		
 		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
 		
 		#ifdef REFLECTION_EDGE_FALLOFF
-		float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
-		float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
-		float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
-		reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
+			float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
+			float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
+			float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
+			reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
 		#endif
 	}
 	
-	float VdotN = dot(normalize(viewSpacePosition.xyz), normal);
-	float alpha = pow(min(1.0 + VdotN, 1.0), 9.0) * 0.99 + 0.01;
+	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
+	vec3 sColor = mix(vec3(0.14), color, vec3(mask.metallic));
+	vec3 fresnel = sColor + (vec3(1.0) - sColor) * pow(1.0 - vdoth, 5);
 	
-	color = mix(color, reflection, alpha);
+	color = mix(color * (1.0 - mask.metallic), reflection, fresnel * smoothness);
 }
 
 void main() {
@@ -212,13 +226,14 @@ void main() {
 	
 	vec3  normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
 	float depth  = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise color would be included in these ternary conditions
-	float smoothness = GetSmoothness(texcoord);
+	float smoothness = GetSmoothness(texcoord) * 0.8;
+	
+	if(mask.water > 0.5)
+		smoothness = 0.85;
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
-	
-	if (mask.water > 0.5)
-		ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
+	ComputeRaytracedReflection(color, smoothness, viewSpacePosition, normal, mask);
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
