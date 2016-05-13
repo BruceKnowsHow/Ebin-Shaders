@@ -30,6 +30,11 @@ float GetMaterialIDs(in int mc_ID) { // Gather material masks
 }
 
 float EncodeMaterialIDs(in float materialIDs, in float bit0, in float bit1, in float bit2, in float bit3) {
+	bit0 = float(bit0 > 0.5);
+	bit1 = float(bit1 > 0.5);
+	bit2 = float(bit2 > 0.5);
+	bit3 = float(bit3 > 0.5);
+	
 	materialIDs += 128.0 * bit0;
 	materialIDs +=  64.0 * bit1;
 	materialIDs +=  32.0 * bit2;
