@@ -139,15 +139,15 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 	
 	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0)) * 0.2;
 	
-	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
+	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 80, 15, reflectedCoord, reflectedViewSpacePosition))
 		reflection = reflectedSky;
 	else {	
 		
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 		
 		float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 1.0;
-		float lod = max(pow(rayLength, 1.2), 1) * (1.0 - smoothness);
-		reflection = GetColorLod(reflectedCoord.st, lod);
+		float lod = rayLength * (1.0 - smoothness);
+		reflection = GetColorLod(reflectedCoord.st, lod / 1);
 		
 		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
 		
@@ -177,7 +177,7 @@ void main() {
 	
 	vec3  normal     = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
 	float depth      = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise color would be included in these ternary conditions
-	float smoothness = GetSmoothness(texcoord) * 0.7;
+	float smoothness = GetSmoothness(texcoord);
 	
 	if(mask.water > 0.5)
 		smoothness = 0.85;
