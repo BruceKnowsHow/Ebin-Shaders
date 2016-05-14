@@ -12,7 +12,10 @@ uniform mat4 shadowModelViewInverse;
 
 uniform vec3 cameraPosition;
 
+uniform float sunAngle;
 uniform float frameTimeCounter;
+
+varying mat4 shadowView;
 
 varying vec4 color;
 varying vec2 texcoord;
@@ -22,7 +25,7 @@ varying vec3 vertNormal;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
-
+#include "/lib/ShadowViewMatrix.glsl"
 
 vec4 GetWorldSpacePositionShadow() {
 	return shadowModelViewInverse * shadowProjectionInverse * ftransform();
@@ -30,6 +33,10 @@ vec4 GetWorldSpacePositionShadow() {
 
 vec4 WorldSpaceToShadowProjection(in vec4 worldSpacePosition) {
 	return shadowProjection * shadowModelView * worldSpacePosition;
+}
+
+vec4 WorldSpaceToShadowProjection1(in vec4 worldSpacePosition) {
+	return shadowProjection * shadowView * worldSpacePosition;
 }
 
 #include "/lib/Waving.vsh"
@@ -53,18 +60,20 @@ vec4 BiasShadowProjection(in vec4 position) {
 
 
 void main() {
+	CalculateShadowView();
+	
 	color         = gl_Color;
 	texcoord      = gl_MultiTexCoord0.st;
 	lightmapCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).st;
 	
-	vertNormal    = gl_NormalMatrix * gl_Normal;
+	vertNormal    = normalize((shadowView * shadowModelViewInverse * vec4(gl_NormalMatrix * gl_Normal, 0.0)).xyz);
 	
 	
 	vec4 position = GetWorldSpacePositionShadow();
 	
 	position.xyz += CalculateVertexDisplacements(position.xyz);
 	
-	gl_Position = BiasShadowProjection(WorldSpaceToShadowProjection(position));
+	gl_Position = BiasShadowProjection(WorldSpaceToShadowProjection1(position));
 	
 	
 	#ifdef FORWARD_SHADING
@@ -76,7 +85,7 @@ void main() {
 	#ifndef PLAYER_SHADOW
 	if (   mc_Entity.x == 0 // If the vertex is an entity
 		&& abs(position.x) < 1.0
-		&& position.y > -0.1 &&  position.y < 2.0 // Check if the vertex is in a bounding box around the player, so that at least non-near entities still cast shadows
+		&& position.y > -0.1 &&  position.y < 2.0 // Check if the vertex is in A bounding box around the player, so that at least non-near entities still cast shadows
 		&& abs(position.z) < 1.0
 	) color.a = 0.0;
 	#endif
