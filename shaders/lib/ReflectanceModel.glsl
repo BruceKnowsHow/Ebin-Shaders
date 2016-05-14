@@ -1,3 +1,24 @@
+float ImplictGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 normal) {
+  float ndotl = max(0, dot(normal, lightDirection));
+  float ndotv = max(0, dot(normal, viewDirection));
+  
+  return ndotl * ndotv;
+}
+
+float NewmannGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 normal) {
+  float ndotl = max(0, dot(normal, lightDirection));
+  float ndotv = max(0, dot(normal, viewDirection));
+  
+  return (ndotl * ndotv) / max(ndotl, ndotv);
+}
+
+float SmithGeom(in vec3 viewDirection, in vec3 normal, in float alpha) {
+  float ndotv = max(0, dot(normal, viewDirection));
+  float alphaCoeff = sqrt((2 * pow(alpha, 2)) / 3.1415927);
+  
+  return ndotv / (ndotv * (1 - alphaCoeff) + alphaCoeff);
+}
+
 float cookTorranceGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 halfVector, in vec3 normal) {
   float hdotn = max(0, dot(halfVector, normal));
   float vdoth = max(0, dot(viewDirection, halfVector));
@@ -56,8 +77,6 @@ float phongDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
   return Xp * ((roughnessCoeff + 2) / (2 * 3.1415927)) * pow(hdotn, roughnessCoeff);
 }
 
-//lod falloff do it after
-
 /*!
  * \brief Calculates the geometry distribution given the given parameters
  *
@@ -68,10 +87,15 @@ float phongDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
  * \return The geometry distribution of the given fragment
  */
 float CalculateGeometryDistribution(in vec3 lightVector, in vec3 viewVector, in vec3 halfVector, in vec3 normal, in float alpha) {
-    float geometry = GGXSmithGeom(lightVector, halfVector, alpha) * GGXSmithGeom(viewVector, halfVector, alpha);
+    float geometry;
     
-    //geometry = SchlickBeckmannGeom(lightVector, halfVector, alpha) * SchlickBeckmannGeom(viewVector, halfVector, alpha);
+    //geometry = ImplictGeom(viewVector, lightVector, normal);
+    //geometry = NewmannGeom(viewVector, lightVector, normal);
     //geometry = cookTorranceGeom(viewVector, lightVector, halfVector, normal);
+    //geometry = SmithGeom(viewVector, normal, alpha);
+    geometry = GGXSmithGeom(lightVector, halfVector, alpha) * GGXSmithGeom(viewVector, halfVector, alpha); //Phisical
+    //geometry = SchlickBeckmannGeom(lightVector, halfVector, alpha) * SchlickBeckmannGeom(viewVector, halfVector, alpha); //Phisical
+    
     
     return geometry;
 }
@@ -85,10 +109,11 @@ float CalculateGeometryDistribution(in vec3 lightVector, in vec3 viewVector, in 
  * \return The microfacet distribution for the current fragment
  */
 float CalculateMicrofacetDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
-    float distribution = GGXDistribution(halfVector, normal, alpha);
+    float distribution;
     
-    //distribution = BeckmannDistribution(halfVector, normal, alpha);
     //distribution = phongDistribution(halfVector, normal, alpha);
+    //distribution = BeckmannDistribution(halfVector, normal, alpha);
+    distribution = GGXDistribution(halfVector, normal, alpha);
     
     return distribution;
 }

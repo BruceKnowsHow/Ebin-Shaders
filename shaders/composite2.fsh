@@ -74,7 +74,22 @@ float GetSmoothness(in vec2 coord) {
 }
 
 vec3 fresnel(vec3 R0, float vdoth) {
-    return R0 + (vec3(1.0) - R0) * max(0.0, pow(1.0 - vdoth, 5));
+		vec3 fresnel;
+		
+		vec3 Schlick = R0 + (vec3(1.0) - R0) * max(0.0, pow(1.0 - vdoth, 5));
+		
+		vec3 SphericalGaussian = R0 + (vec3(1) - R0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
+		
+		vec3 cookTorrance; //Phisically Accurate, handles metals better
+		vec3 nFactor = (1.0 + sqrt(R0)) / (1.0 - sqrt(R0));
+		vec3 gFactor = sqrt(pow(nFactor, vec3(2.0)) + pow(vdoth, 2.0) - 1.0);
+		cookTorrance = 0.5 * pow((gFactor - vdoth) / (gFactor + vdoth), vec3(2.0)) * (1 + pow(((gFactor + vdoth) * vdoth - 1.0) / ((gFactor - vdoth) * vdoth + 1.0), vec3(2.0)));
+		
+		fresnel = cookTorrance;
+		
+		show(fresnel);
+		
+    return fresnel;
 }
 
 float GetVolumetricFog(in vec2 coord) {
@@ -152,6 +167,7 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 		vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
 
 		reflection = reflectedSky + reflectedSunspot * colorSunlight * 100;
+		show(reflectedSunspot * colorSunlight * 100);
 	} else {
 
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
@@ -190,8 +206,9 @@ void main() {
 		smoothness = 0.85;
 
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
-
-	ComputeRaytracedReflection(color, smoothness, viewSpacePosition, normal, mask);
+	
+	if(mask.sky < 0.5)
+		ComputeRaytracedReflection(color, smoothness, viewSpacePosition, normal, mask);
 
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 
