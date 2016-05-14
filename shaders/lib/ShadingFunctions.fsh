@@ -184,7 +184,7 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 
 	shading.sunlight  = shading.normal;
 	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal);
-	shading.sunlight = mix(shading.sunlight, 0.1, mask.metallic);
+	shading.sunlight = mix(shading.sunlight, 0.0, mask.metallic);
 
 	shading.torchlight = 1.0 - pow(torchLightmap, 4.0);
 	shading.torchlight = 1.0 / pow(shading.torchlight, 2.0) - 1.0;
