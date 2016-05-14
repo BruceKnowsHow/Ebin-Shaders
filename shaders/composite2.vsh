@@ -26,7 +26,5 @@ void main() {
 	gl_Position = ftransform();
 	
 	
-	CalculateShadowView();
-	
 	#include "/lib/CompositeCalculations.vsh"
 }
