@@ -10,9 +10,6 @@ uniform vec3 upPosition;
 
 uniform float sunAngle;
 
-varying mat4 shadowView;
-varying mat4 shadowViewInverse;
-
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"

@@ -15,9 +15,6 @@ uniform vec3 cameraPosition;
 uniform float sunAngle;
 uniform float frameTimeCounter;
 
-varying mat4 shadowView;
-varying mat4 shadowViewInverse;
-
 varying vec4 color;
 varying vec2 texcoord;
 varying vec2 lightmapCoord;
@@ -26,6 +23,7 @@ varying vec3 vertNormal;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/ShadowViewMatrix.vsh"
 
 vec4 GetWorldSpacePositionShadow() {
 	return shadowModelViewInverse * shadowProjectionInverse * ftransform();
@@ -57,8 +55,6 @@ vec4 BiasShadowProjection(in vec4 position) {
 	
 	return position;
 }
-
-#include "/lib/ShadowViewMatrix.vsh"
 
 
 void main() {

@@ -7,12 +7,14 @@ attribute vec4 at_tangent;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 shadowModelView;
 
 uniform vec3 sunPosition;
 uniform vec3 upPosition;
 
 uniform vec3  cameraPosition;
 uniform float frameTimeCounter;
+uniform float sunAngle;
 
 varying vec3 color;
 varying vec2 texcoord;
@@ -32,6 +34,7 @@ varying vec3 worldPosition;
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 #ifdef FORWARD_SHADING
+#include "/lib/ShadowViewMatrix.vsh"
 #include "/lib/GlobalCompositeVariables.glsl"
 #endif
 

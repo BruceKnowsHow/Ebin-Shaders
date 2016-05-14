@@ -6,15 +6,15 @@
 // uniform mat4  shadowModelView;
 // uniform float sunAngle;
 // 
-// varying mat4 shadowView;
-// varying mat4 shadowViewInverse;
-// 
 // #include "/lib/Settings.glsl"
+
+varying mat4 shadowView;
+varying mat4 shadowViewInverse;
 
 
 float CalculateShadowView() {
 	
-	float timeAngle = sunAngle * 200;
+	float timeAngle = sunAngle;
 	float pathRotationAngle = sunPathRotation * RAD;
 	float twistAngle = 0.0;
 	

@@ -5,7 +5,6 @@
 // 
 // uniform mat4 gbufferModelView;
 // 
-// uniform vec3 sunPosition;
 // uniform vec3 upPosition;
 // 
 // #include "/lib/Util.glsl"
