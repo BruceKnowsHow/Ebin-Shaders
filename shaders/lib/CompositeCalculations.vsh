@@ -3,20 +3,23 @@
 
 // Prerequisites:
 // 
+// uniform mat4 gbufferModelView;
+// 
 // uniform vec3 sunPosition;
 // uniform vec3 upPosition;
 // 
 // #include "/lib/Util.glsl"
+// #include "/lib/ShadowViewMatrix.vsh"
 // #include "/lib/GlobalCompositeVariables.glsl"
 
 
 // {
-	vec3 sunVector = normalize(sunPosition); //Engine-time overrides will happen by modifying sunVector
+	vec3 sunVector = normalize((gbufferModelView * shadowViewInverse * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
 	
 	lightVector = sunVector * mix(1.0, -1.0, float(dot(sunVector, upPosition) < 0.0));
 	
 	
-	float sunUp   = dot(sunVector, normalize(upPosition));
+	float sunUp  = dot(sunVector, normalize(upPosition));
 	
 	timeDay      = sin( sunUp * PI * 0.5);
 	timeNight    = sin(-sunUp * PI * 0.5);

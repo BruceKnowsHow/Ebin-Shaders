@@ -2,13 +2,22 @@
 #define composite_vsh true
 #define ShaderStage 10
 
+uniform mat4 gbufferModelView;
+uniform mat4 shadowModelView;
+
 uniform vec3 sunPosition;
 uniform vec3 upPosition;
+
+uniform float sunAngle;
+
+varying mat4 shadowView;
+varying mat4 shadowViewInverse;
 
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/ShadowViewMatrix.vsh"
 #include "/lib/GlobalCompositeVariables.glsl"
 
 
@@ -18,6 +27,8 @@ void main() {
 	
 	gl_Position.xy = ((gl_Position.xy * 0.5 + 0.5) * COMPOSITE0_SCALE) * 2.0 - 1.0;
 	
+	
+	CalculateShadowView();
 	
 	#include "/lib/CompositeCalculations.vsh"
 }
