@@ -146,7 +146,7 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 
-	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 80, 14, reflectedCoord, reflectedViewSpacePosition)) {
+	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 12, reflectedCoord, reflectedViewSpacePosition)) {
 		//Some Cook Torrance for the sun on things other than water to make it look nicer.
 
 		vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
@@ -170,7 +170,7 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 		#endif
 	}
 
-	color = mix(color * (1.0 - mask.metallic), reflection, fresnel * smoothness);
+	color = mix(color * (1.0 - mask.metallic * 0.5), reflection, fresnel * smoothness);
 }
 
 
