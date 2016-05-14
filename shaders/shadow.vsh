@@ -5,6 +5,7 @@
 attribute vec4 mc_Entity;
 attribute vec4 at_tangent;
 
+uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
 uniform mat4 shadowModelView;
@@ -12,7 +13,14 @@ uniform mat4 shadowModelViewInverse;
 
 uniform vec3 cameraPosition;
 
+uniform float far;
+uniform float near;
+uniform float sunAngle;
+uniform vec3  sunPosition;
+
 uniform float frameTimeCounter;
+
+varying mat4 viewShadow;
 
 varying vec4 color;
 varying vec2 texcoord;
@@ -20,9 +28,13 @@ varying vec2 lightmapCoord;
 
 varying vec3 vertNormal;
 
+varying mat4 shadowView;
+varying mat4 shadowViewInverse;
+
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
 
+#define rad 0.0174533
 
 vec4 GetWorldSpacePositionShadow() {
 	return shadowModelViewInverse * shadowProjectionInverse * ftransform();
@@ -30,6 +42,20 @@ vec4 GetWorldSpacePositionShadow() {
 
 vec4 WorldSpaceToShadowProjection(in vec4 worldSpacePosition) {
 	return shadowProjection * shadowModelView * worldSpacePosition;
+}
+
+mat2 rotate(in float radians) {
+	return mat2(
+		cos(radians),  sin(radians),
+	   -sin(radians),  cos(radians));
+	
+}
+
+vec4 WorldSpaceToShadowProjection1(in vec4 worldSpacePosition) {
+	worldSpacePosition = shadowView * worldSpacePosition;
+	
+//	worldSpacePosition = shadowModelView * worldSpacePosition;
+	return shadowProjection * worldSpacePosition;
 }
 
 #include "/lib/Waving.vsh"
@@ -51,20 +77,47 @@ vec4 BiasShadowProjection(in vec4 position) {
 	return position;
 }
 
+void CalculateShadowView() {
+	float timeAngle = -mod(sunAngle, 0.5) * 360.0 * rad;
+	float pathRotationAngle = sunPathRotation * rad;
+	float twistAngle = 0.0;
+	
+	float a = cos(pathRotationAngle);
+	float b = sin(pathRotationAngle);
+	float c = cos(timeAngle);
+	float d = sin(timeAngle);
+	float e = cos(twistAngle);
+	float f = sin(twistAngle);
+	
+	shadowView = mat4(
+	-d*e + b*c*f,  -a*f,  c*e + b*d*f,  shadowModelView[0].w,
+	        -a*c,    -b,         -a*d,  shadowModelView[1].w,
+	 b*c*e + d*f,  -a*e,  b*d*e - c*f,  shadowModelView[2].w,
+	 shadowModelView[3]);
+	
+	shadowViewInverse = mat4(
+	-e*d + f*b*c,  -c*a,  f*d + e*b*c,  0.0,
+	        -f*a,    -b,         -e*a,  0.0,
+	 f*b*d + e*c,  -a*d,  e*b*d - f*c,  0.0,
+	         0.0,   0.0,          0.0,  1.0);
+}
+
 
 void main() {
+	CalculateShadowView();
+	
 	color         = gl_Color;
 	texcoord      = gl_MultiTexCoord0.st;
 	lightmapCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).st;
 	
-	vertNormal    = gl_NormalMatrix * gl_Normal;
+	vertNormal    = normalize((shadowView * shadowModelViewInverse * vec4(gl_NormalMatrix * gl_Normal, 0.0)).xyz);
 	
 	
 	vec4 position = GetWorldSpacePositionShadow();
 	
 	position.xyz += CalculateVertexDisplacements(position.xyz);
 	
-	gl_Position = BiasShadowProjection(WorldSpaceToShadowProjection(position));
+	gl_Position = BiasShadowProjection(WorldSpaceToShadowProjection1(position));
 	
 	
 	#ifdef FORWARD_SHADING
