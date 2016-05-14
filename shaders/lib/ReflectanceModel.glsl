@@ -65,5 +65,5 @@ vec3 CalculateSpecularHighlight(
     float ldotn = max(0.01, dot(lightVector, normal));
     float vdotn = max(0.01, dot(viewVector, normal));
 
-    return fresnel * geometryFactor * microfacetDistribution / (4 * ldotn * vdotn);
+    return fresnel * geometryFactor * microfacetDistribution * ldotn / (4 * ldotn * vdotn);
 }
