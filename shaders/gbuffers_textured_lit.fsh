@@ -12,7 +12,6 @@ uniform sampler2D shadowtex1;
 uniform sampler2DShadow shadow;
 
 uniform mat4 gbufferModelViewInverse;
-uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 
 uniform float frameTimeCounter;
@@ -20,6 +19,9 @@ uniform float far;
 
 uniform float viewWidth;
 uniform float viewHeight;
+
+varying mat4 shadowView;
+#define shadowModelView shadowView
 
 varying vec3 color;
 varying vec2 texcoord;

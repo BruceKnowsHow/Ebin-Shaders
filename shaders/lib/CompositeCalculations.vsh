@@ -5,7 +5,6 @@
 // 
 // uniform mat4 gbufferModelView;
 // 
-// uniform vec3 sunPosition;
 // uniform vec3 upPosition;
 // 
 // #include "/lib/Util.glsl"
@@ -14,9 +13,13 @@
 
 
 // {
+	float isNight = CalculateShadowView();
+	
 	vec3 sunVector = normalize((gbufferModelView * shadowViewInverse * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
 	
-	lightVector = sunVector * mix(1.0, -1.0, float(dot(sunVector, upPosition) < 0.0));
+	lightVector = sunVector;
+	
+	sunVector *= 1.0 - isNight * 2.0;
 	
 	
 	float sunUp  = dot(sunVector, normalize(upPosition));

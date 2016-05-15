@@ -10,9 +10,6 @@ uniform vec3 upPosition;
 
 uniform float sunAngle;
 
-varying mat4 shadowView;
-varying mat4 shadowViewInverse;
-
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
@@ -25,8 +22,6 @@ void main() {
 	texcoord    = gl_MultiTexCoord0.st;
 	gl_Position = ftransform();
 	
-	
-	CalculateShadowView();
 	
 	#include "/lib/CompositeCalculations.vsh"
 }
