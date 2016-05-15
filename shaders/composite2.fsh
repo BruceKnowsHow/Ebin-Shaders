@@ -78,7 +78,7 @@ float GetVolumetricFog(in vec2 coord) {
 }
 
 float noise(in vec2 coord) {
-    return fract(sin(dot(coord, vec2(12.8989, 78.233))) * 43758.5453);
+    return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
 #include "/lib/Sky.fsh"
@@ -139,14 +139,28 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
-
+	const int rayCount = 4;
+	bool rays;
+	
+	float roughness = 1 - smoothness;
+	
+	for(int i = 0; i < rayCount; i++) {
+		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
+		vec3 noiseSample = ggxSkew(epsilon, roughness);
+		vec3 reflectDir = normalize(noiseSample * roughness + normal * 12);
+		reflectDir *= sign(dot(normal, reflectDir));
+		vec3 rayDir = reflect(normalize(viewSpacePosition.xyz), reflectDir);
+		
+		rays = ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 12, reflectedCoord, reflectedViewSpacePosition);
+	}
+	
 	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
 	vec3 sColor = mix(vec3(0.15), color, vec3(mask.metallic));
-	vec3 fresnel = fresnel(sColor, vdoth);
+	vec3 fresnel = Fresnel(sColor, vdoth);
 
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 
-	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 12, reflectedCoord, reflectedViewSpacePosition)) {
+	if (!rays) {
 		vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
 		reflection = reflectedSky + reflectedSunspot * colorSunlight * 100;
 	} else {
@@ -155,7 +169,7 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 
 		float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 1.0;
 		float lod = (rayLength + (1.0 - smoothness)) * (1-smoothness);
-		reflection = GetColorLod(reflectedCoord.st, lod);
+		reflection = GetColorLod(reflectedCoord.st, 2);
 
 		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
 
@@ -165,9 +179,8 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 			float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
 			reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
 		#endif
-	}
-
-	color = mix(color * (1.0 - mask.metallic * 0.5), reflection, fresnel * smoothness);
+		}
+	color = mix(color * (1.0 - mask.metallic * 0.5), reflection * 2, fresnel * smoothness);
 }
 
 
