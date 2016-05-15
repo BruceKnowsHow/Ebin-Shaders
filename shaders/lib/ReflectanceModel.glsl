@@ -1,4 +1,4 @@
-vec3 fresnel(vec3 R0, float vdoth) {
+vec3 Fresnel(vec3 R0, float vdoth) {
 		vec3 fresnel;
 		
 		vec3 Schlick = R0 + (vec3(1.0) - R0) * max(0.0, pow(1.0 - vdoth, 5));
@@ -92,6 +92,35 @@ float phongDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
   }
   
   return Xp * ((roughnessCoeff + 2) / (2 * 3.1415927)) * pow(hdotn, roughnessCoeff);
+}
+
+vec3 phongSkew(in vec2 epsilon, in float roughness) {
+	// Uses the Phong sample skewing Functions
+	float Ap = (2 / pow(roughness, 2)) - 2;
+	float theta = acos(pow(epsilon.x, (2 / Ap + 2)));
+	float phi = 2 * PI * epsilon.y;
+
+	float sin_theta = sin(theta);
+
+	float x = cos(phi) * sin_theta;
+	float y = sin(phi) * sin_theta;
+	float z = cos(theta);
+
+	return vec3(x, y, z);
+}
+
+vec3 beckmannSkew(in vec2 epsilon, in float roughness) {
+	// Uses the Beckman sample skewing Functions
+	float theta = atan(sqrt(-pow(roughness, 2) * log(1-epsilon.x)));
+	float phi = 2 * PI * epsilon.y;
+
+	float sin_theta = sin(theta);
+
+	float x = cos(phi) * sin_theta;
+	float y = sin(phi) * sin_theta;
+	float z = cos(theta);
+
+	return vec3(x, y, z);
 }
 
 vec3 ggxSkew(in vec2 epsilon, in float roughness) {
