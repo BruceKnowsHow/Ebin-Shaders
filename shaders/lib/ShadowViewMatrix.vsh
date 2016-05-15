@@ -19,6 +19,7 @@ varying mat4 shadowViewInverse;
 
 
 #define time frameTimeCounter
+#define dayCycle sunAngle
 	
 #ifdef shadow_vsh
 	#define position cameraPosition
