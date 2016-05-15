@@ -94,6 +94,20 @@ float phongDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
   return Xp * ((roughnessCoeff + 2) / (2 * 3.1415927)) * pow(hdotn, roughnessCoeff);
 }
 
+vec3 ggxSkew(in vec2 epsilon, in float roughness) {
+	// Uses the GGX sample skewing Functions
+	float theta = atan(sqrt(roughness * roughness * epsilon.x / (1.0 - epsilon.x)));
+	float phi = 2 * PI * epsilon.y;
+
+	float sin_theta = sin(theta);
+
+	float x = cos(phi) * sin_theta;
+	float y = sin(phi) * sin_theta;
+	float z = cos(theta);
+
+	return vec3(x, y, z);
+}
+
 /*!
  * \brief Calculates the geometry distribution given the given parameters
  *

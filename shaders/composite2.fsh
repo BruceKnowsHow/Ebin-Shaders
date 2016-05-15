@@ -77,6 +77,10 @@ float GetVolumetricFog(in vec2 coord) {
 	return texture2D(colortex4, coord).a;
 }
 
+float noise(in vec2 coord) {
+    return fract(sin(dot(coord, vec2(12.8989, 78.233))) * 43758.5453);
+}
+
 #include "/lib/Sky.fsh"
 
 bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const float rayGrowth, const int maxSteps, const int maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
@@ -143,12 +147,8 @@ void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 v
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 12, reflectedCoord, reflectedViewSpacePosition)) {
-		//Some Cook Torrance for the sun on things other than water to make it look nicer.
-
 		vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
-
 		reflection = reflectedSky + reflectedSunspot * colorSunlight * 100;
-		show(reflectedSunspot * colorSunlight * 100);
 	} else {
 
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
