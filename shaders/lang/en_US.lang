@@ -1,5 +1,7 @@
 
 
+screen.Brightness=Brightness and Saturation
+
 option.EXPOSURE=Exposure
 option.EXPOSURE.comment=The brightness level of the entire scene
 
@@ -22,6 +24,12 @@ option.SKY_BRIGHTNESS=Sky Brightness
 option.SKY_BRIGHTNESS.comment=The brightness level of the sky
 
 
+
+screen.Effects=Effects
+
+
+screen.Bloom=Bloom
+
 option.BLOOM_AMOUNT=Bloom Amount
 option.BLOOM_AMOUNT.comment=The visibility level of bloom, AKA Glow
 
@@ -29,24 +37,28 @@ option.BLOOM_CURVE=Bloom Curve
 option.BLOOM_CURVE.comment=Higher values make the bloom more concentrated to bright areas, and also make the bloom more colorful
 
 
+screen.Motion_Blur=Motion Blur
+
 option.MOTION_BLUR=Motion Blur
 
 option.VARIABLE_MOTION_BLUR_SAMPLES=Variable Sample Count
 option.VARIABLE_MOTION_BLUR_SAMPLES.comment=Whether to vary the amount of blur samples based on the amount of samples needed. This allows for higher sample counts and better quality blur. High performance impact!
 
-option.CONSTANT_MOTION_BLUR_SAMPLE_COUNT=Sample Count (Constant Samples)
+option.CONSTANT_MOTION_BLUR_SAMPLE_COUNT=Constant Sample Count
 option.CONSTANT_MOTION_BLUR_SAMPLE_COUNT.comment=The sample count to be used when "variable sample count" is disabled. Medium performance impact!
 
-option.VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT=Sample Coeff (Variable Samples)
-option.VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT.comment=The sample-count-coefficient for when "variable sample count" is enabled. Medium Performance impact!
-
-option.MAX_MOTION_BLUR_SAMPLE_COUNT=Sample Count (Variable Samples)
+option.MAX_MOTION_BLUR_SAMPLE_COUNT=Max Variable Sample Count
 option.MAX_MOTION_BLUR_SAMPLE_COUNT.comment=The maximum sample count to be used when "variable sample count" is enabled. Medium performance impact!
+
+option.VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT=Variable Sample Coefficient
+option.VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT.comment=The sample-count-coefficient for when "variable sample count" is enabled. Medium Performance impact!
 
 option.MOTION_BLUR_INTENSITY=Blur Intensity
 
 option.MAX_MOTION_BLUR_AMOUNT=Max Blur Amount
 
+
+screen.Waving_Blocks=Waving Blocks
 
 option.WAVING_GRASS=Waving Grass
 
@@ -54,6 +66,8 @@ option.WAVING_LEAVES=Waving Leaves
 
 option.WAVING_WATER=Waving Water
 
+
+screen.Shadows=Shadows
 
 option.sunPathRotation=Sun Path Rotation
 
@@ -72,6 +86,8 @@ option.PLAYER_SHADOW=Player Shadow
 option.PLAYER_SHADOW.comment=Whether or not the player casts a shadow
 
 
+screen.Fog=Fog
+
 option.FOG_ENABLED=Fog Enabled
 
 option.FOG_POWER=Fog Power
@@ -86,6 +102,8 @@ option.VOLUMETRIC_FOG_POWER.comment=Higher values make volumetric fog more visib
 option.ATMOSPHERIC_SCATTERING_AMOUNT=Atmospheric Scattering Amount
 option.ATMOSPHERIC_SCATTERING_AMOUNT.comment=Blue-Purple "haze" effect. Independant of fog setting
 
+
+screen.Global_Illumination=Global Illumination
 
 option.GI_MODE=GI Mode
 option.GI_MODE.comment=1: Better for natural terrain and general gameplay. 2: More Physically accurate. Higher values may have an unmeasured performance cost!
@@ -107,6 +125,9 @@ option.COMPOSITE0_SCALE=Composite0 Scale
 option.COMPOSITE0_SCALE.comment=The resolution coefficient at which global illumination and volumetric fog are rendered.
 
 
+
+screen.Misc=Misc
+
 option.REFLECTION_EDGE_FALLOFF=Reflection Edge Falloff
 option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "fade out" on the edges of the screen
 
@@ -115,6 +136,7 @@ option.RECALCULATE_DISPLACED_NORMALS.comment=Whether or not surface normals are 
 
 option.FORWARD_SHADING=Forward Shading Pipeline
 option.FORWARD_SHADING.comment=Computes shading on blocks that are underwater, behind glass, etc. High performance impact!
+
 
 
 option.DEBUG=Debug Mode

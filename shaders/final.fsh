@@ -56,7 +56,7 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	     previousPosition      = gbufferPreviousProjection * gbufferPreviousModelView * previousPosition; // Re-rotate and re-project using the previous frame matrices
 	     previousPosition.st  /= previousPosition.w; // Un-linearize, swizzle to avoid correcting irrelivant components
 	
-	const float intensity = MOTION_BLUR_INTENSITY;
+	const float intensity = MOTION_BLUR_INTENSITY * 0.5;
 	const float maxVelocity = MAX_MOTION_BLUR_AMOUNT * 0.1;
 	
 	vec2 velocity = (position.st - previousPosition.st) * intensity; // Screen-space motion vector
