@@ -12,8 +12,6 @@ vec3 fresnel(vec3 R0, float vdoth) {
 		
 		fresnel = cookTorrance;
 		
-		show(fresnel);
-		
     return fresnel;
 }
 
