@@ -183,6 +183,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpa
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
+	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100;
 	
 	for(int i = 1; i <= rayCount; i++) {
 		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
@@ -193,16 +194,13 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpa
 		
 		
 		// This is incredibly broken, let Bruce FIXME
-		rays = ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 12, reflectedCoord, reflectedViewSpacePosition);
 		
-		if (!rays) {
-			reflection += reflectedSky + reflectedSunspot * colorSunlight * 100;
+		
+		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) {
+			reflection += offscreen;
 		} else {
-			
 			vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 			
-			float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 1.0;
-			float lod = (rayLength + (1.0 - smoothness)) * (1-smoothness);
 			reflection += GetColorLod(reflectedCoord.st, 2);
 			
 			CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
@@ -216,7 +214,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpa
 		}
 	}
 	
-	color = mix(color * (1.0 - mask.metallic * 0.5), reflection * 2 / rayCount, fresnel * smoothness);
+	color = mix(color * (1.0 - mask.metallic * 0.5), reflection / rayCount, fresnel * smoothness);
 }
 
 
