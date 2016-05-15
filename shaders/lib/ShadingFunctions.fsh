@@ -10,11 +10,12 @@
 // uniform mat4 gbufferModelViewInverse;
 // uniform mat4 shadowModelView;
 // uniform mat4 shadowProjection;
-//
-// varying vec2 texcoord
-//
+// 
 // uniform float viewWidth;
 // uniform float viewHeight;
+// 
+// varying vec3 lightVector;
+// 
 //
 // #include "/lib/Settings.glsl"
 // #include "/lib/Util.glsl"
@@ -61,11 +62,6 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 }
 
 float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in Mask mask) {
-	//float shading = dot(normal, lightVector);
-	
-	vec3 lightColor = colorSunlight;
-	
-	normal = normalize(normal);
 	vec3 eyeDir = normalize(viewSpacePosition.xyz);
 	
 	float NdotL = dot(normal, lightVector);
@@ -75,22 +71,21 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	float angleLN = acos(NdotL);
 	
 	float alpha = max(angleVN, angleLN);
-	float beta = min(angleVN, angleLN);
+	float beta  = min(angleVN, angleLN);
 	float gamma = dot(eyeDir - normal * dot(eyeDir, normal), lightVector - normal * dot(lightVector, normal));
 	
 	float roughnessSquared = square(roughness);
 	
 	float A = 1.0 - 0.5 * (roughnessSquared / (roughnessSquared + 0.57));
-	float B = 0.45 * (roughnessSquared / (roughnessSquared + 0.09));
+	float B =      0.45 * (roughnessSquared / (roughnessSquared + 0.09));
 	float C = sin(alpha) * tan(beta);
 	
-	float L1 = max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
+	float shading = max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
 	
+	shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
+	shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
 	
-	L1 = L1 * (1.0 - mask.grass       ) + mask.grass       ;
-	L1 = L1 * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
-	
-	return L1;
+	return shading;
 }
 
 float ComputeDirectSunlight(in vec4 position, in float normalShading) {

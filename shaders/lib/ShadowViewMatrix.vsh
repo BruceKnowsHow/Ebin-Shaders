@@ -1,10 +1,15 @@
 
-// Start of #include "/lib/ShadowViewMatrix.glsl"
+// Start of #include "/lib/ShadowViewMatrix.vsh"
 
 // Prerequisites:
 // 
-// uniform mat4  shadowModelView;
+// uniform mat4 shadowModelView;
+// 
+// uniform vec3 cameraPosition;
+// uniform vec3 previousCameraPosition;
+// 
 // uniform float sunAngle;
+// uniform float frameTimeCounter;
 // 
 // #include "/lib/Settings.glsl"
 
@@ -14,14 +19,31 @@ varying mat4 shadowViewInverse;
 
 float CalculateShadowView() {
 	
-	float timeAngle = sunAngle;
-	float pathRotationAngle = sunPathRotation * RAD;
+	float timeAngle = sunAngle * 360.0;
+	float pathRotationAngle = sunPathRotation;
 	float twistAngle = 0.0;
 	
 	
-	float isNight = float(mod(timeAngle, 1.0) > 0.5);
+	#define time frameTimeCounter
 	
-	timeAngle = -mod(timeAngle, 0.5) * 360.0 * RAD;
+#ifdef shadow_vsh
+	#define position cameraPosition
+#else
+	#define position previousCameraPosition
+#endif
+	
+	#include "/UserProgram/CustomTimeCycle.vsh"
+	
+	#undef time
+	#undef position
+	
+	
+	float isNight = float(mod(timeAngle, 360.0) > 180.0);
+	
+	timeAngle = -mod(timeAngle, 180.0) * RAD;
+	
+	pathRotationAngle *= RAD;
+	twistAngle *= RAD;
 	
 	
 	float A = cos(pathRotationAngle);
@@ -53,4 +75,4 @@ float CalculateShadowView() {
 }
 
 
-// End of #include "/lib/ShadowViewMatrix.glsl"
+// End of #include "/lib/ShadowViewMatrix.vsh"

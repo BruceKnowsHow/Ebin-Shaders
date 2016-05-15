@@ -6,10 +6,7 @@ struct Mask {
 	float materialIDs;
 	float matIDs;
 	
-	float bit0;
-	float bit1;
-	float bit2;
-	float bit3;
+	float[4] bit;
 	
 	float grass;
 	float leaves;
@@ -20,29 +17,18 @@ struct Mask {
 	float metallic;
 };
 
-void DecodeMaterialIDs(inout float matID, inout float bit0, inout float bit1, inout float bit2, inout float bit3) {
+void DecodeMaterialIDs(inout float matID, inout float[4] bit) {
 	matID  = 1.0 - matID;
 	matID *= 255.0;
 	
-	if (matID >= 128.0 && matID < 254.5) {
-		matID -= 128.0;
-		bit0 = 1.0;
+	if (matID < 254.5) {
+		bit[0] = float(matID >= 128.0);
+		bit[1] = float(matID >=  64.0);
+		bit[2] = float(matID >=  32.0);
+		bit[3] = float(matID >=  16.0);
 	}
 	
-	if (matID >= 64.0 && matID < 254.5) {
-		matID -= 64.0;
-		bit1 = 1.0;
-	}
-	
-	if (matID >= 32.0 && matID < 254.5) {
-		matID -= 32.0;
-		bit2 = 1.0;
-	}
-	
-	if (matID >= 16.0 && matID < 254.5) {
-		matID -= 16.0;
-		bit3 = 1.0;
-	}
+	matID -= 128.0 * bit[0] + 64.0 * bit[1] + 32.0 * bit[2] + 16.0 * bit[3];
 }
 
 float GetMaterialMask(in float mask, in float materialID) {
@@ -53,7 +39,7 @@ void CalculateMasks(inout Mask mask, in float materialIDs) {
 	mask.materialIDs = materialIDs;
 	mask.matIDs      = mask.materialIDs;
 	
-	DecodeMaterialIDs(mask.matIDs, mask.bit0, mask.bit1, mask.bit2, mask.bit3);
+	DecodeMaterialIDs(mask.matIDs, mask.bit);
 	
 	mask.grass  = GetMaterialMask(  2, mask.matIDs);
 	mask.leaves = GetMaterialMask(  3, mask.matIDs);
@@ -61,7 +47,7 @@ void CalculateMasks(inout Mask mask, in float materialIDs) {
 	mask.hand   = GetMaterialMask(  5, mask.matIDs);
 	mask.sky    = GetMaterialMask(255, mask.matIDs);
 	
-	mask.metallic = mask.bit0;
+	mask.metallic = mask.bit[0];
 }
 
 
