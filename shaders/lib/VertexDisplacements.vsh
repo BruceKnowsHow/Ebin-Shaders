@@ -1,10 +1,12 @@
 
 // Start of #include "/lib/VertexDisplacements.vsh"
 
-// Prerequisites:
-// 
+/* Prerequisites:
+
 // #include "/lib/Settings.glsl"
 // #include "/lib/Waving.vsh"
+
+*/
 
 
 vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {

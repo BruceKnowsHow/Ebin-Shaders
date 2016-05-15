@@ -1,24 +1,25 @@
 
 // Start of #include "/lib/ShadingFunctions.fsh"
 
-// Prerequisites:
-//
-// uniform sampler2D shadowtex1;
-// uniform sampler2DShadow shadow;
-// uniform sampler2D noisetex;
-//
-// uniform mat4 gbufferModelViewInverse;
-// uniform mat4 shadowModelView;
-// uniform mat4 shadowProjection;
-// 
-// uniform float viewWidth;
-// uniform float viewHeight;
-// 
-// varying vec3 lightVector;
-// 
-//
+/* Prerequisites:
+
+uniform sampler2D shadowtex1;
+uniform sampler2DShadow shadow;
+uniform sampler2D noisetex;
+
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 shadowModelView;
+uniform mat4 shadowProjection;
+
+uniform float viewWidth;
+uniform float viewHeight;
+
+varying vec3 lightVector;
+
 // #include "/lib/Settings.glsl"
 // #include "/lib/Util.glsl"
+
+*/
 
 
 struct Shading {      // Contains scalar light levels without any color

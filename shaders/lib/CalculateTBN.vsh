@@ -1,11 +1,13 @@
 
 // Start of #include "/lib/CalculateTBN.vsh"
 
-// Prerequisites:
-// 
-// attribute vec4 at_tangent;
-// 
-// #include "/lib/VertexDisplacements.vsh"    // Excluding gbuffers_hand.vsh
+/* Prerequisites:
+
+attribute vec4 at_tangent;
+
+// #include "/lib/VertexDisplacements.vsh"
+
+*/
 
 
 void CalculateTBN(in vec3 position, out mat3 tbnMatrix, out vec3 normal) {

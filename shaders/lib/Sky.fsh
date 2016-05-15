@@ -1,11 +1,13 @@
 
 // Start of #include "/lib/Sky.fsh"
 
-// Prerequisites:
-// 
-// varying vec3 lightVector;
-// 
+/* Prerequisites:
+
+varying vec3 lightVector;
+
 // #include "/lib/Settings.glsl"
+
+*/
 
 
 float CalculateSunlow(in vec4 viewSpacePosition) {

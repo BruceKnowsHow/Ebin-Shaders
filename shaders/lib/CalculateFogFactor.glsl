@@ -1,11 +1,13 @@
 
 // Start of #include "/lib/CalculateFogFactor.glsl"
 
-// Prerequisites:
-// 
-// uniform float far;
-// 
+/* Prerequisites:
+
+uniform float far;
+
 // #include "/lib/Settings.glsl"
+
+*/
 
 
 float CalculateFogFactor(in vec4 viewSpacePosition, in float power) {

@@ -1,11 +1,13 @@
 
 // Start of #include "/lib/Waving.vsh"
 
-// Prerequisites:
-// 
-// uniform float frameTimeCounter; 
-// 
+/* Prerequisites:
+
+uniform float frameTimeCounter; 
+
 // #include "/lib/Settings.glsl"
+
+*/
 
 
 vec3 GetWavingGrass(in vec3 position, in float magnitude) {

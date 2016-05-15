@@ -1,15 +1,17 @@
 
 // Start of #include "/lib/CompositeCalculations.vsh"
 
-// Prerequisites:
-// 
-// uniform mat4 gbufferModelView;
-// 
-// uniform vec3 upPosition;
-// 
+/* Prerequisites:
+
+uniform mat4 gbufferModelView;
+
+uniform vec3 upPosition;
+
 // #include "/lib/Util.glsl"
 // #include "/lib/ShadowViewMatrix.vsh"
 // #include "/lib/GlobalCompositeVariables.glsl"
+
+*/
 
 
 // {
