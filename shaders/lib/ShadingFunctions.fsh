@@ -73,12 +73,12 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	
 	float alpha = max(angleVN, angleLN);
 	float beta  = min(angleVN, angleLN);
-	float gamma = dot(eyeDir - normal * dot(eyeDir, normal), lightVector - normal * dot(lightVector, normal));
+	float gamma = dot(eyeDir - normal * dot(eyeDir, normal), lightVector - normal * NdotL);
 	
 	float roughnessSquared = square(roughness);
 	
-	float A = 1.0 - 0.5 * (roughnessSquared / (roughnessSquared + 0.57));
-	float B =      0.45 * (roughnessSquared / (roughnessSquared + 0.09));
+	float A = 1.0 -  0.5 * (roughnessSquared / (roughnessSquared + 0.57));
+	float B =       0.45 * (roughnessSquared / (roughnessSquared + 0.09));
 	float C = sin(alpha) * tan(beta);
 	
 	float shading = max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
