@@ -29,7 +29,7 @@ varying vec2 texcoord;
 #include "/lib/GlobalCompositeVariables.glsl"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
-#include "/lib/ReflectanceModel.glsl"
+#include "/lib/ReflectanceModel.fsh"
 
 const bool colortex2MipmapEnabled = true;
 
