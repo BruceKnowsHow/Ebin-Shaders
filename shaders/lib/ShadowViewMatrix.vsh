@@ -17,6 +17,9 @@
 varying mat4 shadowView;
 varying mat4 shadowViewInverse;
 
+float timeAngle;
+float pathRotationAngle;
+float twistAngle;
 
 #define time frameTimeCounter
 #define dayCycle sunAngle
@@ -35,12 +38,12 @@ varying mat4 shadowViewInverse;
 
 float CalculateShadowView() {
 	
-	float timeAngle = sunAngle * 360.0;
-	float pathRotationAngle = sunPathRotation;
-	float twistAngle = 0.0;
+	timeAngle = sunAngle * 360.0;
+	pathRotationAngle = sunPathRotation;
+	twistAngle = 0.0;
 	
 	
-	UserRotation(timeAngle, pathRotationAngle, twistAngle);
+	UserRotation();
 	
 	
 	float isNight = abs(sign(float(mod(timeAngle, 360.0) > 180.0) - float(mod(abs(pathRotationAngle) + 90.0, 360.0) > 180.0))); // When they're not both above or below the horizon
