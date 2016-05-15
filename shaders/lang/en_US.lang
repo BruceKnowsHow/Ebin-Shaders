@@ -134,6 +134,8 @@ option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "
 option.RECALCULATE_DISPLACED_NORMALS=Recalculate Displaced Normals
 option.RECALCULATE_DISPLACED_NORMALS.comment=Whether or not surface normals are recalculated on blocks that have a waving effect
 
+option.HORIZON_LEVEL=Horizon Level
+
 option.FORWARD_SHADING=Forward Shading Pipeline
 option.FORWARD_SHADING.comment=Computes shading on blocks that are underwater, behind glass, etc. High performance impact!
 

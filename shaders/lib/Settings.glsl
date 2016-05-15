@@ -71,6 +71,8 @@ const int noiseTextureResolution = 64;
 
 #define RECALCULATE_DISPLACED_NORMALS
 
+#define HORIZON_LEVEL 72 // [64 72 80 128 192 208]
+
 //#define FORWARD_SHADING
 
 
