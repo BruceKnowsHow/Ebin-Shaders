@@ -133,57 +133,90 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 	return false;
 }
 
-void ComputeRaytracedReflection(inout vec3 color, in float smoothness, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
-	const int rayCount = 4;
+	
+	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
+	
+	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
+		reflection = reflectedSky;
+	else {
+		reflection = GetColor(reflectedCoord.st);
+		
+		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
+		
+		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
+		
+		#ifdef REFLECTION_EDGE_FALLOFF
+		float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
+		float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
+		float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
+		reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
+		#endif
+	}
+	
+	float VdotN = dot(normalize(viewSpacePosition.xyz), normal);
+	float alpha = pow(min(1.0 + VdotN, 1.0), 9.0) * 0.99 + 0.01;
+	
+	color = mix(color, reflection, alpha);
+}
+
+void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
+	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
+	vec3  reflectedCoord;
+	vec4  reflectedViewSpacePosition;
+	vec3  reflection;
+	const int rayCount = 2;
 	bool rays;
 	
 	float roughness = 1 - smoothness;
 	
-	for(int i = 0; i < rayCount; i++) {
-		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
-		vec3 noiseSample = ggxSkew(epsilon, roughness);
-		vec3 reflectDir = normalize(noiseSample * roughness + normal * 12);
-		reflectDir *= sign(dot(normal, reflectDir));
-		vec3 rayDir = reflect(normalize(viewSpacePosition.xyz), reflectDir);
-		
-		
-		// This is incredibly broken, let Bruce FIXME
-		rays = ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 12, reflectedCoord, reflectedViewSpacePosition);
-	}
 	
 	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
 	vec3 sColor = mix(vec3(0.15), color, vec3(mask.metallic));
 	vec3 fresnel = Fresnel(sColor, vdoth);
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
+	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
 	
-	if (!rays) {
-		vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
-		reflection = reflectedSky + reflectedSunspot * colorSunlight * 100;
-	} else {
+	for(int i = 1; i <= rayCount; i++) {
+		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
+		vec3 noiseSample = ggxSkew(epsilon, roughness);
+		vec3 reflectDir = normalize(noiseSample * roughness / 12 + normal);
+		reflectDir *= sign(dot(normal, reflectDir));
+		vec3 rayDir = reflect(normalize(viewSpacePosition.xyz), reflectDir);
 		
-		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 		
-		float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 1.0;
-		float lod = (rayLength + (1.0 - smoothness)) * (1-smoothness);
-		reflection = GetColorLod(reflectedCoord.st, 2);
+		// This is incredibly broken, let Bruce FIXME
+		rays = ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 12, reflectedCoord, reflectedViewSpacePosition);
 		
-		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
-		
-		#ifdef REFLECTION_EDGE_FALLOFF
-			float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
-			float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
-			float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
-			reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
-		#endif
+		if (!rays) {
+			reflection += reflectedSky + reflectedSunspot * colorSunlight * 100;
+		} else {
+			
+			vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
+			
+			float rayLength = length(viewSpacePosition.xyz - reflectedViewSpacePosition.xyz) + 1.0;
+			float lod = (rayLength + (1.0 - smoothness)) * (1-smoothness);
+			reflection += GetColorLod(reflectedCoord.st, 2);
+			
+			CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
+			
+			#ifdef REFLECTION_EDGE_FALLOFF
+				float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
+				float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
+				float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
+				reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
+			#endif
+		}
 	}
 	
-	color = mix(color * (1.0 - mask.metallic * 0.5), reflection * 2, fresnel * smoothness);
+	color = mix(color * (1.0 - mask.metallic * 0.5), reflection * 2 / rayCount, fresnel * smoothness);
 }
 
 
@@ -204,7 +237,9 @@ void main() {
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
-	ComputeRaytracedReflection(color, smoothness, viewSpacePosition, normal, mask);
+//	if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
+	
+	ComputePBRReflection(color, smoothness, viewSpacePosition, normal, mask);
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
