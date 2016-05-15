@@ -43,7 +43,7 @@ const int noiseTextureResolution = 64;
 #define MOTION_BLUR_INTENSITY                   1.0   // [0.5 1.0 2.0]
 #define MAX_MOTION_BLUR_AMOUNT                  1.0   // [0.5 1.0 2.0]
 
-//#define WAVING_GRASS
+#define WAVING_GRASS
 #define WAVING_LEAVES
 #define WAVING_WATER
 
@@ -71,7 +71,7 @@ const int noiseTextureResolution = 64;
 
 #define RECALCULATE_DISPLACED_NORMALS
 
-#define HORIZON_LEVEL 72 // [5 64 72 80 128 192 208]
+#define HORIZON_LEVEL 62 // [5 62 72 80 128 192 208]
 
 //#define FORWARD_SHADING
 
