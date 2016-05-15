@@ -5,7 +5,6 @@
 uniform mat4 gbufferModelView;
 uniform mat4 shadowModelView;
 
-uniform vec3 sunPosition;
 uniform vec3 upPosition;
 uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
