@@ -115,8 +115,8 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 		vec3 sampleDir    = normalize(sampleDiff);
 		vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
 		
-		float viewNormalCoeff   = max(0.0, dot(      normal, sampleDir));
-		float shadowNormalCoeff = max(0.0, dot(shadowNormal, sampleDir));
+		float viewNormalCoeff   = max0(dot(      normal, sampleDir));
+		float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
 		
 		viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
 		

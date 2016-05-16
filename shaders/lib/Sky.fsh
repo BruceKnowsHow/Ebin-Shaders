@@ -6,12 +6,13 @@
 varying vec3 lightVector;
 
 // #include "/lib/Settings.glsl"
+// #include "/lib/Util.glsl"
 
 */
 
 
 float CalculateSunlow(in vec4 viewSpacePosition) {
-	float sunglow = max(0.0, dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
+	float sunglow = max0(dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
 	      sunglow = pow(sunglow, 8.0) * 5.0;
 	
 	return sunglow;
@@ -40,7 +41,7 @@ vec3 CalculateSkyGradient(in vec4 viewSpacePosition) {
 }
 
 vec3 CalculateSunspot(in vec4 viewSpacePosition) {
-	float sunspot  = max(0.0, dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
+	float sunspot  = max0(dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
 	      sunspot  = pow(sunspot, 350.0);
 	      sunspot  = pow(sunspot + 1.0, 400.0) - 1.0;
 	      sunspot  = min(sunspot, 20.0);

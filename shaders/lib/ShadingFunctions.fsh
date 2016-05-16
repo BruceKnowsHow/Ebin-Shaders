@@ -81,7 +81,7 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	float B =       0.45 * (roughnessSquared / (roughnessSquared + 0.09));
 	float C = sin(alpha) * tan(beta);
 	
-	float shading = max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
+	float shading = max0(NdotL) * (A + B * max0(gamma) * C);
 	
 	shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
 	shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;

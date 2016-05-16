@@ -1,11 +1,17 @@
 
 // Start of #include "/lib/ReflectanceModel.fsh"
 
+/* Prerequisites:
+
+// #include "/lib/Util.glsl"
+
+*/
+
 
 vec3 Fresnel(vec3 R0, float vdoth) {
 	vec3 fresnel;
 	
-	vec3 Schlick = R0 + (vec3(1.0) - R0) * max(0.0, pow(1.0 - vdoth, 5.0));
+	vec3 Schlick = R0 + (vec3(1.0) - R0) * max0(pow(1.0 - vdoth, 5.0));
 	
 	vec3 SphericalGaussian = R0 + (vec3(1) - R0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
 	
@@ -20,42 +26,42 @@ vec3 Fresnel(vec3 R0, float vdoth) {
 }
 
 float ImplictGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 normal) {
-	float ndotl = max(0.0, dot(normal, lightDirection));
-	float ndotv = max(0.0, dot(normal, viewDirection));
+	float ndotl = max0(dot(normal, lightDirection));
+	float ndotv = max0(dot(normal, viewDirection));
 	
 	return ndotl * ndotv;
 }
 
 float NewmannGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 normal) {
-	float ndotl = max(0.0, dot(normal, lightDirection));
-	float ndotv = max(0.0, dot(normal, viewDirection));
+	float ndotl = max0(dot(normal, lightDirection));
+	float ndotv = max0(dot(normal, viewDirection));
 	
 	return (ndotl * ndotv) / max(ndotl, ndotv);
 }
 
 float SmithGeom(in vec3 viewDirection, in vec3 normal, in float alpha) {
-	float ndotv = max(0.0, dot(normal, viewDirection));
+	float ndotv = max0(dot(normal, viewDirection));
 	float alphaCoeff = sqrt((2.0 * pow2(alpha)) / PI);
 	
 	return ndotv / (ndotv * (1.0 - alphaCoeff) + alphaCoeff);
 }
 
 float cookTorranceGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 halfVector, in vec3 normal) {
-	float hdotn = max(0.0, dot(halfVector, normal));
-	float vdoth = max(0.0, dot(viewDirection, halfVector));
-	float ndotv = max(0.0, dot(normal, viewDirection));
-	float ndotl = max(0.0, dot(normal, lightDirection));
+	float hdotn = max0(dot(halfVector, normal));
+	float vdoth = max0(dot(viewDirection, halfVector));
+	float ndotv = max0(dot(normal, viewDirection));
+	float ndotl = max0(dot(normal, lightDirection));
 	
 	// geometric attenuation
 	float NH2 =  2.0 * hdotn;
 	float g1  = (NH2 * ndotv) / vdoth;
 	float g2  = (NH2 * ndotl) / vdoth;
 	
-	return min(1.0, min(g1, g2));
+	return min1(min(g1, g2));
 }
 
 float GGXSmithGeom(in vec3 i, in vec3 normal, in float alpha) {
-	float idotn = max(0.0, dot(normal, i));
+	float idotn = max0(dot(normal, i));
 	float idotn2 = pow2(idotn);
 	
 	return 2.0 * idotn / (idotn + sqrt(idotn2 + pow(alpha, 2.0) * (1 - idotn2)));
@@ -63,7 +69,7 @@ float GGXSmithGeom(in vec3 i, in vec3 normal, in float alpha) {
 
 float SchlickBeckmannGeom(in vec3 i, in vec3 normal, in float alpha) {
 	float k = sqrt((2.0 * pow2(alpha)) / PI);
-	float idotn = max(0.0, dot(normal, i));
+	float idotn = max0(dot(normal, i));
 	
 	return idotn / (idotn * (1 - k) + k);
 }
@@ -72,13 +78,13 @@ float SchlickBeckmannGeom(in vec3 i, in vec3 normal, in float alpha) {
 
 float GGXDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
 	float alpha2 = pow2(alpha);
-	float hdotn = max(0.0, dot(halfVector, normal));
+	float hdotn = max0(dot(halfVector, normal));
 	
 	return alpha2 / (PI * pow2(1.0 + pow2(hdotn) * (alpha2 - 1.0)));
 }
 
 float BeckmannDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
-	float hdotn = max(0.0, dot(halfVector, normal));
+	float hdotn = max0(dot(halfVector, normal));
 	float alpha2 = pow2(alpha);
 	
 	return (1.0 / (PI * alpha2 * pow(hdotn, 3.0))) * exp((pow2(hdotn) - 1.0) / (pow2(hdotn) * alpha2));
@@ -86,7 +92,7 @@ float BeckmannDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
 
 float phongDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
 	float roughnessCoeff = 2.0 / pow2(alpha) - 2.0;
-	float hdotn = max(0.0, dot(halfVector, normal));
+	float hdotn = max0(dot(halfVector, normal));
 	float Xp = (hdotn <= 0.0 ? 0.0 : 1.0);
 	
 	return Xp * ((roughnessCoeff + 2.0) / (2.0 * PI)) * pow(hdotn, roughnessCoeff);

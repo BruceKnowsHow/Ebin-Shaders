@@ -160,7 +160,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	}
 	
 	float VdotN = dot(normalize(viewSpacePosition.xyz), normal);
-	float alpha = pow(min(1.0 + VdotN, 1.0), 9.0) * 0.99 + 0.01;
+	float alpha = pow(min1(1.0 + VdotN), 9.0) * 0.99 + 0.01;
 	
 	color = mix(color, reflection, alpha);
 }

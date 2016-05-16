@@ -30,7 +30,7 @@ uniform vec3 upPosition;
 	timeNight    = sin(-sunUp * PI * 0.5);
 	timeHorizon  = pow(1 + timeDay * timeNight, 4.0);
 	
-	float horizonClip = max(0.0, 0.9 - timeHorizon) / 0.9;
+	float horizonClip = max0(0.9 - timeHorizon) / 0.9;
 	
 	timeDay = clamp01(timeDay * horizonClip);
 	timeNight = clamp01(timeNight * horizonClip);

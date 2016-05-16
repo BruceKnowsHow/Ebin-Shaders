@@ -6,6 +6,7 @@
 uniform float far;
 
 // #include "/lib/Settings.glsl"
+// #include "/lib/Util.glsl"
 
 */
 
@@ -16,16 +17,16 @@ float CalculateFogFactor(in vec4 viewSpacePosition, in float power) {
 	#endif
 	
 	float fogFactor  = length(viewSpacePosition.xyz);
-		  fogFactor  = max(fogFactor - gl_Fog.start, 0.0);
+		  fogFactor  = max0(fogFactor - gl_Fog.start);
 		  fogFactor /= far - gl_Fog.start;
 		  fogFactor  = pow(fogFactor, power);
-		  fogFactor  = clamp(fogFactor, 0.0, 1.0);
+		  fogFactor  = clamp01(fogFactor);
 	
 	return fogFactor;
 }
 
 float GetSkyAlpha(in float fogVolume, in float fogFactor) {
-	return min(fogVolume * fogFactor + pow(fogFactor, 6) * float(Volumetric_Fog), 1.0);
+	return min1(fogVolume * fogFactor + pow(fogFactor, 6) * float(Volumetric_Fog));
 }
 
 
