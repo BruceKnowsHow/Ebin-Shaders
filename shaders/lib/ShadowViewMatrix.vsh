@@ -23,19 +23,10 @@ float timeAngle;
 float pathRotationAngle;
 float twistAngle;
 
-#define time frameTimeCounter
-#define dayCycle sunAngle
-	
-#ifdef shadow_vsh
-	#define position cameraPosition
-#else
-	#define position previousCameraPosition
-#endif
 
+#include "/lib/EbinScript/Load.vsh"
 #include "/UserProgram/CustomTimeCycle.vsh"
-
-#undef time
-#undef position
+#include "/lib/EbinScript/Unload.vsh"
 
 
 float CalculateShadowView() {
