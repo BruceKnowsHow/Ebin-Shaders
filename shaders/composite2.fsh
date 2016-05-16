@@ -171,15 +171,14 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpa
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
+	
 	const int rayCount = 2;
-	bool rays;
 	
-	float roughness = 1 - smoothness;
+	float roughness = 1.0 - smoothness;
 	
-	
-	float vdoth = clamp(dot(-normalize(viewSpacePosition.xyz), normal), 0, 1);
-	vec3 sColor = mix(vec3(0.15), color, vec3(mask.metallic));
-	vec3 fresnel = Fresnel(sColor, vdoth);
+	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
+	vec3  sColor  = mix(vec3(0.15), color, vec3(mask.metallic));
+	vec3  fresnel = Fresnel(sColor, vdoth);
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
@@ -193,24 +192,23 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpa
 		vec3 rayDir = reflect(normalize(viewSpacePosition.xyz), reflectDir);
 		
 		
-		// This is incredibly broken, let Bruce FIXME
-		
-		
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) {
 			reflection += offscreen;
 		} else {
 			vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 			
-			reflection += GetColorLod(reflectedCoord.st, 2);
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 2);
 			
-			CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
+			CompositeFog(colorSample, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
 			
 			#ifdef REFLECTION_EDGE_FALLOFF
 				float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
 				float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
 				float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
-				reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
+				colorSample      = mix(colorSample, reflectedSky, pow(1.0 - edge, 10.0));
 			#endif
+			
+			reflection += colorSample;
 		}
 	}
 	

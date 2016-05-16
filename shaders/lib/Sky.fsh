@@ -50,30 +50,28 @@ vec3 CalculateSunspot(in vec4 viewSpacePosition) {
 }
 
 vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
-	float factor = pow(length(viewSpacePosition.xyz), 1.4) * 0.00015 * ATMOSPHERIC_SCATTERING_AMOUNT;
+	float factor = pow(length(viewSpacePosition.xyz), 1.4) * 0.0001 * ATMOSPHERIC_SCATTERING_AMOUNT;
 	
-	return pow(colorSkylight, vec3(3.5)) * factor * 0.0;
+	return pow(colorSkylight, vec3(3.5)) * factor;
 }
 
 void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolume) {
 	#ifndef FOG_ENABLED
 	color += CalculateAtmosphereScattering(viewSpacePosition);
 	#else
+	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
+	color += atmosphere * SKY_BRIGHTNESS;
+	
 	vec4  skyComposite;
-	
-	float fogFactor  = CalculateFogFactor(viewSpacePosition, FOG_POWER);
-	
-	skyComposite.a   = GetSkyAlpha(fogVolume, fogFactor);
-	
+	float fogFactor = CalculateFogFactor(viewSpacePosition, FOG_POWER);
+	skyComposite.a  = GetSkyAlpha(fogVolume, fogFactor);
 	if (skyComposite.a < 0.0001) return;
 	
-	vec3  gradient   = CalculateSkyGradient(viewSpacePosition);
-	vec3  sunspot    = CalculateSunspot(viewSpacePosition) * pow(fogFactor, 25);
-	vec3  atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
+	vec3 gradient = CalculateSkyGradient(viewSpacePosition);
+	vec3 sunspot  = CalculateSunspot(viewSpacePosition) * pow(fogFactor, 25);
 	
 	skyComposite.rgb = (gradient + sunspot) * SKY_BRIGHTNESS;
 	
-	color += atmosphere * SKY_BRIGHTNESS;
 	color  = mix(color, skyComposite.rgb, skyComposite.a);
 	#endif
 }
