@@ -171,7 +171,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	color = mix(color, reflection, alpha);
 }
 
-void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightmap, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
@@ -183,10 +183,11 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpa
 	float roughness = 1.0 - smoothness;
 	
 	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
-	vec3  sColor  = mix(vec3(0.15), color, vec3(mask.metallic));
+	vec3  sColor  = mix(vec3(0.15), color * 3, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
+	reflectedSky = mix(reflectedSky * 0.02, reflectedSky, lightmap);
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness);
 	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100;
 	
@@ -245,9 +246,9 @@ void main() {
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
-	if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
+//	if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
-//	ComputePBRReflection(color, smoothness, viewSpacePosition, normal, mask);
+	ComputePBRReflection(color, smoothness, skyLightmap, viewSpacePosition, normal, mask);
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
