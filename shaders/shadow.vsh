@@ -76,7 +76,7 @@ void main() {
 	
 	
 	#ifdef FORWARD_SHADING
-		if (abs(mc_Entity.x - 8.5) < 0.6) gl_Position.w = -1.0;
+		if (abs(mc_Entity.x - 8.5) < 0.6) gl_Position.w = -1.0; // Remove water so that it doesn't cast shadows
 	#else
 		if (abs(mc_Entity.x - 8.5) < 0.6) color.rgb *= 0.0; // Make water black, so that it doesn't bounce light
 	#endif

@@ -61,6 +61,12 @@ float GetMaterialID(in vec2 coord) {
 	return texture2D(colortex3, texcoord).b;
 }
 
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0, out float buffer1, out float buffer2) {
+	tex3.r = texture2D(colortex3, texcoord).r;
+	
+	Decode32to8(tex3.r, buffer0, buffer1, buffer2);
+}
+
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
 	float lightMult = 1.0;
 	
@@ -168,13 +174,19 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 
 
 void main() {
-	Mask mask;
-	CalculateMasks(mask, GetMaterialID(texcoord));
+	float depth = GetDepth(texcoord);
 	
-	if (mask.sky > 0.5)
-		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); return; }
+	if (depth >= 1.0) {
+		gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); return; }
 	
-	float depth             = GetDepth(texcoord);
+	
+	vec3 tex3; float torchLightmap, skyLightmap; Mask mask;
+	
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs);
+	
+	CalculateMasks(mask);
+	
+	
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	vec2  noise2D           = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 2.0) * 2.0 - 1.0;
 	

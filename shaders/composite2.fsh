@@ -73,6 +73,12 @@ float GetSmoothness(in vec2 coord) {
 	return pow(texture2D(colortex0, texcoord).b, 2.2);
 }
 
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0, out float buffer1, out float buffer2) {
+	tex3.r = texture2D(colortex3, texcoord).r;
+	
+	Decode32to8(tex3.r, buffer0, buffer1, buffer2);
+}
+
 float GetVolumetricFog(in vec2 coord) {
 	return texture2D(colortex4, coord).a;
 }
@@ -217,15 +223,21 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in vec4 viewSpa
 
 
 void main() {
-	Mask mask;
-	CalculateMasks(mask, texture2D(colortex3, texcoord).b);
+	vec3  color = GetColor(texcoord);
+	float depth = GetDepth(texcoord);
 	
-	vec3 color = GetColor(texcoord);
+	if (depth >= 1.0) {
+		gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); return; }
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); return;}
+	
+	vec3 tex3; float torchLightmap, skyLightmap; Mask mask;
+	
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs);
+	
+	CalculateMasks(mask);
+	
 	
 	vec3  normal     = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
-	float depth      = (mask.sky < 0.5 ?  GetDepth(texcoord) : 1.0);       // Sky was calculated in the last file, otherwise color would be included in these ternary conditions
 	float smoothness = pow(GetSmoothness(texcoord), 2.2);
 	
 	if(mask.water > 0.5)

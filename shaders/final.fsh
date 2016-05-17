@@ -41,8 +41,10 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-float GetMaterialID(in vec2 coord) {
-	return texture2D(colortex3, texcoord).b;
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0, out float buffer1, out float buffer2) {
+	tex3.r = texture2D(colortex3, texcoord).r;
+	
+	Decode32to8(tex3.r, buffer0, buffer1, buffer2);
 }
 
 void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
@@ -143,8 +145,11 @@ void SetSaturationLevel(inout vec3 color, in float level) {
 
 
 void main() {
-	Mask mask;
-	CalculateMasks(mask, GetMaterialID(texcoord));
+	vec3 tex3; float torchLightmap, skyLightmap; Mask mask;
+	
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs);
+	
+	CalculateMasks(mask);
 	
 	
 	float depth = GetDepth(texcoord);

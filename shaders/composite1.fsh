@@ -72,22 +72,10 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
 
-float GetMaterialID(in vec2 coord) {
-	return texture2D(colortex3, texcoord).b;
-}
-
-float GetTorchLightmap(in vec2 coord) {
-	return texture2D(colortex3, texcoord).r;
-}
-
-float GetSkyLightmap(in vec2 coord) {
-	return texture2D(colortex3, texcoord).g;
-}
-
 void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0, out float buffer1, out float buffer2) {
-	tex3.g = texture2D(colortex3, texcoord).g;
+	tex3.r = texture2D(colortex3, texcoord).r;
 	
-	Decode32to8(tex3.g, buffer0, buffer1, buffer2);
+	Decode32to8(tex3.r, buffer0, buffer1, buffer2);
 }
 
 void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float volFog) {
@@ -157,12 +145,11 @@ void main() {
 	float depth = GetDepth(texcoord);
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
-	if (depth >= 1.0) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); exit(); return; }
+	if (depth >= 1.0) {
+		gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); exit(); return; }
 	
 	
-	vec3  tex3;
-	float torchLightmap, skyLightmap;
-	Mask  mask;
+	vec3 tex3; float torchLightmap, skyLightmap; Mask mask;
 	
 	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs);
 	
