@@ -140,9 +140,9 @@ void main() {
 	vec2  specularity        = GetSpecularity();
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
 	
+	float Colortex3 = Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs);
+	
 	#ifdef DEFERRED_SHADING
-		float Colortex3 = Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs);
-		
 		gl_FragData[0] = vec4(diffuse.rgb, diffuse.a);
 	//	gl_FragData[1] = vec4(vertLightmap.st, encodedMaterialIDs, 1.0);
 		gl_FragData[1] = vec4(vertLightmap.s, Colortex3, encodedMaterialIDs, 1.0);
@@ -154,7 +154,7 @@ void main() {
 		vec3 composite = CalculateShadedFragment(diffuse.rgb, mask, vertLightmap.r, vertLightmap.g, normal, specularity.r, viewSpacePosition);
 		
 		gl_FragData[0] = vec4(EncodeColor(composite), diffuse.a);
-		gl_FragData[1] = vec4(vertLightmap.st, encodedMaterialIDs, 1.0);
+		gl_FragData[1] = vec4(vertLightmap.s, Colortex3, encodedMaterialIDs, 1.0);
 		gl_FragData[2] = vec4(EncodeNormal(normal).xy, specularity.r, 1.0);
 		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
 	#endif
