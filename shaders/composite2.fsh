@@ -233,9 +233,9 @@ void main() {
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
 	
-//	if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
+	if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
-	ComputePBRReflection(color, smoothness, viewSpacePosition, normal, mask);
+//	ComputePBRReflection(color, smoothness, viewSpacePosition, normal, mask);
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	

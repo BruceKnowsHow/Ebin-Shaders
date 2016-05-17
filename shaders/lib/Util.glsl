@@ -2,6 +2,36 @@
 // Start of #include "/lib/Util.glsl"
 
 
+float roundU(in float x) { // round unsigned float
+	float part = x - floor(x);
+	return floor(x) + (part > 0.5 ? 1.0 : 0.0);
+}
+
+float Encode8to32(in float buffer0, in float buffer1, in float buffer2) {
+	float buffer = 0.0;
+	
+	buffer0 = roundU(buffer0 * 255.0) * exp2( 0.0);
+	buffer1 = roundU(buffer1 * 255.0) * exp2( 8.0);
+	buffer2 = roundU(buffer2 * 255.0) * exp2(16.0);
+//	buffer3 = roundU(buffer3 * 255.0) - 127.0;
+	
+	return roundU(buffer0 + buffer1 + buffer2) / exp2(24.0) ;// * exp2(buffer3);
+}
+
+void Decode32to8(in float buffer, out float buffer0, out float buffer1, out float buffer2) {
+//	buffer3 = ceil(log2(ceil(buffer - mod(buffer, 1.0 / exp(24.0)))));
+	
+	buffer  = buffer * exp2(24.0) ;// / exp2(buffer3);
+	
+	buffer0 = mod(buffer          , exp2( 8.0));
+	buffer1 = mod(buffer - buffer0, exp2(16.0));
+	buffer2 = buffer - buffer1 - buffer0;
+	
+	buffer0 /= 255.0 * exp2( 0.0);
+	buffer1 /= 255.0 * exp2( 8.0);
+	buffer2 /= 255.0 * exp2(16.0);
+}
+
 vec3 EncodeColor(in vec3 color) { // Prepares the color to be sent through a limited dynamic range pipeline
 	return pow(color * 0.001, vec3(1.0 / 2.2));
 }

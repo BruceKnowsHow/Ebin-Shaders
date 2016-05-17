@@ -4,6 +4,10 @@
 
 vec3 Debug;
 
+void debug(in bool x) {
+	Debug = vec3(float(x));
+}
+
 void debug(in float x) {
 	Debug = vec3(x);
 }

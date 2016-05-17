@@ -36,9 +36,20 @@ float GetMaterialMask(in float mask, in float materialID) {
 }
 
 void CalculateMasks(inout Mask mask, in float materialIDs) {
-	mask.materialIDs = materialIDs;
-	mask.matIDs      = mask.materialIDs;
+	mask.matIDs = materialIDs;
 	
+	DecodeMaterialIDs(mask.matIDs, mask.bit);
+	
+	mask.grass  = GetMaterialMask(  2, mask.matIDs);
+	mask.leaves = GetMaterialMask(  3, mask.matIDs);
+	mask.water  = GetMaterialMask(  4, mask.matIDs);
+	mask.hand   = GetMaterialMask(  5, mask.matIDs);
+	mask.sky    = GetMaterialMask(255, mask.matIDs);
+	
+	mask.metallic = mask.bit[0];
+}
+
+void CalculateMasks(inout Mask mask) {
 	DecodeMaterialIDs(mask.matIDs, mask.bit);
 	
 	mask.grass  = GetMaterialMask(  2, mask.matIDs);

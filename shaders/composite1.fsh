@@ -84,6 +84,12 @@ float GetSkyLightmap(in vec2 coord) {
 	return texture2D(colortex3, texcoord).g;
 }
 
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0, out float buffer1, out float buffer2) {
+	tex3.g = texture2D(colortex3, texcoord).g;
+	
+	Decode32to8(tex3.g, buffer0, buffer1, buffer2);
+}
+
 void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float volFog) {
 	GI = vec3(0.0);
 	volFog = 0.0;
@@ -147,28 +153,34 @@ void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewS
 
 
 void main() {
-	Mask mask;
-	CalculateMasks(mask, GetMaterialID(texcoord));
+	// Sky pixels are swiftly calculated and returned
+	float depth = GetDepth(texcoord);
+	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
-	vec3  diffuse    = (mask.sky < 0.5 ?            GetDiffuse(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
-	vec3  normal     = (mask.sky < 0.5 ?             GetNormal(texcoord) : vec3(0.0));
-	float depth      = (mask.sky < 0.5 ?              GetDepth(texcoord) : 1.0);
-	float depth1     = (mask.sky < 0.5 ?   GetTransparentDepth(texcoord) : 1.0); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
-	float smoothness = (mask.sky < 0.5 ?         GetSmoothness(texcoord) : 0.0);
+	if (depth >= 1.0) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); exit(); return; }
 	
-	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord,  depth);
+	
+	vec3  tex3;
+	float torchLightmap, skyLightmap;
+	Mask  mask;
+	
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs);
+	
+	CalculateMasks(mask);
+	
+	
+	vec3  diffuse    =          GetDiffuse(texcoord);
+	vec3  normal     =           GetNormal(texcoord);
+	float smoothness =       GetSmoothness(texcoord);
+	float depth1     = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
+	
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); exit(); return; } // I would discard the sky here and do sky color in the next shader stage, except that reflections tend to catch sky pixels around the edges of reflected blocks
-	
-	#ifdef DEFERRED_SHADING
-	float torchLightmap = GetTorchLightmap(texcoord);
-	float skyLightmap   = GetSkyLightmap(texcoord);
-	
+#ifdef DEFERRED_SHADING
 	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition);
-	#else
+#else
 	vec3 composite = DecodeColor(texture2D(colortex2, texcoord).rgb);
-	#endif
+#endif
 	
 	
 	vec3 GI; float volFog;
