@@ -2,7 +2,7 @@
 #define textured_lit_fsh true
 #define ShaderStage -1
 
-/* DRAWBUFFERS:2306 */
+/* DRAWBUFFERS:230 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -140,12 +140,14 @@ void main() {
 	vec2  specularity        = GetSpecularity();
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
 	
-	float Colortex3 = Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs);
+	vec3 Colortex3 = vec3(
+		Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
+		Encode8to32(diffuse.r, diffuse.g, diffuse.b),
+		0.0);
 	
 	#ifdef DEFERRED_SHADING
 		gl_FragData[0] = vec4(diffuse.rgb, diffuse.a);
-	//	gl_FragData[1] = vec4(vertLightmap.st, encodedMaterialIDs, 1.0);
-		gl_FragData[1] = vec4(Colortex3, 0.0, 0.0, 1.0);
+		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
 		gl_FragData[2] = vec4(EncodeNormal(normal), specularity.r, 1.0);
 	#else
 		Mask mask;
@@ -154,9 +156,8 @@ void main() {
 		vec3 composite = CalculateShadedFragment(diffuse.rgb, mask, vertLightmap.r, vertLightmap.g, normal, specularity.r, viewSpacePosition);
 		
 		gl_FragData[0] = vec4(EncodeColor(composite), diffuse.a);
-		gl_FragData[1] = vec4(Colortex3, 0.0, 0.0, 1.0);
+		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
 		gl_FragData[2] = vec4(EncodeNormal(normal).xy, specularity.r, 1.0);
-		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
 	#endif
 	
 	exit();
