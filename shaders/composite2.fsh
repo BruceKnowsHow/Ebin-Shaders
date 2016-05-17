@@ -69,14 +69,14 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
 
-float GetSmoothness(in vec2 coord) {
-	return pow(texture2D(colortex0, texcoord).b, 2.2);
-}
-
-void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0, out float buffer1, out float buffer2) {
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
 	tex3.r = texture2D(colortex3, texcoord).r;
+	tex3.g = texture2D(colortex3, texcoord).g;
 	
-	Decode32to8(tex3.r, buffer0, buffer1, buffer2);
+	float buffer1g, buffer1b;
+	
+	Decode32to8(tex3.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(tex3.g, buffer1r, buffer1g, buffer1b);
 }
 
 float GetVolumetricFog(in vec2 coord) {
@@ -231,20 +231,19 @@ void main() {
 		gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); return; }
 	
 	
-	vec3 tex3; float torchLightmap, skyLightmap; Mask mask;
+	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs);
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs, smoothness);
 	
 	CalculateMasks(mask);
 	
 	
-	vec3  normal     = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
-	float smoothness = pow(GetSmoothness(texcoord), 2.2);
+	vec3 normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
+	smoothness = pow(smoothness, 2.2 * 2.2);
 	
-	if(mask.water > 0.5)
-		smoothness = 0.85;
+	if(mask.water > 0.5) smoothness = 0.85;
 	
-	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord,  depth);
+	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 //	if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	

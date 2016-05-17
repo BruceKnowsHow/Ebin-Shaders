@@ -8,6 +8,7 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -40,6 +41,10 @@ varying vec2 texcoord;
 #include "/lib/CalculateFogFactor.glsl"
 
 
+vec3 GetDiffuse(in vec2 coord) {
+	return texture2D((Deferred_Shading ? colortex2 : colortex5), coord).rgb;
+}
+
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
@@ -67,12 +72,14 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
 
-void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out vec3 buffer1) {
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
 	tex3.r = texture2D(colortex3, texcoord).r;
 	tex3.g = texture2D(colortex3, texcoord).g;
 	
-	Decode32to8(tex3.r, buffer0r, buffer0g  , buffer0b);
-	Decode32to8(tex3.g, buffer1.r, buffer1.g, buffer1.b);
+	float buffer1g, buffer1b;
+	
+	Decode32to8(tex3.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(tex3.g, buffer1r, buffer1g, buffer1b);
 }
 
 void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float volFog) {
@@ -146,15 +153,15 @@ void main() {
 		gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); exit(); return; }
 	
 	
-	vec3 tex3; float torchLightmap, skyLightmap; Mask mask; vec3 diffuse;
+	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs, diffuse);
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs, smoothness);
 	
 	CalculateMasks(mask);
 	
 	
+	vec3  diffuse    =          GetDiffuse(texcoord);
 	vec3  normal     =           GetNormal(texcoord);
-	float smoothness =       GetSmoothness(texcoord);
 	float depth1     = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
 	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);

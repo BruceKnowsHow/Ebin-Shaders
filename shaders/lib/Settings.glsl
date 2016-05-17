@@ -8,16 +8,13 @@ const float shadowDistance           = 140.0;
 const float shadowIntervalSize       = 4.0;
 const bool  shadowHardwareFiltering0 = true;
 
-
-const int RG8             = 0;
-const int RGB8            = 0;
-const int RGB16           = 0;
-const int RGBA16          = 0;
-const int RG32F            = 0;
+/*
 const int colortex0Format = RGB16;
 const int colortex2Format = RGB16;
 const int colortex3Format = RG32F;
-const int colortex4Format = RGBA16;
+const int colortex4Format = RGBA8;
+const int colortex5Format = RGB8;
+*/
 
 const int noiseTextureResolution = 64;
 
