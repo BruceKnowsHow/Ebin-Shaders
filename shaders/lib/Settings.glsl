@@ -8,7 +8,7 @@ const float shadowDistance           = 140.0;
 const float shadowIntervalSize       = 4.0;
 const bool  shadowHardwareFiltering0 = true;
 
-const int RG8            = 0;
+const int RG8             = 0;
 const int RGB8            = 0;
 const int RGB16           = 0;
 const int RGBA16          = 0;
