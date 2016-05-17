@@ -3,10 +3,16 @@
 
 /* Prerequisites:
 
+uniform mat4 gbufferModelViewInverse;
+
+uniform float far;
+
 varying vec3 lightVector;
 
 // #include "/lib/Settings.glsl"
 // #include "/lib/Util.glsl"
+// #include "/lib/GlobalCompositeVariables.glsl"
+// #include "/lib/CalculateFogFactor.glsl"
 
 */
 
