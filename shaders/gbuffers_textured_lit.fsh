@@ -146,7 +146,7 @@ void main() {
 		0.0);
 	
 	#ifdef DEFERRED_SHADING
-		gl_FragData[0] = vec4(diffuse.rgb, diffuse.a);
+		gl_FragData[0] = vec4(EncodeColor(diffuse.rgb), diffuse.a);
 		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
 		gl_FragData[2] = vec4(EncodeNormal(normal), 0.0, 1.0);
 	#else

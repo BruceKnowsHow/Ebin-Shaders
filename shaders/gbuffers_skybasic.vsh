@@ -2,6 +2,28 @@
 #define skybasic_vsh true
 #define ShaderStage -10
 
+uniform mat4 gbufferModelView;
+uniform mat4 shadowModelView;
+
+uniform vec3 upPosition;
+
+uniform float frameTimeCounter;
+uniform float sunAngle;
+
+varying vec3 color;
+varying vec2 texcoord;
+
+#include "/lib/Settings.glsl"
+#include "/lib/Util.glsl"
+#include "/lib/ShadowViewMatrix.vsh"
+#include "/lib/GlobalCompositeVariables.glsl"
+
+
 void main() {
-	gl_Position = vec4(-1.0);
+	color    = gl_Color.rgb;
+	texcoord = gl_MultiTexCoord0.st;
+	
+	gl_Position = ftransform();
+	
+	#include "/lib/CompositeCalculations.vsh"
 }

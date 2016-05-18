@@ -42,7 +42,11 @@ varying vec2 texcoord;
 
 
 vec3 GetDiffuse(in vec2 coord) {
-	return texture2D((Deferred_Shading ? colortex2 : colortex5), coord).rgb;
+#ifdef FORWARD_SHADING
+	return texture2D(colortex5, coord).rgb;
+#else
+	return DecodeColor(texture2D(colortex2, coord).rgb);
+#endif
 }
 
 float GetDepth(in vec2 coord) {
@@ -109,7 +113,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			      FogWeight = pow(FogWeight, 32);
 			      FogWeight = max(0.1e-8, FogWeight);
 			
-			GI  += DecodeColor(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb) * weight;
+			GI  += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb * weight;
 			volFog += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).a * FogWeight;
 			
 			totalWeights   += weight;
@@ -150,7 +154,7 @@ void main() {
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	if (depth >= 1.0) {
-		gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0); exit(); return; }
+		gl_FragData[0] = vec4((texture2D(colortex2, texcoord).rgb), 1.0); exit(); return; }
 	
 	
 	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
