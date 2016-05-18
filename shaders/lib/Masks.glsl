@@ -3,7 +3,6 @@
 
 
 struct Mask {
-	float materialIDs;
 	float matIDs;
 	
 	float[4] bit;
