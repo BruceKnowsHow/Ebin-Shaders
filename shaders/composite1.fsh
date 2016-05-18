@@ -43,9 +43,9 @@ varying vec2 texcoord;
 
 vec3 GetDiffuse(in vec2 coord) {
 #ifdef FORWARD_SHADING
-	return texture2D(colortex5, coord).rgb;
+	return pow(texture2D(colortex5, coord).rgb, vec3(2.2));
 #else
-	return DecodeColor(texture2D(colortex2, coord).rgb);
+	return texture2D(colortex2, coord).rgb * 20.0;
 #endif
 }
 
@@ -149,12 +149,14 @@ void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewS
 
 
 void main() {
-	// Sky pixels are swiftly calculated and returned
 	float depth = GetDepth(texcoord);
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
-	if (depth >= 1.0) {
-		gl_FragData[0] = vec4((texture2D(colortex2, texcoord).rgb), 1.0); exit(); return; }
+	if (depth >= 1.0) { // Sky pixels are quickly composited and returned
+		gl_FragData[0] = vec4( (Deferred_Shading ?
+			EncodeColor(texture2D(colortex2, texcoord).rgb * 20.0) :
+			texture2D(colortex2, texcoord).rgb
+			), 1.0); exit(); return; }
 	
 	
 	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
@@ -164,11 +166,11 @@ void main() {
 	CalculateMasks(mask);
 	
 	
-	vec3  diffuse    =          GetDiffuse(texcoord);
-	vec3  normal     =           GetNormal(texcoord);
-	float depth1     = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
+	vec3  diffuse =          GetDiffuse(texcoord);
+	vec3  normal  =           GetNormal(texcoord);
+	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
-	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
+	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 #ifdef DEFERRED_SHADING
 	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition);
@@ -180,12 +182,12 @@ void main() {
 	vec3 GI; float volFog;
 	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
-	composite += GI * colorSunlight * pow(diffuse, vec3(2.2));
+	composite += GI * colorSunlight * diffuse;
 	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
-	gl_FragData[1] = vec4(EncodeColor(GI), volFog);
+	gl_FragData[1] = vec4(GI, volFog);
 	
 	exit();
 }

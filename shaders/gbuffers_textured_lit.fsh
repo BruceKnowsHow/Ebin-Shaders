@@ -146,14 +146,14 @@ void main() {
 		0.0);
 	
 	#ifdef DEFERRED_SHADING
-		gl_FragData[0] = vec4(EncodeColor(diffuse.rgb), diffuse.a);
+		gl_FragData[0] = vec4(pow(diffuse.rgb, vec3(2.2)) * 0.05, diffuse.a);
 		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
 		gl_FragData[2] = vec4(EncodeNormal(normal), 0.0, 1.0);
 	#else
 		Mask mask;
 		CalculateMasks(mask, encodedMaterialIDs);
 		
-		vec3 composite = CalculateShadedFragment(diffuse.rgb, mask, vertLightmap.r, vertLightmap.g, normal, specularity.r, viewSpacePosition);
+		vec3 composite = CalculateShadedFragment(pow(diffuse.rgb, vec3(2.2)), mask, vertLightmap.r, vertLightmap.g, normal, specularity.r, viewSpacePosition);
 		
 		gl_FragData[0] = vec4(EncodeColor(composite), diffuse.a);
 		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);

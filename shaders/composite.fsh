@@ -200,7 +200,7 @@ void main() {
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, noise2D, mask);
 	
 	
-	gl_FragData[0] = vec4(EncodeColor(GI), volFog);
+	gl_FragData[0] = vec4(GI, volFog);
 	
 	exit();
 }
