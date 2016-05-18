@@ -115,8 +115,8 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 		
 		vec3 sampleDiff = (GI_MODE == 1 ? shadowViewPosition.xyz : position.xyz) - samplePos.xyz;
 		
-		float distanceCoeff = max(length(sampleDiff), (GI_MODE == 1 ? radius : 0.005));
-		      distanceCoeff = 1.0 / square(distanceCoeff); // Inverse-square law
+		float distanceCoeff = lengthSquared(sampleDiff); // Inverse-square law
+		      distanceCoeff = 1.0 / max(distanceCoeff, (GI_MODE == 1 ? radius * radius : 2.5e-6));
 		
 		vec3 sampleDir    = normalize(sampleDiff);
 		vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;

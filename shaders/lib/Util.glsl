@@ -59,11 +59,23 @@ vec2 cubesmooth(in vec2 x) {
 
 
 float square(in float x) {
-	return x * x;
+	return dot(x, x);
 }
 
 float pow2(in float x) {
-	return x * x;
+	return dot(x, x);
+}
+
+float lengthSquared(in vec2 x) {
+	return dot(x, x);
+}
+
+float lengthSquared(in vec3 x) {
+	return dot(x, x);
+}
+
+float lengthSquared(in vec4 x) {
+	return dot(x, x);
 }
 
 float pow8(in float x) {

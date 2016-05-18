@@ -252,6 +252,7 @@ void main() {
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
 	
+	
 	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
 	
 	exit();
