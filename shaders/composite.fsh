@@ -68,6 +68,7 @@ void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0, out float buf
 }
 
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
+#ifdef GI_ENABLED
 	float lightMult = 1.0;
 	
 	#ifdef GI_BOOST
@@ -90,8 +91,8 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
 	normal  *= (GI_MODE == 1 ? vec3(-1.0) : vec3(-1.0, -1.0,  1.0));
 	
-	const float brightness  = (GI_MODE == 1 ? 30.0 : 0.0001) * pow(radius, 2) * SUN_LIGHT_LEVEL;
-	const float scale       = radius / (GI_MODE == 1 ? 256.0 : 1024);
+	const float brightness = (GI_MODE == 1 ? 30.0 : 0.0001) * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	const float scale      = radius / (GI_MODE == 1 ? 256.0 : 1024);
 	
 	vec3 GI = vec3(0.0);
 	
@@ -116,7 +117,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 		vec3 sampleDiff = (GI_MODE == 1 ? shadowViewPosition.xyz : position.xyz) - samplePos.xyz;
 		
 		float distanceCoeff = lengthSquared(sampleDiff); // Inverse-square law
-		      distanceCoeff = 1.0 / max(distanceCoeff, (GI_MODE == 1 ? radius * radius : 2.5e-6));
+		      distanceCoeff = 1.0 / max(distanceCoeff, (GI_MODE == 1 ? pow(radius, 2) : 2.5e-6));
 		
 		vec3 sampleDir    = normalize(sampleDiff);
 		vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
@@ -138,38 +139,41 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	GI /= GI_SAMPLE_COUNT;
 	
 	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
+#else
+	return vec3(0.0);
+#endif
 }
 
 float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
-	#ifdef VOLUMETRIC_FOG
-		float fog    = 0.0;
-		float weight = 0.0;
+#ifdef VOLUMETRIC_FOG
+	float fog    = 0.0;
+	float weight = 0.0;
+	
+	float rayIncrement = gl_Fog.start / 64.0;
+	vec3  rayStep      = normalize(viewSpacePosition.xyz + vec3(0.0, 0.0, noise));
+	vec4  ray          = vec4(rayStep * gl_Fog.start, 1.0);
+	
+	mat4 ViewSpaceToShadowSpace = shadowProjection * shadowModelView * gbufferModelViewInverse; // Compose matrices outside of the loop to save computations
+	
+	while (length(ray) < length(viewSpacePosition.xyz)) {
+		ray.xyz += rayStep * rayIncrement; // Increment raymarch
 		
-		float rayIncrement = gl_Fog.start / 64.0;
-		vec3  rayStep      = normalize(viewSpacePosition.xyz + vec3(0.0, 0.0, noise));
-		vec4  ray          = vec4(rayStep * gl_Fog.start, 1.0);
+		vec3 samplePosition = BiasShadowProjection((ViewSpaceToShadowSpace * ray).xyz) * 0.5 + 0.5; // Convert ray to shadow-space, bias it, unsign it (reduce the range from [-1.0 to 1.0] to [0.0 to 1.0]) to convert it to lookup-coordinates
 		
-		mat4 ViewSpaceToShadowSpace = shadowProjection * shadowModelView * gbufferModelViewInverse; // Compose matrices outside of the loop to save computations
+		fog += shadow2D(shadow, samplePosition).x * rayIncrement; // Increment fog
 		
-		while (length(ray) < length(viewSpacePosition.xyz)) {
-			ray.xyz += rayStep * rayIncrement; // Increment raymarch
-			
-			vec3 samplePosition = BiasShadowProjection((ViewSpaceToShadowSpace * ray).xyz) * 0.5 + 0.5; // Convert ray to shadow-space, bias it, unsign it (reduce the range from [-1.0 to 1.0] to [0.0 to 1.0]) to convert it to lookup-coordinates
-			
-			fog += shadow2D(shadow, samplePosition).x * rayIncrement; // Increment fog
-			
-			weight += rayIncrement;
-			
-			rayIncrement *= 1.01; // Increase the step-size so that the sample-count decreases as the ray gets farther from the viewer
-		}
+		weight += rayIncrement;
 		
-		fog /= max(weight, 0.1e-8);
-		fog  = pow(fog, VOLUMETRIC_FOG_POWER);
-		
-		return fog;
-	#else
-		return 1.0;
-	#endif
+		rayIncrement *= 1.01; // Increase the step-size so that the sample-count decreases as the ray gets farther from the viewer
+	}
+	
+	fog /= max(weight, 0.1e-8);
+	fog  = pow(fog, VOLUMETRIC_FOG_POWER);
+	
+	return fog;
+#else
+	return 1.0;
+#endif
 }
 
 

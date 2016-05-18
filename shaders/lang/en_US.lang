@@ -105,11 +105,10 @@ option.ATMOSPHERIC_SCATTERING_AMOUNT.comment=Blue-Purple "haze" effect. Independ
 
 screen.Global_Illumination=Global Illumination
 
+option.GI_ENABLED=GI Enabled
+
 option.GI_MODE=GI Mode
 option.GI_MODE.comment=1: Better for natural terrain and general gameplay. 2: More Physically accurate. Higher values may have an unmeasured performance cost!
-
-option.GI_TRANSLUCENCE=GI Translucence
-option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "bounce through" surfaces, similar to subsurface scattering
 
 option.GI_RADIUS=GI Radius
 option.GI_RADIUS.comment=The radius of global illumination light bounces
@@ -119,6 +118,12 @@ option.GI_SAMPLE_COUNT.comment=Higher values have a high performance cost!
 
 option.GI_BOOST=GI Boost
 option.GI_BOOST.comment=Disables global illumination computations in certain situations where they will have a minimal visual impact (mostly in sunlight). High performance benefit!
+
+option.GI_TRANSLUCENCE=GI Translucence
+option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "bounce through" surfaces, similar to subsurface scattering
+
+option.GI_BRIGHTNESS=GI Brightness
+
 
 
 option.COMPOSITE0_SCALE=Composite0 Scale
