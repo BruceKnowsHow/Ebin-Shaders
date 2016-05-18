@@ -130,7 +130,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 		shadowNormalCoeff = sqrt(shadowNormalCoeff);
 	#endif
 		
-		vec3 flux = pow(1.0 - texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
+		vec3 flux = pow(texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
 		
 		GI += flux * viewNormalCoeff * shadowNormalCoeff * distanceCoeff;
 	}

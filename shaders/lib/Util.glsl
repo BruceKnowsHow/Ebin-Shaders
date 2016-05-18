@@ -13,16 +13,11 @@ float Encode8to32(in float buffer0, in float buffer1, in float buffer2) {
 	buffer0 = roundU(buffer0 * 255.0) * exp2( 0.0);
 	buffer1 = roundU(buffer1 * 255.0) * exp2( 8.0);
 	buffer2 = roundU(buffer2 * 255.0) * exp2(16.0);
-//	buffer3 = roundU(buffer3 * 255.0) - 127.0;
 	
-	return roundU(buffer0 + buffer1 + buffer2) / exp2(24.0) ;// * exp2(buffer3);
+	return roundU(buffer0 + buffer1 + buffer2);
 }
 
 void Decode32to8(in float buffer, out float buffer0, out float buffer1, out float buffer2) {
-//	buffer3 = ceil(log2(ceil(buffer - mod(buffer, 1.0 / exp(24.0)))));
-	
-	buffer  = buffer * exp2(24.0) ;// / exp2(buffer3);
-	
 	buffer0 = mod(buffer          , exp2( 8.0));
 	buffer1 = mod(buffer - buffer0, exp2(16.0));
 	buffer2 = buffer - buffer1 - buffer0;
