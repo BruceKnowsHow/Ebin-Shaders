@@ -180,7 +180,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	float roughness = 1.0 - smoothness;
 	
 	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
-	vec3  sColor  = mix(vec3(0.15), color * 3, vec3(mask.metallic));
+	vec3  sColor  = mix(vec3(0.15), color * 0.5, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
@@ -220,7 +220,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 		}
 	}
 	
-	color = mix(color * (1.0 - mask.metallic * 0.5), reflection / PBR_RAYS, fresnel * smoothness);
+	color = mix(color * (1.0 - mask.metallic), reflection / PBR_RAYS, fresnel * smoothness);
 }
 
 
