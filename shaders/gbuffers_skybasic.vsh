@@ -7,6 +7,9 @@ uniform mat4 shadowModelView;
 
 uniform vec3 upPosition;
 
+uniform vec3 cameraPosition;
+uniform vec3 previousCameraPosition;
+
 uniform float frameTimeCounter;
 uniform float sunAngle;
 
