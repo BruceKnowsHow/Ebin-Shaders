@@ -61,20 +61,25 @@ float GetMaterialID(in vec2 coord) {
 	return texture2D(colortex3, texcoord).b;
 }
 
-void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0, out float buffer1, out float buffer2) {
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, out float buffer1g) {
 	tex3.r = texture2D(colortex3, texcoord).r;
+	tex3.g = texture2D(colortex3, texcoord).g;
 	
-	Decode32to8(tex3.r, buffer0, buffer1, buffer2);
+	float buffer1b;
+	
+	Decode32to8(tex3.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(tex3.g, buffer1r, buffer1g, buffer1b);
 }
 
-vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
+vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float sunlight, const in float radius, in vec2 noise, in Mask mask) {
 #ifdef GI_ENABLED
 	float lightMult = 1.0;
 	
 	#ifdef GI_BOOST
 		float normalShading = GetLambertianShading(normal, mask);
 		
-		float sunlight = ComputeDirectSunlight(position, normalShading);
+		if (Deferred_Shading) sunlight = ComputeDirectSunlight(position, normalShading);
+		
 		lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
 		
 		if (lightMult < 0.05) return vec3(0.0);
@@ -184,9 +189,9 @@ void main() {
 		gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); return; }
 	
 	
-	vec3 tex3; float torchLightmap, skyLightmap; Mask mask;
+	vec3 tex3; float torchLightmap, skyLightmap, smoothness, sunlight; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs);
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness, sunlight);
 	
 	CalculateMasks(mask);
 	
@@ -201,7 +206,7 @@ void main() {
 	
 	vec3 normal = GetNormal(texcoord);
 	
-	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, noise2D, mask);
+	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, sunlight, GI_RADIUS, noise2D, mask);
 	
 	
 	gl_FragData[0] = vec4(GI, volFog);

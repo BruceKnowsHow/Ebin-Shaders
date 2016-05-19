@@ -76,11 +76,11 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
 
-void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, out float buffer1g) {
 	tex3.r = texture2D(colortex3, texcoord).r;
 	tex3.g = texture2D(colortex3, texcoord).g;
 	
-	float buffer1g, buffer1b;
+	float buffer1b;
 	
 	Decode32to8(tex3.r, buffer0r, buffer0g, buffer0b);
 	Decode32to8(tex3.g, buffer1r, buffer1g, buffer1b);
@@ -159,9 +159,9 @@ void main() {
 			), 1.0); exit(); return; }
 	
 	
-	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	vec3 tex3; float torchLightmap, skyLightmap, smoothness, sunlight; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness, sunlight);
 	
 	CalculateMasks(mask);
 	
@@ -173,8 +173,6 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 #ifdef DEFERRED_SHADING
-	float sunlight;
-	
 	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition, sunlight);
 	
 	tex3 = vec3(Encode8to32(torchLightmap, skyLightmap, mask.materialIDs),
