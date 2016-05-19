@@ -172,7 +172,6 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 }
 
 void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightmap, in float sunlight, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
-	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
@@ -188,18 +187,21 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 	reflectedSky = mix(reflectedSky * 0.02, reflectedSky, lightmap + sunlight);
+	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness) * sunlight;
+	
 	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100;
 	
 	for(int i = 1; i <= rayCount; i++) {
 		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
-		vec3 noiseSample = ggxSkew(epsilon, roughness);
-		vec3 reflectDir = normalize(noiseSample * roughness / 12 + normal);
+		vec3 BRDFSkew = ggxSkew(epsilon, roughness);
+		
+		vec3 reflectDir = normalize(BRDFSkew * roughness / 12 + normal);
 		reflectDir *= sign(dot(normal, reflectDir));
 		vec3 rayDir = reflect(normalize(viewSpacePosition.xyz), reflectDir);
 		
 		
-		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) {
+		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) { //this is much faster I tested
 			reflection += offscreen;
 		} else {
 			vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
@@ -247,7 +249,7 @@ void main() {
 	
 //	if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	
-	ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
+	if(smoothness > 0.05) ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
