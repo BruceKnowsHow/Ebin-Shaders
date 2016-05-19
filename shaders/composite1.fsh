@@ -140,8 +140,8 @@ float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1
 	return 1.0 - clamp(depth - fogFactor, 0.0, 1.0);
 }
 
-void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in Mask mask) {
-	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.1) * colorSkylight;
+void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in float skyLightmap, in Mask mask) {
+	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.1) * colorSkylight * pow(skyLightmap, 4.0);
 	
 	if (mask.water > 0.5)
 		color = mix(color, waterVolumeColor, ComputeSkyAbsorbance(viewSpacePosition, viewSpacePosition1, normal));
@@ -184,7 +184,7 @@ void main() {
 	
 	composite += GI * colorSunlight * diffuse;
 	
-	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, mask);
+	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, skyLightmap, mask);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);
