@@ -138,6 +138,28 @@ screen.Misc=Misc
 option.REFLECTION_EDGE_FALLOFF=Reflection Edge Falloff
 option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "fade out" on the edges of the screen
 
+
+
+option.PBR=Physically Based Rendering
+option.PBR.comment=Physically Based Rendering or PBR is an effect that defines how light interacts with different materials. Needs a supported PBR recourse pack!
+
+option.PBR_SKEW=PBR Ray Skew
+option.PBR_SKEW.comment=Ray Skewing adds microfacets so the SSR. This will be higher quality the more rays you send. 1: Phong. 2: Beckmann. 3: GGX.
+
+option.FRESNEL=Fresnel
+option.FRESNEL.comment=How much more reflectance at grazing angles. we give an option on which algorithm you can use. 1: Schlick. 2: Spherical Gaussian. 3: Cook Torrance.
+
+option.PBR_RAYS=PBR Rays
+option.PBR_RAYS.comment=The number of rays that are sent per pixel, the more rays the higher quality.
+
+option.PBR_GEOMETRY_MODEL=PBR Geometry Model
+option.PBR_GEOMETRY_MODEL.comment=This is an advanced option! Different geometry models interact with direct light differently. 1: Implict. 2: Newmann. 3: Cook Torrance. 4: Smith. 5: GGX - PBR. 6: Schlick Beckmann - PBR.
+
+option.PBR_DISTROBUTION_MODEL=PBR Microfacet distribution
+option.PBR_DISTROBUTION_MODEL.comment=This is an advanced option! This option determines how direct light spreads across a surface based on roughness. 1: Phong. 2: Beckmann. 3: GGX.
+
+
+
 option.RECALCULATE_DISPLACED_NORMALS=Recalculate Displaced Normals
 option.RECALCULATE_DISPLACED_NORMALS.comment=Whether or not surface normals are recalculated on blocks that have a waving effect
 

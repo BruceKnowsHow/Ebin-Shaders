@@ -177,13 +177,13 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
 	
-	const int rayCount = 2;
-	
 	float roughness = 1.0 - smoothness;
 	
 	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
 	vec3  sColor  = mix(vec3(0.15), color * 3, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
+	
+	show(fresnel);
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 	reflectedSky = mix(reflectedSky * 0.02, reflectedSky, lightmap + sunlight);
@@ -192,9 +192,9 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	
 	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100;
 	
-	for(int i = 1; i <= rayCount; i++) {
+	for(int i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
-		vec3 BRDFSkew = ggxSkew(epsilon, roughness);
+		vec3 BRDFSkew = skew(epsilon, roughness);
 		
 		vec3 reflectDir = normalize(BRDFSkew * roughness / 12 + normal);
 		reflectDir *= sign(dot(normal, reflectDir));
@@ -205,6 +205,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 			reflection += offscreen;
 		} else {
 			vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
+			//Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
 			vec3 colorSample = GetColorLod(reflectedCoord.st, 2);
 			
@@ -221,7 +222,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 		}
 	}
 	
-	color = mix(color * (1.0 - mask.metallic * 0.5), reflection / rayCount, fresnel * smoothness);
+	color = mix(color * (1.0 - mask.metallic * 0.5), reflection / PBR_RAYS, fresnel * smoothness);
 }
 
 
@@ -247,9 +248,11 @@ void main() {
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
-//	if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
-	
-	if(smoothness > 0.05) ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
+	#ifdef PBR
+		if(smoothness > 0.05) ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
+	#else
+		if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
+	#endif
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	

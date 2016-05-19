@@ -11,18 +11,20 @@
 vec3 Fresnel(vec3 R0, float vdoth) {
 	vec3 fresnel;
 	
-	vec3 Schlick = R0 + (vec3(1.0) - R0) * max0(pow(1.0 - vdoth, 5.0));
+	#if FRESNEL == 1
+		fresnel = R0 + (vec3(1.0) - R0) * max0(pow(1.0 - vdoth, 5.0));
+		
+	#elif FRESNEL == 2
+		fresnel = R0 + (vec3(1) - R0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
+		
+	#elif FRESNEL == 3
+		vec3 nFactor = (1.0 + sqrt(R0)) / (1.0 - sqrt(R0));
+		vec3 gFactor = sqrt(pow(nFactor, vec3(2.0)) + pow(vdoth, 2.0) - 1.0);
+		fresnel = 0.5 * pow((gFactor - vdoth) / (gFactor + vdoth), vec3(2.0)) * (1 + pow(((gFactor + vdoth) * vdoth - 1.0) / ((gFactor - vdoth) * vdoth + 1.0), vec3(2.0)));
+
+	#endif
 	
-	vec3 SphericalGaussian = R0 + (vec3(1) - R0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
-	
-	vec3 cookTorrance; //Phisically Accurate, handles metals better
-	vec3 nFactor = (1.0 + sqrt(R0)) / (1.0 - sqrt(R0));
-	vec3 gFactor = sqrt(pow(nFactor, vec3(2.0)) + pow(vdoth, 2.0) - 1.0);
-	cookTorrance = 0.5 * pow((gFactor - vdoth) / (gFactor + vdoth), vec3(2.0)) * (1 + pow(((gFactor + vdoth) * vdoth - 1.0) / ((gFactor - vdoth) * vdoth + 1.0), vec3(2.0)));
-	
-	fresnel = cookTorrance;
-	
-    return fresnel;
+  return fresnel;
 }
 
 float ImplictGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 normal) {
@@ -141,6 +143,20 @@ vec3 ggxSkew(in vec2 epsilon, in float roughness) {
 	return vec3(x, y, z);
 }
 
+vec3 skew(in vec2 epsilon, in float roughness) {
+	vec3 skew;
+		
+	#if PBR_SKEW == 1
+		skew = phongSkew(epsilon, roughness);
+	#elif PBR_SKEW == 2
+		skew = beckmannSkew(epsilon, roughness);
+	#elif PBR_SKEW == 3
+		skew = ggxSkew(epsilon, roughness);
+	#endif
+		
+	return skew;	
+}
+
 /*!
  * \brief Calculates the geometry distribution given the given parameters
  *
@@ -153,12 +169,25 @@ vec3 ggxSkew(in vec2 epsilon, in float roughness) {
 float CalculateGeometryDistribution(in vec3 lightVector, in vec3 viewVector, in vec3 halfVector, in vec3 normal, in float alpha) {
 	float geometry;
 	
-	//geometry = ImplictGeom(viewVector, lightVector, normal);
-	//geometry = NewmannGeom(viewVector, lightVector, normal);
-	//geometry = cookTorranceGeom(viewVector, lightVector, halfVector, normal);
-	//geometry = SmithGeom(viewVector, normal, alpha);
-	geometry = GGXSmithGeom(lightVector, halfVector, alpha) * GGXSmithGeom(viewVector, halfVector, alpha); //Physical
-	//geometry = SchlickBeckmannGeom(lightVector, halfVector, alpha) * SchlickBeckmannGeom(viewVector, halfVector, alpha); //Phisical
+	#if PBR_GEOMETRY_MODEL == 1
+		geometry = ImplictGeom(viewVector, lightVector, normal);
+		
+	#elif PBR_GEOMETRY_MODEL == 2
+		geometry = NewmannGeom(viewVector, lightVector, normal);
+		
+	#elif PBR_GEOMETRY_MODEL == 3
+		geometry = cookTorranceGeom(viewVector, lightVector, halfVector, normal);
+	
+	#elif PBR_GEOMETRY_MODEL == 4
+		geometry = SmithGeom(viewVector, normal, alpha);
+	
+	#elif PBR_GEOMETRY_MODEL == 5
+		geometry = GGXSmithGeom(lightVector, halfVector, alpha) * GGXSmithGeom(viewVector, halfVector, alpha); //Physical
+		
+	#elif PBR_GEOMETRY_MODEL == 6
+		geometry = SchlickBeckmannGeom(lightVector, halfVector, alpha) * SchlickBeckmannGeom(viewVector, halfVector, alpha); //Phisical
+		
+	#endif
 	
 	return geometry;
 }
@@ -173,10 +202,17 @@ float CalculateGeometryDistribution(in vec3 lightVector, in vec3 viewVector, in 
  */
 float CalculateMicrofacetDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
 	float distribution;
-	
-	//distribution = phongDistribution(halfVector, normal, alpha);
-	//distribution = BeckmannDistribution(halfVector, normal, alpha);
-	distribution = GGXDistribution(halfVector, normal, alpha);
+		
+	#if PBR_DISTROBUTION_MODEL == 1	
+		distribution = phongDistribution(halfVector, normal, alpha);
+		
+	#elif PBR_DISTROBUTION_MODEL == 2
+		distribution = BeckmannDistribution(halfVector, normal, alpha);
+		
+	#elif PBR_DISTROBUTION_MODEL == 3
+		distribution = GGXDistribution(halfVector, normal, alpha);
+		
+	#endif
 	
 	return distribution;
 }
