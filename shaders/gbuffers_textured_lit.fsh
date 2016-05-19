@@ -16,6 +16,7 @@ uniform mat4 shadowProjection;
 
 uniform float frameTimeCounter;
 uniform float far;
+uniform float wetness;
 
 uniform float viewWidth;
 uniform float viewHeight;
@@ -118,15 +119,32 @@ vec3 GetWaveNormals(in vec3 position) {
 	return normal;
 }
 
-vec3 GetNormal() {
+vec4 GetNormal() {
 	if (abs(materialIDs - 4.0) < 0.5)
-		return normalize(GetWaveNormals(worldPosition.xyz) * tbnMatrix);
-	else
-		return normalize((texture2D(normals, texcoord).xyz * 2.0 - 1.0) * tbnMatrix);
+		return vec4(normalize(GetWaveNormals(worldPosition.xyz) * tbnMatrix), 1.0);
+	else {
+		vec4 normal     = texture2D(normals, texcoord);
+		     normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * tbnMatrix);
+		
+		return normal;
+	}
 }
 
-vec2 GetSpecularity() {
-	return texture2D(specular, texcoord).rg;
+vec2 GetSpecularity(in float height, in float skyLightmap) {
+	vec2 specular = texture2D(specular, texcoord).rg;
+	
+	float smoothness = specular.r;
+	float metalness = specular.g;
+	
+	float wetfactor = wetness * pow(skyLightmap, 10.0);
+	
+	smoothness *= 1 + wetfactor;
+	smoothness += wetfactor - 0.5;
+	smoothness += (1 - height) * 0.5;
+	
+	smoothness = clamp01(smoothness);
+	
+	return vec2(smoothness, metalness);
 }
 
 #include "/lib/Materials.glsl"
@@ -136,8 +154,8 @@ void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
 	vec4  diffuse            = GetDiffuse();    if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
-	vec3  normal             = GetNormal();
-	vec2  specularity        = GetSpecularity();
+	vec4  normal             = GetNormal();
+	vec2  specularity        = GetSpecularity(normal.a, vertLightmap.t);
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
 	
 	vec3 Colortex3 = vec3(
@@ -148,16 +166,16 @@ void main() {
 	#ifdef DEFERRED_SHADING
 		gl_FragData[0] = vec4(pow(diffuse.rgb, vec3(2.2)) * 0.05, diffuse.a);
 		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
-		gl_FragData[2] = vec4(EncodeNormal(normal), 0.0, 1.0);
+		gl_FragData[2] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
 	#else
 		Mask mask;
 		CalculateMasks(mask, encodedMaterialIDs);
 		
-		vec3 composite = CalculateShadedFragment(pow(diffuse.rgb, vec3(2.2)), mask, vertLightmap.r, vertLightmap.g, normal, specularity.r, viewSpacePosition);
+		vec3 composite = CalculateShadedFragment(pow(diffuse.rgb, vec3(2.2)), mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
 		
 		gl_FragData[0] = vec4(EncodeColor(composite), diffuse.a);
 		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
-		gl_FragData[2] = vec4(EncodeNormal(normal).xy, 0.0, 1.0);
+		gl_FragData[2] = vec4(EncodeNormal(normal.xyz).xy, 0.0, 1.0);
 		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
 	#endif
 	

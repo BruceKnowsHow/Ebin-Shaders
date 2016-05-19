@@ -8,6 +8,9 @@ const float shadowDistance           = 140.0;
 const float shadowIntervalSize       = 4.0;
 const bool  shadowHardwareFiltering0 = true;
 
+const float wetnessHalflife          = 200.0;
+const float drynessHalflife          = 40.0;
+
 /*
 const int colortex0Format = RGB16;
 const int colortex2Format = RGB16;
