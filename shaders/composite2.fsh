@@ -183,8 +183,6 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	vec3  sColor  = mix(vec3(0.15), color * 3, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
-	show(fresnel);
-	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
 	reflectedSky = mix(reflectedSky * 0.002, reflectedSky, pow(lightmap, 5.0) + sunlight);
 	
