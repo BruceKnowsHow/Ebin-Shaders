@@ -138,9 +138,9 @@ vec2 GetSpecularity(in float height, in float skyLightmap) {
 	
 	float wetfactor = wetness * pow(skyLightmap, 10.0);
 	
-	smoothness *= 1 + wetfactor;
-	smoothness += wetfactor - 0.5;
-	smoothness += (1 - height) * 0.5;
+	smoothness *= 1.0 + wetfactor;
+	smoothness += (wetfactor - 0.5) * wetfactor;
+	smoothness += (1 - height) * 0.5 * wetfactor;
 	
 	smoothness = clamp01(smoothness);
 	
