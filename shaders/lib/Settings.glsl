@@ -33,6 +33,7 @@ const int noiseTextureResolution = 64;
 #define SKY_BRIGHTNESS      1.0  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0 8.0]
 
 
+#define BLOOM_ENABLED
 #define BLOOM_AMOUNT        0.12 // [0.00 0.12 0.25 0.50 1.00]
 #define BLOOM_CURVE         1.50 // [1.00 1.25 1.50 1.75 2.00]
 
@@ -119,7 +120,7 @@ const int noiseTextureResolution = 64;
 
 const float e = exp(1.0);
 
-const bool  biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
+const bool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
 
 
 // End of #include "/lib/Settings.glsl"

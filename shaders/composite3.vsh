@@ -16,6 +16,7 @@ varying vec2 texcoord;
 
 
 void main() {
+#ifdef BLOOM_ENABLED
 	texcoord    = gl_MultiTexCoord0.st;
 	gl_Position = ftransform();
 	
@@ -27,4 +28,7 @@ void main() {
 	gl_Position.xy = ((gl_Position.xy * 0.5 + 0.5) * vertexScale) * 2.0 - 1.0; // Crop the vertex to only cover the areas that are being used
 	
 	texcoord *= vertexScale; // Compensate for the vertex adjustment to make this a true "crop" rather than a "downscale"
+#else
+	gl_Position = vec4(-1.0);
+#endif
 }

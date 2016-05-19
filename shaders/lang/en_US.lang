@@ -30,6 +30,8 @@ screen.Effects=Effects
 
 screen.Bloom=Bloom
 
+option.BLOOM_ENABLED=Bloom Enabled
+
 option.BLOOM_AMOUNT=Bloom Amount
 option.BLOOM_AMOUNT.comment=The visibility level of bloom, AKA Glow
 

@@ -99,9 +99,10 @@ vec3 GetBloomTile(const int scale, vec2 offset) {
 }
 
 vec3[8] GetBloom() {
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
-	
 	vec3[8] bloom;
+	
+#ifdef BLOOM_ENABLED
+	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	
 	// These arguments should be identical to those in composite2.fsh
 	bloom[1] = GetBloomTile(  4, vec2(0.0                         ,                          0.0));
@@ -118,6 +119,7 @@ vec3[8] GetBloom() {
 		bloom[0] += bloom[index];
 	
 	bloom[0] /= bloom.length() - 1.0;
+#endif
 	
 	return bloom;
 }
