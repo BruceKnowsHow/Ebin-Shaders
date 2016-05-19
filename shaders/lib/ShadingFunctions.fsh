@@ -184,7 +184,6 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 	
 	shading.torchlight = 1.0 - pow(torchLightmap, 4.0);
 	shading.torchlight = 1.0 / pow(shading.torchlight, 2.0) - 1.0;
-	shading.torchlight = mix(shading.torchlight, 0, mask.metallic);
 	
 	shading.skylight = pow(skyLightmap, 4.0);
 	
