@@ -186,7 +186,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	show(fresnel);
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
-	reflectedSky = mix(reflectedSky * 0.02, reflectedSky, lightmap + sunlight);
+	reflectedSky = mix(reflectedSky * 0.002, reflectedSky, pow(lightmap, 5.0) + sunlight);
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness) * sunlight;
 	
