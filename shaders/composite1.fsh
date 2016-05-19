@@ -2,7 +2,7 @@
 #define composite1_fsh true
 #define ShaderStage 1
 
-/* DRAWBUFFERS:24 */
+/* DRAWBUFFERS:243 */
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
@@ -161,7 +161,7 @@ void main() {
 	
 	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs, smoothness);
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
 	
 	CalculateMasks(mask);
 	
@@ -173,7 +173,12 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 #ifdef DEFERRED_SHADING
-	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition);
+	float sunlight;
+	
+	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition, sunlight);
+	
+	tex3 = vec3(Encode8to32(torchLightmap, skyLightmap, mask.materialIDs),
+	            Encode8to32(smoothness, sunlight, 0.0), 0.0);
 #else
 	vec3 composite = DecodeColor(texture2D(colortex2, texcoord).rgb);
 #endif
@@ -188,6 +193,7 @@ void main() {
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);
+	gl_FragData[2] = vec4(tex3.rgb, 1.0);
 	
 	exit();
 }

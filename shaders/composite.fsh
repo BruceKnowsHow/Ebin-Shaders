@@ -186,7 +186,7 @@ void main() {
 	
 	vec3 tex3; float torchLightmap, skyLightmap; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.matIDs);
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs);
 	
 	CalculateMasks(mask);
 	

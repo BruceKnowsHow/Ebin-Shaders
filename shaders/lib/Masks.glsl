@@ -3,6 +3,7 @@
 
 
 struct Mask {
+	float materialIDs;
 	float matIDs;
 	
 	float[4] bit;
@@ -35,7 +36,8 @@ float GetMaterialMask(in float mask, in float materialID) {
 }
 
 void CalculateMasks(inout Mask mask, in float materialIDs) {
-	mask.matIDs = materialIDs;
+	mask.materialIDs = materialIDs;
+	mask.matIDs      = materialIDs;
 	
 	DecodeMaterialIDs(mask.matIDs, mask.bit);
 	
@@ -49,6 +51,8 @@ void CalculateMasks(inout Mask mask, in float materialIDs) {
 }
 
 void CalculateMasks(inout Mask mask) {
+	mask.matIDs = mask.materialIDs;
+	
 	DecodeMaterialIDs(mask.matIDs, mask.bit);
 	
 	mask.grass  = GetMaterialMask(  2, mask.matIDs);
