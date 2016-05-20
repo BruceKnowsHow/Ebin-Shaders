@@ -1,6 +1,9 @@
-#version 120
-#define shadow_vsh true
+#version 410 compatibility
+#define gbuffers_shadow
+#define vsh
 #define ShaderStage -10
+#include "/lib/Compatibility.glsl"
+
 
 attribute vec4 mc_Entity;
 attribute vec4 at_tangent;

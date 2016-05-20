@@ -1,6 +1,9 @@
-#version 120
-#define textured_lit_vsh true
+#version 410 compatibility
+#define gbuffers_textured_lit
+#define vsh
 #define ShaderStage -10
+#include "/lib/Compatibility.glsl"
+
 
 attribute vec4 mc_Entity;
 attribute vec4 at_tangent;

@@ -1,6 +1,9 @@
-#version 120
-#define composite_fsh true
+#version 410 compatibility
+#define composite0
+#define fsh
 #define ShaderStage 0
+#include "/lib/Compatibility.glsl"
+
 
 /* DRAWBUFFERS:4 */
 

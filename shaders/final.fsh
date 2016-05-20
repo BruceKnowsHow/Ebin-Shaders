@@ -1,6 +1,9 @@
-#version 120
-#define final_fsh true
+#version 410 compatibility
+#define final
+#define fsh
 #define ShaderStage 7
+#include "/lib/Compatibility.glsl"
+
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
@@ -70,7 +73,7 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	
 	#ifdef VARIABLE_MOTION_BLUR_SAMPLES
 	float sampleCount = length(velocity * vec2(viewWidth, viewHeight)) * VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT; // There should be exactly 1 sample for every pixel when the sample coefficient is 1.0
-	      sampleCount = floor(clamp(sampleCount, 1.0, MAX_MOTION_BLUR_SAMPLE_COUNT));
+	      sampleCount = floor(clamp(sampleCount, 1, MAX_MOTION_BLUR_SAMPLE_COUNT));
 	#else
 	const float sampleCount = CONSTANT_MOTION_BLUR_SAMPLE_COUNT;
 	#endif

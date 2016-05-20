@@ -1,6 +1,9 @@
-#version 120
-#define composite_vsh true
+#version 410 compatibility
+#define composite0
+#define vsh
 #define ShaderStage 10
+#include "/lib/Compatibility.glsl"
+
 
 uniform mat4 gbufferModelView;
 uniform mat4 shadowModelView;

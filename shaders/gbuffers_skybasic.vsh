@@ -1,6 +1,9 @@
-#version 120
-#define skybasic_vsh true
+#version 410 compatibility
+#define gbuffers_skybasic
+#define vsh
 #define ShaderStage -10
+#include "/lib/Compatibility.glsl"
+
 
 uniform mat4 gbufferModelView;
 uniform mat4 shadowModelView;

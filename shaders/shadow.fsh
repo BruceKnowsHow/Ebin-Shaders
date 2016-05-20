@@ -1,6 +1,9 @@
-#version 120
-#define shadow_fsh true
+#version 410 compatibility
+#define gbuffers_shadow
+#define fsh
 #define ShaderStage -1
+#include "/lib/Compatibility.glsl"
+
 
 uniform sampler2D texture;
 

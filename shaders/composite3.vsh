@@ -1,6 +1,9 @@
-#version 120
-#define composite3_vsh true
+#version 410 compatibility
+#define composite3
+#define vsh
 #define ShaderStage 10
+#include "/lib/Compatibility.glsl"
+
 
 uniform vec3 sunPosition;
 uniform vec3 upPosition;

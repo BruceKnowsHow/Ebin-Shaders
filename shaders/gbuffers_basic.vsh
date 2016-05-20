@@ -1,6 +1,9 @@
-#version 120
-#define basic_vsh true
+#version 410 compatibility
+#define gbuffers_basic
+#define vsh
 #define ShaderStage -10
+#include "/lib/Compatibility.glsl"
+
 
 varying vec3 color;
 

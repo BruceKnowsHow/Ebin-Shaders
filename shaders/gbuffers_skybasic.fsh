@@ -1,6 +1,9 @@
-#version 120
-#define skybasic_fsh true
+#version 410 compatibility
+#define gbuffers_skybasic
+#define fsh
 #define ShaderStage -1
+#include "/lib/Compatibility.glsl"
+
 
 /* DRAWBUFFERS:2 */
 

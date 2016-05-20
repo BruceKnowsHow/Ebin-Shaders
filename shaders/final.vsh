@@ -1,6 +1,9 @@
-#version 120
-#define final_vsh true
+#version 410 compatibility
+#define final
+#define vsh
 #define ShaderStage 10
+#include "/lib/Compatibility.glsl"
+
 
 varying vec2 texcoord;
 

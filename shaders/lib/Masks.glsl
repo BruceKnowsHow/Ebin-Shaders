@@ -17,7 +17,7 @@ struct Mask {
 	float metallic;
 };
 
-void DecodeMaterialIDs(inout float matID, inout float[4] bit) {
+void DecodeMaterialIDs(inout float matID, out float[4] bit) {
 	matID  = 1.0 - matID;
 	matID *= 255.0;
 	
