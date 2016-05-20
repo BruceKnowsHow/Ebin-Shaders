@@ -29,6 +29,8 @@ uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowProjectionInverse;
 
+uniform vec3 cameraPosition;
+
 uniform float viewWidth;
 uniform float viewHeight;
 
@@ -212,7 +214,7 @@ void main() {
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, sunlight, GI_RADIUS, noise2D, mask);
 	
 	
-	gl_FragData[0] = vec4(GI, volFog);
+	gl_FragData[0] = vec4(EncodeColor(GI), volFog);
 	
 	exit();
 }

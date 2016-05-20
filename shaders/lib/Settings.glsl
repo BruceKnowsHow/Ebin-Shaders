@@ -15,7 +15,7 @@ const float drynessHalflife          = 40.0;
 const int colortex0Format = RGB16;
 const int colortex2Format = RGB16;
 const int colortex3Format = RG32F;
-const int colortex4Format = RGBA8;
+const int colortex4Format = RGBA16;
 const int colortex5Format = RGB8;
 */
 
@@ -65,7 +65,7 @@ const int noiseTextureResolution = 64;
 
 #define GI_ENABLED
 #define GI_MODE         1    // [1 2]
-#define GI_RADIUS 16         // [4 8 16 24 32]
+#define GI_RADIUS       16   // [4 8 16 24 32]
 #define GI_SAMPLE_COUNT 80   // [20 40 80 128 160 256]
 #define GI_BOOST
 #define GI_TRANSLUCENCE 0.2  // [0.0 0.2 0.4 0.6 0.8 1.0]
