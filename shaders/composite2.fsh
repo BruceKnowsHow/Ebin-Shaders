@@ -180,7 +180,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	float roughness = 1.0 - smoothness;
 	
 	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
-	vec3  sColor  = mix(vec3(0.15), color, vec3(mask.metallic));
+	vec3  sColor  = mix(vec3(0.15), color * 0.2, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
 	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
@@ -188,7 +188,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness) * sunlight;
 	
-	vec3 offscreen = reflectedSky * sColor + reflectedSunspot * colorSunlight * 100;
+	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100 + 15 * mask.metallic;
 	
 	for(int i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
@@ -247,7 +247,7 @@ void main() {
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	#ifdef PBR
-		if(smoothness > 0.05) ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
+		ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
 	#else
 		if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
 	#endif
