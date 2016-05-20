@@ -24,6 +24,11 @@ const int noiseTextureResolution = 64;
 
 
 // GUI Settings
+//#define DEFAULT_TEXTURE_PACK
+#define PBR_TEXTURE_PACK
+#define TEXTURE_PACK_RESOLUTION 128 // [16 32 64 128 256 512]
+
+
 #define EXPOSURE            1.0  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0  8.0]
 #define SATURATION          1.15 // [0.00 0.50 1.00 1.15 1.30]
 #define SUN_LIGHT_LEVEL     1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
@@ -73,7 +78,7 @@ const int noiseTextureResolution = 64;
 
 #define REFLECTION_EDGE_FALLOFF
 
-#define PBR
+
 #define FRESNEL 3 // [1 2 3]
 #define PBR_SKEW 3 // [1 2 3]
 #define PBR_RAYS 2 // [1 2 4 6 8 16 32]
@@ -116,6 +121,10 @@ const int noiseTextureResolution = 64;
 	#define Volumetric_Fog true
 #else
 	#define Volumetric_Fog false
+#endif
+
+#ifdef PBR_TEXTURE_PACK
+	#define PBR
 #endif
 
 
