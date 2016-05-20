@@ -46,6 +46,6 @@ void main() {
 #ifdef FORWARD_SHADING
 	gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition)), 1.0);
 #else
-	gl_FragData[0] = vec4(CalculateSky(viewSpacePosition) * 0.05, 1.0);
+	gl_FragData[0] = vec4(CalculateSky(viewSpacePosition, true) * 0.05, 1.0);
 #endif
 }

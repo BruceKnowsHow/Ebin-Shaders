@@ -144,14 +144,14 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 	return false;
 }
 
-void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in float sunlight, in Mask mask) {
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
 	
-	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
+	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
 	
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
 		reflection = reflectedSky;
@@ -176,7 +176,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	color = mix(color, reflection, alpha);
 }
 
-void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightmap, in float sunlight, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+void ComputePBRReflection(inout vec3 color, in float smoothness, in float skyLightmap, in float sunlight, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
@@ -188,27 +188,28 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	vec3  sColor  = mix(vec3(0.15), color * 0.2, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
-	vec3 reflectedSky = CalculateReflectedSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0));
-	reflectedSky = mix(reflectedSky * 0.002, reflectedSky, pow(lightmap, 5.0) + sunlight);
+	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
+	     reflectedSky *= clamp(pow(skyLightmap, 5.0) + sunlight, 0.002, 1.0);
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness) * sunlight;
 	
 	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100;
 	
 	for(int i = 1; i <= PBR_RAYS; i++) {
-		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
+		vec2 epsilon  = vec2(noise(texcoord * i), noise(texcoord * i * 3));
 		vec3 BRDFSkew = skew(epsilon, roughness);
 		
-		vec3 reflectDir = normalize(BRDFSkew * roughness / 12 + normal);
-		reflectDir *= sign(dot(normal, reflectDir));
-		vec3 rayDir = reflect(normalize(viewSpacePosition.xyz), reflectDir);
+		vec3 reflectDir  = normalize(normal + BRDFSkew * roughness / 12.0);
+		     reflectDir *= sign(dot(normal, reflectDir));
+		
+		vec3 rayDirection = reflect(normalize(viewSpacePosition.xyz), reflectDir);
 		
 		
-		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) { //this is much faster I tested
+		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) { //this is much faster I tested
 			reflection += offscreen + 0.1 * mask.metallic;
 		} else {
 			vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
-			//Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
+			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
 			vec3 colorSample = GetColorLod(reflectedCoord.st, 2);
 			
@@ -225,7 +226,9 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 		}
 	}
 	
-	color = mix(color * (1.0 - mask.metallic * 0.9), reflection / PBR_RAYS, fresnel * smoothness);
+	reflection /= PBR_RAYS;
+	
+	color = mix(color * (1.0 - mask.metallic * 0.9), reflection, fresnel * smoothness);
 }
 
 
@@ -247,14 +250,14 @@ void main() {
 	vec3 normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
 	smoothness = pow(smoothness, 2.2 * 2.2);
 	
-	if(mask.water > 0.5) smoothness = 0.85;
+	if (mask.water > 0.5) smoothness = 0.85;
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	#ifdef PBR
 		ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
 	#else
-		if (mask.water > 0.5) ComputeRaytracedReflection(color, viewSpacePosition, normal, mask);
+		if (smoothness > 0.05) ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, sunlight, mask);
 	#endif
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
