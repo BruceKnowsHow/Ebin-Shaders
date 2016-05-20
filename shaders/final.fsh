@@ -147,7 +147,7 @@ vec3 Uncharted2Tonemap(in vec3 color) {
 void SetSaturationLevel(inout vec3 color, in float level) {
 	const vec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 	
-	float luminance = dot(color, lumaCoeff);
+	float luminance = max(0.1175, dot(color, lumaCoeff));
 	
 	color = mix(vec3(luminance), color, level);
 }
