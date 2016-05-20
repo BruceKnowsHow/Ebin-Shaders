@@ -1,5 +1,16 @@
 
 
+screen.Setup=Setup
+
+option.DEFAULT_TEXTURE_PACK=Default Resource Pack
+option.DEFAULT_TEXTURE_PACK.comment=Having this enabled will overwrite other settings!
+
+option.PBR_TEXTURE_PACK=PBR Resource Pack
+option.PBR_TEXTURE_PACK.comment=Turn this off if you're not using a PBR Texture Pack.
+
+option.TEXTURE_PACK_RESOLUTION=Resource Pack Resolution
+
+
 screen.Brightness=Brightness and Saturation
 
 option.EXPOSURE=Exposure
@@ -141,7 +152,7 @@ option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "
 
 
 option.PBR=Physically Based Rendering
-option.PBR.comment=Physically Based Rendering or PBR is an effect that defines how light interacts with different materials. Needs a supported PBR recourse pack!
+option.PBR.comment=Physically Based Rendering or PBR is an effect that defines how light interacts with different materials. Needs a supported PBR resource pack!
 
 option.PBR_SKEW=PBR Ray Skew
 option.PBR_SKEW.comment=Ray Skewing adds microfacets so the SSR. This will be higher quality the more rays you send. 1: Phong. 2: Beckmann. 3: GGX.
