@@ -93,7 +93,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float sunlig
 	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	
 	float depthLOD	= 2.0 * LodCoeff * (GI_MODE == 1 ? 1.0 : 0.0);
-	float sampleLOD	= 5.0 * LodCoeff * (GI_MODE == 1 ? 1.0 : 0.5);
+	float sampleLOD	= 5.0 * LodCoeff * (GI_MODE == 1 ? 1.0 : 0.0);
 	
 	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;    // For linear comparisons (GI_MODE = 1)
 	
@@ -127,7 +127,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float sunlig
 		vec3 sampleDiff = (GI_MODE == 1 ? shadowViewPosition.xyz : position.xyz) - samplePos.xyz;
 		
 		float distanceCoeff = lengthSquared(sampleDiff); // Inverse-square law
-		      distanceCoeff = 1.0 / max(distanceCoeff, (GI_MODE == 1 ? pow(radius, 2) : 2.5e-6));
+		      distanceCoeff = 1.0 / max(distanceCoeff, (GI_MODE == 1 ? pow(radius, 2) : 2.5e-4));
 		
 		vec3 sampleDir    = normalize(sampleDiff);
 		vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
