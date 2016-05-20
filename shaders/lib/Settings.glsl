@@ -25,7 +25,6 @@ const int noiseTextureResolution = 64;
 
 // GUI Settings
 //#define DEFAULT_TEXTURE_PACK
-#define PBR_TEXTURE_PACK
 #define TEXTURE_PACK_RESOLUTION 128 // [16 32 64 128 256 512]
 
 
@@ -121,6 +120,10 @@ const int noiseTextureResolution = 64;
 	#define Volumetric_Fog true
 #else
 	#define Volumetric_Fog false
+#endif
+
+#ifndef DEFAULT_TEXTURE_PACK
+	#define PBR_TEXTURE_PACK
 #endif
 
 #ifdef PBR_TEXTURE_PACK
