@@ -264,11 +264,11 @@ void main() {
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
-	#ifdef PBR
-		ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
-	#else
-		ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, sunlight, mask);
-	#endif
+#ifdef PBR
+	ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
+#else
+	ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, sunlight, mask);
+#endif
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	

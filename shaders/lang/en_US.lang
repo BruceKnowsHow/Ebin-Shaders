@@ -138,16 +138,8 @@ option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "b
 option.GI_BRIGHTNESS=GI Brightness
 
 
-
 option.COMPOSITE0_SCALE=Composite0 Scale
 option.COMPOSITE0_SCALE.comment=The resolution coefficient at which global illumination and volumetric fog are rendered.
-
-
-
-screen.Misc=Misc
-
-option.REFLECTION_EDGE_FALLOFF=Reflection Edge Falloff
-option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "fade out" on the edges of the screen
 
 
 
@@ -171,13 +163,21 @@ option.PBR_DISTROBUTION_MODEL.comment=This is an advanced option! This option de
 
 
 
-option.RECALCULATE_DISPLACED_NORMALS=Recalculate Displaced Normals
-option.RECALCULATE_DISPLACED_NORMALS.comment=Whether or not surface normals are recalculated on blocks that have a waving effect
+option.CUSTOM_HORIZON_HEIGHT=Custom Horizon Height
 
-option.HORIZON_LEVEL=Horizon Level
+option.HORIZON_HEIGHT=Horizon Height
 
 option.FORWARD_SHADING=Forward Shading Pipeline
 option.FORWARD_SHADING.comment=Computes shading on blocks that are underwater, behind glass, etc. High performance impact!
+
+
+screen.Misc=Misc
+
+option.REFLECTION_EDGE_FALLOFF=Reflection Edge Falloff
+option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "fade out" on the edges of the screen
+
+option.RECALCULATE_DISPLACED_NORMALS=Recalculate Displaced Normals
+option.RECALCULATE_DISPLACED_NORMALS.comment=Whether or not surface normals are recalculated on blocks that have a waving effect
 
 
 
