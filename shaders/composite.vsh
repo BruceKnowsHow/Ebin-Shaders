@@ -21,6 +21,7 @@ varying vec2 texcoord;
 
 
 void main() {
+#if (defined GI_ENABLED) || (defined VOLUMETRIC_FOG)
 	texcoord    = gl_MultiTexCoord0.st;
 	gl_Position = ftransform();
 	
@@ -28,4 +29,7 @@ void main() {
 	
 	
 	#include "/lib/CompositeCalculations.vsh"
+#else
+	gl_Position = vec4(-1.0);
+#endif
 }
