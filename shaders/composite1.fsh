@@ -30,6 +30,8 @@ uniform float far;
 uniform float viewWidth;
 uniform float viewHeight;
 
+uniform int isEyeInWater;
+
 varying mat4 shadowView;
 #define shadowModelView shadowView
 

@@ -66,24 +66,33 @@ void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolum
 	#ifndef FOG_ENABLED
 	color += CalculateAtmosphereScattering(viewSpacePosition);
 	#else
+	
 	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
 	color += atmosphere * SKY_BRIGHTNESS;
 	
-	vec4  skyComposite;
+	
+	vec4 skyComposite;
 	float fogFactor = CalculateFogFactor(viewSpacePosition, FOG_POWER);
 	skyComposite.a  = GetSkyAlpha(fogVolume, fogFactor);
 	if (skyComposite.a < 0.0001) return;
+	
+	
+	if (isEyeInWater == 1) {
+		color = mix(color, vec3(0.0, 0.01, 0.1) * colorSkylight, skyComposite.a); return; }
+	
 	
 	vec3 gradient = CalculateSkyGradient(viewSpacePosition);
 	vec3 sunspot  = CalculateSunspot(viewSpacePosition) * pow(fogFactor, 25);
 	
 	skyComposite.rgb = (gradient + sunspot) * SKY_BRIGHTNESS;
 	
-	color  = mix(color, skyComposite.rgb, skyComposite.a);
+	color = mix(color, skyComposite.rgb, skyComposite.a);
 	#endif
 }
 
 vec3 CalculateSky(in vec4 viewSpacePosition) {
+	if (isEyeInWater == 1) return vec3(0.0, 0.01, 0.1) * colorSkylight; // waterVolumeColor from composite1
+	
 	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz) * far;
 	
 	vec3 gradient   = CalculateSkyGradient(viewSpacePosition);
@@ -94,6 +103,8 @@ vec3 CalculateSky(in vec4 viewSpacePosition) {
 }
 
 vec3 CalculateReflectedSky(in vec4 viewSpacePosition) {
+	if (isEyeInWater == 1) return vec3(0.0, 0.01, 0.1) * colorSkylight;
+	
 	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz) * far;
 	
 	vec3 gradient   = CalculateSkyGradient(viewSpacePosition);

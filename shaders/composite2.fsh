@@ -24,6 +24,8 @@ uniform float rainStrength;
 uniform float near;
 uniform float far;
 
+uniform int isEyeInWater;
+
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"

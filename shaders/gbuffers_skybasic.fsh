@@ -19,6 +19,8 @@ uniform float viewHeight;
 
 uniform float far;
 
+uniform int isEyeInWater;
+
 varying vec3 color;
 varying vec2 texcoord;
 
