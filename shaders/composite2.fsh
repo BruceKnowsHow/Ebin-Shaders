@@ -188,7 +188,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness) * sunlight;
 	
-	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100 + 15 * mask.metallic;
+	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100;
 	
 	for(int i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * i), noise(texcoord * i * 3));
@@ -200,7 +200,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 		
 		
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDir, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) { //this is much faster I tested
-			reflection += offscreen;
+			reflection += offscreen + 0.1 * mask.metallic;
 		} else {
 			vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 			//Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
@@ -220,7 +220,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float lightm
 		}
 	}
 	
-	color = mix(color * (1.0 - mask.metallic), reflection / PBR_RAYS, fresnel * smoothness);
+	color = mix(color * (1.0 - mask.metallic * 0.9), reflection / PBR_RAYS, fresnel * smoothness);
 }
 
 
