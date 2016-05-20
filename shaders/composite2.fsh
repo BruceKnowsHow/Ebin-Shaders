@@ -151,10 +151,21 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
 	
-	vec3 reflectedSky = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
+	float roughness = 1.0 - smoothness;
+	
+	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
+	vec3  sColor  = mix(vec3(0.15), color * 0.2, vec3(mask.metallic));
+	vec3  fresnel = Fresnel(sColor, vdoth);
+	
+	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
+	     reflectedSky *= clamp(pow(skyLightmap, 5.0) + sunlight, 0.002, 1.0);
+	
+	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
+	
+	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100.0;
 	
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
-		reflection = reflectedSky;
+		reflection = offscreen;
 	else {
 		reflection = GetColor(reflectedCoord.st);
 		
@@ -170,10 +181,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 		#endif
 	}
 	
-	float VdotN = dot(normalize(viewSpacePosition.xyz), normal);
-	float alpha = pow(min1(1.0 + VdotN), 9.0) * 0.99 + 0.01;
-	
-	color = mix(color, reflection, alpha);
+	color = mix(color, reflection, fresnel * smoothness);
 }
 
 void ComputePBRReflection(inout vec3 color, in float smoothness, in float skyLightmap, in float sunlight, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
@@ -191,11 +199,11 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float skyLig
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
 	     reflectedSky *= clamp(pow(skyLightmap, 5.0) + sunlight, 0.002, 1.0);
 	
-	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), 1.0 - smoothness) * sunlight;
+	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
-	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100;
+	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100.0;
 	
-	for(int i = 1; i <= PBR_RAYS; i++) {
+	for (int i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon  = vec2(noise(texcoord * i), noise(texcoord * i * 3));
 		vec3 BRDFSkew = skew(epsilon, roughness);
 		
