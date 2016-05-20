@@ -145,6 +145,8 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 }
 
 void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in float sunlight, in Mask mask) {
+	if (smoothness < 0.01) return;
+	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
@@ -174,10 +176,10 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
 		
 		#ifdef REFLECTION_EDGE_FALLOFF
-		float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
-		float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
-		float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
-		reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
+			float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
+			float dist       = length8(abs(reflectedCoord.xy - vec2(0.5)));
+			float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
+			reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
 		#endif
 	}
 	
@@ -265,7 +267,7 @@ void main() {
 	#ifdef PBR
 		ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
 	#else
-		if (smoothness > 0.05) ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, sunlight, mask);
+		ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, sunlight, mask);
 	#endif
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
