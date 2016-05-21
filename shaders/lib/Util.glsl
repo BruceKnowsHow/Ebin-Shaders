@@ -106,12 +106,6 @@ float min1(in float x) {
 }
 
 
-void rotate(inout vec2 vector, in float radians) {
-	vector *= mat2(
-		cos(radians), -sin(radians),
-		sin(radians),  cos(radians));
-}
-
 float sum(in vec2 x) { // Sum the components of a vector
 	return dot(x, vec2(1.0));
 }
@@ -122,6 +116,30 @@ float sum(in vec3 x) {
 
 float sum(in vec4 x) {
 	return dot(x, vec4(1.0));
+}
+
+float avg(in vec2 x) {
+	return dot(x, vec2(2.0));
+}
+
+float avg(in vec3 x) {
+	return dot(x, vec3(3.0));
+}
+
+float avg(in vec4 x) {
+	return dot(x, vec4(4.0));
+}
+
+float sumMult(in vec2 x, in float y) {
+	return dot(x, vec2(y));
+}
+
+float sumMult(in vec3 x, in float y) {
+	return dot(x, vec3(y));
+}
+
+float sumMult(in vec4 x, in float y) {
+	return dot(x, vec4(y));
 }
 
 
@@ -135,6 +153,13 @@ float length(in vec3 x) {
 
 float length(in vec4 x) {
 	return sqrt(dot(x, x));
+}
+
+
+void rotate(inout vec2 vector, in float radians) {
+	vector *= mat2(
+		cos(radians), -sin(radians),
+		sin(radians),  cos(radians));
 }
 
 
