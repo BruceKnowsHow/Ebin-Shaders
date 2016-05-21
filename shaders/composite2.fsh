@@ -198,12 +198,16 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float skyLig
 	vec3  sColor  = mix(vec3(0.15), color * 0.2, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
+	vec3 alpha = fresnel * smoothness;
+	
+	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
 	     reflectedSky *= (pow(skyLightmap, 5.0) + sunlight) * 0.998 + 0.002;
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
 	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100.0;
+	
 	
 	for (int i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon  = vec2(noise(texcoord * i), noise(texcoord * i * 3));
@@ -238,7 +242,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float skyLig
 	
 	reflection /= PBR_RAYS;
 	
-	color = mix(color * (1.0 - mask.metallic * 0.9), reflection, fresnel * smoothness);
+	color = mix(color * (1.0 - mask.metallic * 0.9), reflection, alpha);
 }
 
 
