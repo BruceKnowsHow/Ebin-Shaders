@@ -4,10 +4,13 @@
 #define ShaderStage 10
 #include "/lib/Compatibility.glsl"
 
+#include "/lib/DebugSetup.glsl"
 
 varying vec2 texcoord;
 
 void main() {
 	texcoord    = gl_MultiTexCoord0.st;
 	gl_Position = ftransform();
+	
+	exit();
 }
