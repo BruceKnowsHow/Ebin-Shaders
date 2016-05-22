@@ -1,4 +1,4 @@
-
+ 
 // Start of #include "/lib/CompositeCalculations.vsh"
 
 /* Prerequisites:
@@ -15,6 +15,33 @@ uniform vec3 upPosition;
 
 
 // {
+	const vec3 color[24] = vec3[24](
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0),
+		vec3(  0.0,   0.0,   0.0));
+	
+	
 	float isNight = CalculateShadowView();
 	
 	vec3 sunVector = normalize((gbufferModelView * shadowViewInverse * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
@@ -50,7 +77,7 @@ uniform vec3 upPosition;
 	vec3 sunlightMoonrise =
 	vec3(0.90, 1.00, 1.00);
 	
-	colorSunlight  = sunlightDay * timeDay + sunlightNight * timeNight + sunlightSunrise * timeSunrise + sunlightMoonrise * timeMoonrise;
+	colorSunlight = sunlightDay * timeDay + sunlightNight * timeNight + sunlightSunrise * timeSunrise + sunlightMoonrise * timeMoonrise;
 	
 	
 	const vec3 skylightDay =
