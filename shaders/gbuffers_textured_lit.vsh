@@ -10,6 +10,7 @@ attribute vec4 at_tangent;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferProjection;
 uniform mat4 shadowModelView;
 
 uniform vec3 sunPosition;
@@ -18,6 +19,8 @@ uniform vec3 upPosition;
 uniform vec3  cameraPosition;
 uniform float frameTimeCounter;
 uniform float sunAngle;
+
+uniform int isEyeInWater;
 
 varying vec3 color;
 varying vec2 texcoord;
@@ -54,7 +57,7 @@ vec4 GetWorldSpacePosition() {
 }
 
 vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
-	return gl_ProjectionMatrix * gbufferModelView * worldSpacePosition;
+	return (isEyeInWater == 1 ? gbufferProjection : gl_ProjectionMatrix) * gbufferModelView * worldSpacePosition;
 }
 
 #include "/lib/Waving.vsh"

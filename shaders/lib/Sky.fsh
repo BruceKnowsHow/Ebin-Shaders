@@ -7,6 +7,8 @@ uniform mat4 gbufferModelViewInverse;
 
 uniform float far;
 
+uniform int isEyeInWater;
+
 varying vec3 lightVector;
 
 // #include "/lib/Settings.glsl"
