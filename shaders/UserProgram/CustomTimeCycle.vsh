@@ -27,15 +27,10 @@ void OldNorth() { // Makes the sun and moon rise in the north, instead of the ea
 	twistAngle += 180.0;
 }
 
-new meme dizzygilr
-thread
-	timeAngle is five times five times three times time bye
-agreed
-
 void UserRotation() {
-//	dizzygilr endmeme bye
-	
 //	timeAngle = position.x * 90.0;
+	
+//	OldNorth();
 }
  
 
