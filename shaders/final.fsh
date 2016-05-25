@@ -144,14 +144,6 @@ vec3 Uncharted2Tonemap(in vec3 color) {
 	return pow(color, vec3(1.0 / 2.2));
 }
 
-void SetSaturationLevel(inout vec3 color, in float level) {
-	const vec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
-	
-	float luminance = max(0.1175, dot(color, lumaCoeff));
-	
-	color = mix(vec3(luminance), color, level);
-}
-
 
 void main() {
 	vec3 tex3; float torchLightmap, skyLightmap, smoothness, sunlight; Mask mask;
@@ -177,7 +169,7 @@ void main() {
 	
 	color = Uncharted2Tonemap(color);
 	
-	SetSaturationLevel(color, SATURATION);
+	color = SetSaturationLevel(color, SATURATION);
 	
 	gl_FragData[0] = vec4(color, 1.0);
 	

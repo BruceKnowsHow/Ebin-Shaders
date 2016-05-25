@@ -21,13 +21,13 @@ varying vec3 lightVector;
 
 float CalculateSunlow(in vec4 viewSpacePosition) {
 	float sunglow = max0(dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
-	      sunglow = pow(sunglow, 8.0) * 5.0;
+	      sunglow = pow(sunglow, 8.0);
 	
 	return sunglow;
 }
 
 
-vec3 CalculateSkyGradient(in vec4 viewSpacePosition) {
+vec3 CalculateSkyGradient(in vec4 viewSpacePosition, in float fogFactor) {
 	float radius = max(176.0, far * sqrt(2.0));
 	
 	vec3 worldPosition = (gbufferModelViewInverse * vec4(normalize(viewSpacePosition.xyz), 0.0)).xyz;
@@ -39,14 +39,24 @@ vec3 CalculateSkyGradient(in vec4 viewSpacePosition) {
 	
 	float dotUP = dot(normalize(worldPosition), vec3(0.0, 1.0, 0.0));
 	
-	float horizonCoeff = dotUP * 0.65;
-	      horizonCoeff = abs(horizonCoeff);
-	      horizonCoeff = pow(1.0 - horizonCoeff, 4.0) / 0.65 * 5.0;
+	
+	float gradientCoeff = abs(dotUP * 0.5);
+	      gradientCoeff = pow(1.0 - gradientCoeff, 4.0);
+	
+	float horizonCoeff = pow(1.0 - pow2(dotUP), 10.0);
 	
 	float sunglow = CalculateSunlow(viewSpacePosition);
 	
-	vec3 color  = horizonCoeff * pow(colorSkylight, vec3((10.0 - horizonCoeff) / 5.5)); // Sky desaturates as it approaches the horizon
-	     color += sunglow * pow(colorSkylight, vec3(1.3));
+	
+	vec3 skyMainColor = skylightColor;
+	
+	vec3 primaryHorizonColor = SetSaturationLevel(skylightColor, mix(1.0, 0.5, gradientCoeff * timeDay)) * (1.0 + gradientCoeff * 0.5);
+	     primaryHorizonColor = mix(primaryHorizonColor, sunlightColor, gradientCoeff * sunglow * timeDay);
+	
+	
+	vec3 color  = skyMainColor;
+	     color += gradientCoeff * primaryHorizonColor * 7.0; // Sky desaturates as it approaches the horizon
+	     color += sunglow * mix(skylightColor, sunlightColor * 0.5, gradientCoeff * sunglow) * 5.0;
 	
 	return color;
 }
@@ -58,13 +68,13 @@ vec3 CalculateSunspot(in vec4 viewSpacePosition) {
 	      sunspot  = min(sunspot, 20.0);
 	      sunspot += 100.0 * float(sunspot == 20.0);
 	
-	return sunspot * colorSunlight * colorSunlight;
+	return sunspot * sunlightColor * sunlightColor;
 }
 
 vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
 	float factor = pow(length(viewSpacePosition.xyz), 1.4) * 0.0001 * ATMOSPHERIC_SCATTERING_AMOUNT;
 	
-	return pow(colorSkylight, vec3(3.5)) * factor;
+	return pow(skylightColor, vec3(3.5)) * factor;
 }
 
 void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolume) {
@@ -83,10 +93,10 @@ void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolum
 	
 	
 	if (isEyeInWater == 1) {
-		color = mix(color, vec3(0.0, 0.01, 0.1) * colorSkylight, skyComposite.a); return; }
+		color = mix(color, vec3(0.0, 0.01, 0.1) * skylightColor, skyComposite.a); return; }
 	
 	
-	vec3 gradient = CalculateSkyGradient(viewSpacePosition);
+	vec3 gradient = CalculateSkyGradient(viewSpacePosition, fogFactor);
 	vec3 sunspot  = CalculateSunspot(viewSpacePosition) * pow(fogFactor, 25);
 	
 	skyComposite.rgb = (gradient + sunspot) * SKY_BRIGHTNESS;
@@ -96,26 +106,15 @@ void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolum
 }
 
 vec3 CalculateSky(in vec4 viewSpacePosition, const bool sunSpot) {
-	if (isEyeInWater == 1) return vec3(0.0, 0.01, 0.1) * colorSkylight; // waterVolumeColor from composite1
+	if (isEyeInWater == 1) return vec3(0.0, 0.01, 0.1) * skylightColor; // waterVolumeColor from composite1
 	
 	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz);
 	
-	vec3 gradient   = CalculateSkyGradient(viewSpacePosition);
+	vec3 gradient   = CalculateSkyGradient(viewSpacePosition, 1.0);
 	vec3 sunspot    = (sunSpot ? CalculateSunspot(viewSpacePosition) : vec3(0.0));
 	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
 	
 	return (gradient + sunspot + atmosphere) * SKY_BRIGHTNESS;
-}
-
-vec3 CalculateReflectedSky(in vec4 viewSpacePosition) {
-	if (isEyeInWater == 1) return vec3(0.0, 0.01, 0.1) * colorSkylight;
-	
-	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz);
-	
-	vec3 gradient   = CalculateSkyGradient(viewSpacePosition);
-	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
-	
-	return (gradient + atmosphere) * SKY_BRIGHTNESS;
 }
 
 

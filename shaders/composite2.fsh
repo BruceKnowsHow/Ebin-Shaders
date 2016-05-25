@@ -95,6 +95,8 @@ float noise(in vec2 coord) {
 #include "/lib/Sky.fsh"
 
 bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const float rayGrowth, const int maxSteps, const int maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
+	if (dot(vec3(0.0, 0.0, -1.0), rayDirection) < 0.0) return false;
+	
 	vec3 rayStep = rayDirection * firstStepSize;
 	vec4 ray = vec4(startingViewPosition + rayStep, 1.0);
 	
@@ -109,7 +111,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 		if (screenSpacePosition.x < 0.0 || screenSpacePosition.x > 1.0 ||
 			screenSpacePosition.y < 0.0 || screenSpacePosition.y > 1.0 ||
 			screenSpacePosition.z < 0.0 || screenSpacePosition.z > 1.0 ||
-			-ray.z < near               || -ray.z > far * 1.6 + 16.0)
+			-ray.z > far * 1.6 + 16.0)
 		{   return false; }
 		
 		float sampleDepth = GetDepth(screenSpacePosition.st);
@@ -164,7 +166,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
-	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100.0;
+	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 100.0;
 	
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
 		reflection = offscreen;
@@ -206,7 +208,7 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float skyLig
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
-	vec3 offscreen = reflectedSky + reflectedSunspot * colorSunlight * 100.0;
+	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 100.0;
 	
 	
 	for (int i = 1; i <= PBR_RAYS; i++) {

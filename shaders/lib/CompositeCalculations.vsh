@@ -1,4 +1,4 @@
- 
+
 // Start of #include "/lib/CompositeCalculations.vsh"
 
 /* Prerequisites:
@@ -23,46 +23,47 @@ uniform vec3 upPosition;
 	
 	sunVector *= 1.0 - isNight * 2.0;
 	
+	float LdotUp = dot(sunVector, normalize(upPosition));
 	
-	float sunUp  = dot(sunVector, normalize(upPosition));
+	const float timePower = 4.0;
 	
-	timeDay      = sin( sunUp * PI * 0.5);
-	timeNight    = sin(-sunUp * PI * 0.5);
+//	horizonTime = cubesmooth(clamp01((1.0 - abs(LdotUp)) * 4.0 - 3.0));
+	
+	timeDay   = 1.0 - pow(1.0 - clamp01( LdotUp - 0.1) / 0.9, timePower);
+	timeNight = 1.0 - pow(1.0 - clamp01(-LdotUp), timePower);
+	
+	timeHorizon	= (1.0 - timeDay) * (1.0 - timeNight);// clamp01(1.0 - timeDay - timeNight);
+	
+	/*
+	timeDay      = sin( LdotUp * PI * 0.5);
+	timeNight    = sin(-LdotUp * PI * 0.5);
 	timeHorizon  = pow(1 + timeDay * timeNight, 4.0);
 	
 	float horizonClip = max0(0.9 - timeHorizon) / 0.9;
 	
 	timeDay = clamp01(timeDay * horizonClip);
 	timeNight = clamp01(timeNight * horizonClip);
+	*/
 	
 	float timeSunrise  = timeHorizon * timeDay;
 	float timeMoonrise = timeHorizon * timeNight;
 	
-	vec3 sunlightDay =
-	vec3(1.0, 1.0, 1.0);
 	
-	vec3 sunlightNight =
-	vec3(0.43, 0.65, 1.0) * 0.025;
-	
-	vec3 sunlightSunrise =
-	vec3(1.00, 0.50, 0.00);
-	
-	vec3 sunlightMoonrise =
-	vec3(0.90, 1.00, 1.00);
-	
-	colorSunlight = sunlightDay * timeDay + sunlightNight * timeNight + sunlightSunrise * timeSunrise + sunlightMoonrise * timeMoonrise;
+	#include "/lib/Colors.glsl"
 	
 	
-	const vec3 skylightDay =
-	vec3(0.24, 0.58, 1.00);
+	sunlightColor =
+		mix(sunlightDay  , sunlightSunrise , timeHorizon  ) * timeDay +
+		mix(sunlightNight, sunlightMoonrise, timeMoonrise * timeNight) * timeNight;
 	
-	const vec3 skylightNight =
-	vec3(0.25, 0.5, 1.0) * 0.025;
+	skylightColor =
+		mix(skylightDay, skylightSunrise, timeHorizon * timeDay) * timeDay +
+		skylightNight * timeNight + skylightHorizon * timeHorizon;
 	
-	const vec3 skylightHorizon =
-	vec3(0.29, 0.48, 1.0) * 0.01;
 	
-	colorSkylight = skylightDay * timeDay + skylightNight * timeNight + skylightHorizon * timeHorizon;
+//	skyMainColor = skylightColor;
+//	horizonColor = skylightColor;
+//	sunGlowColor = skylightColor;
 // }
 
 

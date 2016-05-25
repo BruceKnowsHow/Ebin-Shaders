@@ -146,7 +146,7 @@ float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1
 }
 
 void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in float skyLightmap, in Mask mask) {
-	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.1) * colorSkylight * pow(skyLightmap, 4.0);
+	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.1) * skylightColor * pow(skyLightmap, 4.0);
 	
 	if (mask.water > 0.5)
 		color = mix(color, waterVolumeColor, ComputeSkyAbsorbance(viewSpacePosition, viewSpacePosition1, normal));
@@ -190,7 +190,7 @@ void main() {
 	vec3 GI; float volFog;
 	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
-	composite += GI * colorSunlight * diffuse;
+	composite += GI * sunlightColor * diffuse;
 	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, skyLightmap, mask);
 	

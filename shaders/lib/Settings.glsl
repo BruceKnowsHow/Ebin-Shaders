@@ -133,13 +133,6 @@ const int noiseTextureResolution = 64;
 
 
 
-// Global variables
-#define  PI 3.1415926 // Pi
-#define RAD 0.0174533 // Degrees per radian
-#define TIME frameTimeCounter
-
-const float e = exp(1.0);
-
 const bool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
 
 

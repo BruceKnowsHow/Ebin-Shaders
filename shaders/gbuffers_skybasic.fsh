@@ -26,6 +26,7 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Util.glsl"
+#include "/lib/DebugSetup.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 #include "/lib/GlobalCompositeVariables.glsl"
 
@@ -48,4 +49,6 @@ void main() {
 #else
 	gl_FragData[0] = vec4(CalculateSky(viewSpacePosition, true) * 0.05, 1.0);
 #endif
+	
+	exit();
 }
