@@ -133,7 +133,7 @@ const int noiseTextureResolution = 64;
 
 
 
-const bool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
+cbool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
 
 
 // End of #include "/lib/Settings.glsl"

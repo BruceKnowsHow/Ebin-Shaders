@@ -2,7 +2,7 @@
 #define final
 #define vsh
 #define ShaderStage 10
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 #include "/lib/DebugSetup.glsl"
 

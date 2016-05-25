@@ -2,7 +2,7 @@
 #define composite3
 #define vsh
 #define ShaderStage 10
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 uniform vec3 sunPosition;

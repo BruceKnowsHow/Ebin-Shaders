@@ -2,7 +2,7 @@
 #define composite0
 #define fsh
 #define ShaderStage 0
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 /* DRAWBUFFERS:4 */
@@ -101,8 +101,8 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float sunlig
 	normal   = (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
 	normal  *= (GI_MODE == 1 ? vec3(-1.0) : vec3(-1.0, -1.0,  1.0));
 	
-	const float brightness = (GI_MODE == 1 ? 30.0 : 0.0001) * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
-	const float scale      = radius / (GI_MODE == 1 ? 256.0 : 1024);
+	cfloat brightness = (GI_MODE == 1 ? 30.0 : 0.0001) * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	cfloat scale      = radius / (GI_MODE == 1 ? 256.0 : 1024);
 	
 	vec3 GI = vec3(0.0);
 	

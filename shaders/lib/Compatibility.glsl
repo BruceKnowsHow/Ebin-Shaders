@@ -1,5 +1,5 @@
 
-// Start of #include "/lib/Compatibility.glsl"
+// Start of #include "/lib/Syntax.glsl"
 
 
 #ifdef fsh
@@ -12,4 +12,4 @@
 #endif
 
 
-// End of #include "/lib/Compatibility.glsl"
+// End of #include "/lib/Syntax.glsl"

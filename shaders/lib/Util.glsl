@@ -7,9 +7,9 @@
 
 #define TIME frameTimeCounter
 
-const vec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
+cvec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 
-const float e = exp(1.0);
+cfloat e = exp(1.0);
 
 
 float cubesmooth(in float x) { // Applies a subtle S-shaped curve, domain [0 to 1]
@@ -127,7 +127,7 @@ vec3 SetSaturationLevel(in vec3 color, in float level) {
 
 
 float Encode8to32(in float buffer0, in float buffer1, in float buffer2) {
-	const vec3 encode = vec3(1.0, exp2(8.0), exp2(16.0));
+	cvec3 encode = vec3(1.0, exp2(8.0), exp2(16.0));
 	
 	vec3 buffer = vec3(buffer0, buffer1, buffer2);
 	     buffer = round(buffer * 255.0);

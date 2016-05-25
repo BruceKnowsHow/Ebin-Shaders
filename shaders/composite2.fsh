@@ -2,7 +2,7 @@
 #define composite2
 #define fsh
 #define ShaderStage 2
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 /* DRAWBUFFERS:0 */
@@ -94,7 +94,7 @@ float noise(in vec2 coord) {
 
 #include "/lib/Sky.fsh"
 
-bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, const float rayGrowth, const int maxSteps, const int maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
+bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, cfloat rayGrowth, cint maxSteps, cint maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
 	if (dot(vec3(0.0, 0.0, -1.0), rayDirection) < 0.0) return false;
 	
 	vec3 rayStep = rayDirection * firstStepSize;
@@ -105,7 +105,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 	float refinements = 0;
 	float refinementCoeff = 1.0;
 	
-	const bool doRefinements = (maxRefinements > 0);
+	cbool doRefinements = (maxRefinements > 0);
 	
 	for (int i = 0; i < maxSteps; i++) {
 		if (screenSpacePosition.x < 0.0 || screenSpacePosition.x > 1.0 ||

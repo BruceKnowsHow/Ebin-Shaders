@@ -2,7 +2,7 @@
 #define composite3
 #define fsh
 #define ShaderStage 3
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 /* DRAWBUFFERS:2 */
@@ -21,7 +21,7 @@ varying vec2 texcoord;
 #include "/lib/DebugSetup.glsl"
 
 
-vec3 ComputeBloomTile(const int scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
+vec3 ComputeBloomTile(cint scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
 	// Each bloom tile uses (1.0 / scale + pixelSize * 2.0) texcoord-units of the screen
 	
 	vec2  pixelSize = 1.0 / vec2(viewWidth, viewHeight);
@@ -37,9 +37,9 @@ vec3 ComputeBloomTile(const int scale, vec2 offset) { // Computes a single bloom
 		return vec3(0.0);
 	
 	
-	const float range       = 2.0 * scale; // Sample radius has to be adjusted based on the scale of the bloom tile
-	const float interval    = 1.0 * scale;
-	      float maxLength   = length(vec2(range));
+	cfloat range     = 2.0 * scale; // Sample radius has to be adjusted based on the scale of the bloom tile
+	cfloat interval  = 1.0 * scale;
+	float  maxLength = length(vec2(range));
 	
 	vec3  bloom       = vec3(0.0);
 	float totalWeight = 0.0;

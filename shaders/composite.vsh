@@ -2,7 +2,7 @@
 #define composite0
 #define vsh
 #define ShaderStage 10
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 uniform mat4 gbufferModelView;

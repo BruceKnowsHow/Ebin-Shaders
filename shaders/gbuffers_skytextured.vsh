@@ -2,7 +2,7 @@
 #define gbuffers_skytextured
 #define vsh
 #define ShaderStage -10
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 varying vec3 color;

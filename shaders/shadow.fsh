@@ -2,7 +2,7 @@
 #define gbuffers_shadow
 #define fsh
 #define ShaderStage -1
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 uniform sampler2D texture;

@@ -3,7 +3,7 @@
 
 
 #if GI_SAMPLE_COUNT == 20
-	const vec2[20] samples = vec2[20](
+	cvec2[20] samples = vec2[20](
 		vec2(-0.8816997, -0.1146828),
 		vec2(-0.3685457,  0.1058905),
 		vec2(-0.6838517, -0.5160863),
@@ -27,7 +27,7 @@
 #endif
 
 #if GI_SAMPLE_COUNT == 40
-	const vec2[40] samples = vec2[40](
+	cvec2[40] samples = vec2[40](
 		vec2(-0.8500837, -0.1638091),
 		vec2(-0.6492744, -0.3556781),
 		vec2(-0.8931585,  0.0920454),
@@ -71,7 +71,7 @@
 #endif
 
 #if GI_SAMPLE_COUNT == 80
-	const vec2[80] samples = vec2[80](
+	cvec2[80] samples = vec2[80](
 		vec2( 0.4062509,  0.8598457),
 		vec2( 0.4099896,  0.6299807),
 		vec2( 0.5838635,  0.7261247),
@@ -155,7 +155,7 @@
 #endif
 
 #if GI_SAMPLE_COUNT == 128
-	const vec2[128] samples = vec2[128](
+	cvec2[128] samples = vec2[128](
 		vec2( 0.7427905, -0.2204209),
 		vec2( 0.8439732, -0.1025051),
 		vec2( 0.5378156, -0.0629079),
@@ -287,7 +287,7 @@
 #endif
 
 #if GI_SAMPLE_COUNT == 160
-	const vec2[160] samples = vec2[160](
+	cvec2[160] samples = vec2[160](
 		vec2(-0.6327311,  0.2057007),
 		vec2(-0.8516641,  0.1723533),
 		vec2(-0.6119106,  0.3190989),
@@ -452,7 +452,7 @@
 
 
 #if GI_SAMPLE_COUNT == 256
-	const vec2[256] samples = vec2[256](
+	cvec2[256] samples = vec2[256](
 		vec2( 0.2966576, -0.9411677),
 		vec2( 0.1897487, -0.8451576),
 		vec2( 0.1275250, -0.9200693),

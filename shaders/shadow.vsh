@@ -2,7 +2,7 @@
 #define gbuffers_shadow
 #define vsh
 #define ShaderStage -10
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 attribute vec4 mc_Entity;

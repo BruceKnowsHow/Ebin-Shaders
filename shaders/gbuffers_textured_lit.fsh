@@ -2,7 +2,7 @@
 #define gbuffers_textured_lit
 #define fsh
 #define ShaderStage -1
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 /* DRAWBUFFERS:2305 */
@@ -65,8 +65,8 @@ vec2 smoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing t
 	return floor(coord) + cubesmooth(fract(coord)) + 0.5;
 }
 
-float GetFractalWaveHeight(in vec2 coord, const vec2 wavelength, const vec2 speed, const vec2 direction, const float amplitude, inout float totalAmplitude) {
-	const float angle = atan(normalize(direction).x, normalize(direction).y);
+float GetFractalWaveHeight(in vec2 coord, cvec2 wavelength, cvec2 speed, cvec2 direction, cfloat amplitude, inout float totalAmplitude) {
+	cfloat angle = atan(normalize(direction).x, normalize(direction).y);
 	
 	coord += TIME * speed;
 	rotate(coord, angle);

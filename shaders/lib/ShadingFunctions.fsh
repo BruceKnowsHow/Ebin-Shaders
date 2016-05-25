@@ -154,9 +154,9 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	#elif SHADOW_TYPE == 2 // Fixed softness
 		float spread   = 1.0 * (1.0 - biasCoeff) / shadowMapResolution;
 		
-		const float range       = 1.0;
-		const float interval    = 1.0;
-		const float sampleCount = pow(range / interval * 2.0 + 1.0, 2.0); // Calculating the sample count outside of the for-loop is generally faster.
+		cfloat range       = 1.0;
+		cfloat interval    = 1.0;
+		cfloat sampleCount = pow(range / interval * 2.0 + 1.0, 2.0); // Calculating the sample count outside of the for-loop is generally faster.
 		
 		for (float i = -range; i <= range; i += interval)
 			for (float j = -range; j <= range; j += interval)

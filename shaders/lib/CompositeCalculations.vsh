@@ -25,7 +25,7 @@ uniform vec3 upPosition;
 	
 	float LdotUp = dot(sunVector, normalize(upPosition));
 	
-	const float timePower = 4.0;
+	cfloat timePower = 4.0;
 	
 //	horizonTime = cubesmooth(clamp01((1.0 - abs(LdotUp)) * 4.0 - 3.0));
 	

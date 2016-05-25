@@ -2,7 +2,7 @@
 #define gbuffers_basic
 #define fsh
 #define ShaderStage -1
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 /* DRAWBUFFERS:2 */

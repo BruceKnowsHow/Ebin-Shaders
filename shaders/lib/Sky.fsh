@@ -104,7 +104,7 @@ void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolum
 	#endif
 }
 
-vec3 CalculateSky(in vec4 viewSpacePosition, const bool sunSpot) {
+vec3 CalculateSky(in vec4 viewSpacePosition, cbool sunSpot) {
 	if (isEyeInWater == 1) return vec3(0.0, 0.01, 0.1) * skylightColor; // waterVolumeColor from composite1
 	
 	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz);

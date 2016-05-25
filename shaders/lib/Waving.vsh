@@ -14,7 +14,7 @@ vec3 GetWavingGrass(in vec3 position, in float magnitude) {
 	vec3 wave = vec3(0.0);
 	
 	#ifdef WAVING_GRASS
-		const float speed = 1.0;
+		cfloat speed = 1.0;
 		
 		float intensity = sin((TIME * 20.0 * PI / (28.0)) + position.x + position.z) * 0.1 + 0.1;
 		
@@ -34,7 +34,7 @@ vec3 GetWavingLeaves(in vec3 position, in float magnitude) {
 	vec3 wave = vec3(0.0);
 	
 	#ifdef WAVING_LEAVES
-		const float speed = 1.0;
+		cfloat speed = 1.0;
 		
 		float intensity = (sin(((position.y + position.x) * 0.5 + TIME * PI / ((88.0)))) * 0.05 + 0.15) * 0.35;
 		

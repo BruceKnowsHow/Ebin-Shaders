@@ -2,7 +2,7 @@
 #define final
 #define fsh
 #define ShaderStage 7
-#include "/lib/Compatibility.glsl"
+#include "/lib/Syntax.glsl"
 
 
 uniform sampler2D colortex0;
@@ -65,8 +65,8 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	     previousPosition      = gbufferPreviousProjection * gbufferPreviousModelView * previousPosition; // Re-rotate and re-project using the previous frame matrices
 	     previousPosition.st  /= previousPosition.w; // Un-linearize, swizzle to avoid correcting irrelivant components
 	
-	const float intensity = MOTION_BLUR_INTENSITY * 0.5;
-	const float maxVelocity = MAX_MOTION_BLUR_AMOUNT * 0.1;
+	cfloat intensity = MOTION_BLUR_INTENSITY * 0.5;
+	cfloat maxVelocity = MAX_MOTION_BLUR_AMOUNT * 0.1;
 	
 	vec2 velocity = (position.st - previousPosition.st) * intensity; // Screen-space motion vector
 	     velocity = clamp(velocity, vec2(-maxVelocity), vec2(maxVelocity));
@@ -75,7 +75,7 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	float sampleCount = length(velocity * vec2(viewWidth, viewHeight)) * VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT; // There should be exactly 1 sample for every pixel when the sample coefficient is 1.0
 	      sampleCount = floor(clamp(sampleCount, 1, MAX_MOTION_BLUR_SAMPLE_COUNT));
 	#else
-	const float sampleCount = CONSTANT_MOTION_BLUR_SAMPLE_COUNT;
+	cfloat sampleCount = CONSTANT_MOTION_BLUR_SAMPLE_COUNT;
 	#endif
 	
 	vec2 sampleStep = velocity / sampleCount;
@@ -95,7 +95,7 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	color *= 1000.0 / max(sampleCount + 1.0, 1.0);
 }
 
-vec3 GetBloomTile(const int scale, vec2 offset) {
+vec3 GetBloomTile(cint scale, vec2 offset) {
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	
 	vec2 coord  = texcoord;
@@ -132,9 +132,9 @@ vec3[8] GetBloom() {
 }
 
 vec3 Uncharted2Tonemap(in vec3 color) {
-	const float A = 0.15, B = 0.5, C = 0.1, D = 0.2, E = 0.02, F = 0.3, W = 11.2;
-	const float whiteScale = 1.0 / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F);
-	const float ExposureBias = 2.3 * EXPOSURE;
+	cfloat A = 0.15, B = 0.5, C = 0.1, D = 0.2, E = 0.02, F = 0.3, W = 11.2;
+	cfloat whiteScale = 1.0 / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F);
+	cfloat ExposureBias = 2.3 * EXPOSURE;
 	
 	vec3 curr = ExposureBias * color;
 	     curr = ((curr * (A * curr + C * B) + D * E) / (curr * (A * curr + B) + D * F)) - E / F;
