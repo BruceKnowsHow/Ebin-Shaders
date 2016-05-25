@@ -7,17 +7,10 @@ vec3 sunlightNight    = vec3(0.43, 0.65, 1.00);
 vec3 sunlightSunrise  = vec3(1.00, 0.45, 0.00);
 vec3 sunlightMoonrise = vec3(0.90, 1.00, 1.00);
 
-
-vec3 skylightDay     = vec3(0.07, 0.25, 1.00);
+vec3 skylightDay     = vec3(0.12, 0.40, 1.00);
 vec3 skylightNight   = vec3(0.25, 0.50, 1.00);
 vec3 skylightSunrise = vec3(0.29, 0.48, 1.00);
 vec3 skylightHorizon = skylightNight;
-
- 
-
-// skyMainColor = skylightDay
-// horizonColor
-// sunGlowColor
 
 
 sunlightDay      *= 1.0 / length(sunlightDay      * lumaCoeff);
