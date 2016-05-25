@@ -19,7 +19,7 @@ varying vec3 lightVector;
 */
 
 
-float CalculateSunlow(in vec4 viewSpacePosition) {
+float CalculateSunglow(in vec4 viewSpacePosition) {
 	float sunglow = max0(dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
 	      sunglow = pow(sunglow, 8.0);
 	
@@ -30,35 +30,34 @@ float CalculateSunlow(in vec4 viewSpacePosition) {
 vec3 CalculateSkyGradient(in vec4 viewSpacePosition, in float fogFactor) {
 	float radius = max(176.0, far * sqrt(2.0));
 	
-	vec3 worldPosition = (gbufferModelViewInverse * vec4(normalize(viewSpacePosition.xyz), 0.0)).xyz;
+	vec4 worldPosition = gbufferModelViewInverse * vec4(normalize(viewSpacePosition.xyz), 0.0);
 	
 #ifdef CUSTOM_HORIZON_HEIGHT
 	worldPosition.y  = radius * worldPosition.y / length(worldPosition.xz) + cameraPosition.y - HORIZON_HEIGHT; // Reproject the world vector to have a consistent horizon height
 	worldPosition.xz = normalize(worldPosition.xz) * radius;
 #endif
 	
-	float dotUP = dot(normalize(worldPosition), vec3(0.0, 1.0, 0.0));
+	float dotUP = dot(normalize(worldPosition.xyz), vec3(0.0, 1.0, 0.0));
 	
 	
-	float gradientCoeff = abs(dotUP * 0.5);
-	      gradientCoeff = pow(1.0 - gradientCoeff, 4.0);
+	float gradientCoeff = pow(1.0 - abs(dotUP) * 0.5, 4.0);
 	
-	float horizonCoeff = pow(1.0 - pow2(dotUP), 10.0);
-	
-	float sunglow = CalculateSunlow(viewSpacePosition);
+	float sunglow = CalculateSunglow(viewSpacePosition);
 	
 	
-	vec3 skyMainColor = skylightColor;
+	vec3 primaryHorizonColor  = SetSaturationLevel(skylightColor, mix(1.0, 0.5, gradientCoeff * timeDay));
+	     primaryHorizonColor  = SetSaturationLevel(primaryHorizonColor, mix(1.0, 1.1, timeDay));
+	     primaryHorizonColor *= (1.0 + gradientCoeff * 0.5);
+	     primaryHorizonColor  = mix(primaryHorizonColor, sunlightColor, gradientCoeff * sunglow * timeDay);
 	
-	vec3 primaryHorizonColor = SetSaturationLevel(skylightColor, mix(1.0, 0.5, gradientCoeff * timeDay)) * (1.0 + gradientCoeff * 0.5);
-	     primaryHorizonColor = mix(primaryHorizonColor, sunlightColor, gradientCoeff * sunglow * timeDay);
+	vec3 sunglowColor = mix(skylightColor, sunlightColor * 0.5, gradientCoeff * sunglow) * sunglow;
 	
 	
-	vec3 color  = skyMainColor;
-	     color += gradientCoeff * primaryHorizonColor * 7.0; // Sky desaturates as it approaches the horizon
-	     color += sunglow * mix(skylightColor, sunlightColor * 0.5, gradientCoeff * sunglow) * 5.0;
+	vec3 color  = primaryHorizonColor * gradientCoeff * 7.0; // Sky desaturates as it approaches the horizon
+	     color *= 1.0 + sunglowColor * 2.0;
+	     color += sunglowColor * 5.0;
 	
-	return color;
+	return color * 0.9;
 }
 
 vec3 CalculateSunspot(in vec4 viewSpacePosition) {

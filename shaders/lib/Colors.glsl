@@ -4,7 +4,7 @@
 
 vec3 sunlightDay      = vec3(1.00, 1.00, 1.00);
 vec3 sunlightNight    = vec3(0.43, 0.65, 1.00);
-vec3 sunlightSunrise  = vec3(1.00, 0.50, 0.00);
+vec3 sunlightSunrise  = vec3(1.00, 0.45, 0.00);
 vec3 sunlightMoonrise = vec3(0.90, 1.00, 1.00);
 
 

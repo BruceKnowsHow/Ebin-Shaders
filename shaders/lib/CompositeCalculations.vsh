@@ -53,11 +53,11 @@ uniform vec3 upPosition;
 	
 	
 	sunlightColor =
-		mix(sunlightDay  , sunlightSunrise , timeHorizon  ) * timeDay +
+		mix(sunlightDay  , sunlightSunrise , timeHorizon) * timeDay +
 		mix(sunlightNight, sunlightMoonrise, timeMoonrise * timeNight) * timeNight;
 	
 	skylightColor =
-		mix(skylightDay, skylightSunrise, timeHorizon * timeDay) * timeDay +
+		mix(skylightDay, skylightSunrise, timeHorizon) * timeDay +
 		skylightNight * timeNight + skylightHorizon * timeHorizon;
 	
 	
