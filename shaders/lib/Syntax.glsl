@@ -1,5 +1,5 @@
 
-// Start of #include "/lib/Compatibility.glsl"
+// Start of #include "/lib/Syntax.glsl"
 
 
 #ifdef fsh
@@ -12,13 +12,13 @@
 #endif
 
 
-#define cbool const bool
-#define cuint const uint
-#define cint const int
+#define cbool  const bool
+#define cuint  const uint
+#define cint   const int
 #define cfloat const float
-#define cvec2 const vec2
-#define cvec3 const vec3
-#define cvec4 const vec4
+#define cvec2  const vec2
+#define cvec3  const vec3
+#define cvec4  const vec4
 
 
-// End of #include "/lib/Compatibility.glsl"
+// End of #include "/lib/Syntax.glsl"
