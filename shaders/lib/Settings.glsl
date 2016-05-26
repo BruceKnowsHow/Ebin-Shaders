@@ -77,6 +77,8 @@ const int noiseTextureResolution = 64;
 
 #define REFLECTION_EDGE_FALLOFF
 
+#define WAVE_MULT 1.3
+
 
 #define FRESNEL 3 // [1 2 3]
 #define PBR_SKEW 3 // [1 2 3]

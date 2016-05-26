@@ -61,53 +61,78 @@ vec4 GetDiffuse() {
 	return diffuse;
 }
 
-vec2 smoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
-	return floor(coord) + cubesmooth(fract(coord)) + 0.5;
-}
-
-float GetFractalWaveHeight(in vec2 coord, cvec2 wavelength, cvec2 speed, cvec2 direction, cfloat amplitude, inout float totalAmplitude) {
-	cfloat angle = atan(normalize(direction).x, normalize(direction).y);
-	
-	coord += TIME * speed;
-	rotate(coord, angle);
-	coord /= wavelength;
-	coord  = smoothNoiseCoord(coord);
+vec2 SmoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
+	coord *= noiseTextureResolution;
+	coord  = floor(coord) + cubesmooth(fract(coord)) + 0.5;
 	coord /= noiseTextureResolution;
 	
-	float wave = texture2D(noisetex, coord).x;
-	
-	totalAmplitude += amplitude;
-	
-	return wave * amplitude;
+	return coord;
 }
 
-float GetFractalWaves(vec3 position) {
-	float waves = 0.0;
-	float totalAmplitude = 0.0;
+float SharpenWave(in float wave) {
+	wave = 1.0 - abs(wave * 2.0 - 1.0);
 	
-	vec2 coord  = position.xz;
-	     coord -= position.y * vec2(0.5, 0.866);
+	if (wave > 0.78) wave = 5.0 * wave - pow2(wave) * 2.5 - 1.6;
 	
-	waves += GetFractalWaveHeight(coord, vec2(0.38, 0.15), vec2( 1.00,  0.57), vec2( 1.00, -0.40), 0.85, totalAmplitude);
-	waves += GetFractalWaveHeight(coord, vec2(0.29, 0.53), vec2(-0.63,  0.86), vec2(-0.10,  0.50), 2.49, totalAmplitude);
-	waves += GetFractalWaveHeight(coord, vec2(0.94, 1.16), vec2( 0.76, -0.54), vec2( 0.47,  1.50), 6.93, totalAmplitude);
-	waves += GetFractalWaveHeight(coord, vec2(1.57, 1.24), vec2(-0.39, -0.66), vec2(-0.90, -1.80), 8.54, totalAmplitude);
-	
-	return waves / totalAmplitude;
+	return wave;
 }
 
-void GetFractalWaveDifferentials(in vec3 position, out vec2 diff) { // Get finite wave differentials for the world-space X and Z coordinates
-	float a  = GetFractalWaves(position);
-	float aX = GetFractalWaves(position + vec3(0.1, 0.0, 0.0));
-	float aY = GetFractalWaves(position + vec3(0.0, 0.0, 0.1));
+float GetWave(in vec2 coord) {
+	return texture2D(noisetex, SmoothNoiseCoord(coord)).x;
+}
+
+float GetWaves(vec3 position, cfloat speed) {
+	vec2 pos  = position.xz + position.y;
+	     pos += TIME * speed * vec2(1.0, -1.0);
+	     pos *= 0.05;
 	
-	diff = a - vec2(aX, aY);
+	
+	float weight, waves, weights;
+	
+	
+	pos = pos / 2.1 - vec2(TIME * speed / 30.0, TIME * 0.03);
+	
+	weight   = 4.0;
+	waves   += GetWave(vec2(pos.x * 2.0, pos.y * 1.4 + pos.x * -2.1)) * weight;
+	weights += weight;
+	
+	
+	pos = pos / 1.5 + vec2(TIME / 20.0 * speed, 0.0);
+	
+	weight   = 17.0;
+	waves   += GetWave(vec2(pos.x, pos.y * 0.75 + pos.x * 1.1)) * weight;
+	weights += weight;
+	
+	
+	pos = pos / 1.5 - vec2(TIME / 55.0 * speed, 0.0);
+	
+	weight   = 15.0;
+	waves   += GetWave(vec2(pos.x, pos.y * 0.75 + pos.x * -1.7)) * weight;
+	weights += weight;
+	
+	
+	pos = pos / 1.9 + vec2(TIME / 155.0 * 0.8, 0.0);
+	
+	weight   = 29.0;
+	waves   += SharpenWave(GetWave(vec2(pos.x, pos.y * 0.8 + pos.x * -1.7))) * weight;
+	weights += weight;
+	
+	
+	return waves * WAVE_MULT / weights;
+}
+
+vec2 GetWaveDifferentials(in vec3 position) { // Get finite wave differentials for the world-space X and Z coordinates
+	cfloat speed = 0.35;
+	
+	float a  = GetWaves(position                      , speed);
+	float aX = GetWaves(position + vec3(0.1, 0.0, 0.0), speed);
+	float aY = GetWaves(position + vec3(0.0, 0.0, 0.1), speed);
+	
+	return a - vec2(aX, aY);
 }
 
 vec3 GetWaveNormals(in vec3 position) {
-	vec2 diff;
-	
-	GetFractalWaveDifferentials(position, diff);
+	vec2 diff = GetWaveDifferentials(position);
 	
 	vec3 normal;
 	

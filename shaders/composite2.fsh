@@ -266,7 +266,7 @@ void main() {
 	vec3 normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
 	smoothness = pow(smoothness, 2.2 * 2.2);
 	
-	if (mask.water > 0.5) smoothness = 0.85;
+	if (mask.water > 0.5) smoothness = 0.8;
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	

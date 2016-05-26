@@ -20,6 +20,14 @@ vec2 cubesmooth(in vec2 x) {
 	return x * x * (3.0 - 2.0 * x);
 }
 
+float cosmooth(in float x) { // Same concept as cubesmooth, slightly different distribution
+	return 0.5 - cos(x * PI) * 0.5;
+}
+
+vec2 cosmooth(in vec2 x) {
+	return 0.5 - cos(x * PI) * 0.5;
+}
+
 
 float square(in float x) {
 	return dot(x, x);
