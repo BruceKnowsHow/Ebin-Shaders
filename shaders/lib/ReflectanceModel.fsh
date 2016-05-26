@@ -233,14 +233,9 @@ vec3 CalculateSpecularHighlight(
 	in vec3 normal,
 	in vec3 fresnel,
 	in vec3 viewVector,
-	in float roughness,
-	in float waterMask) {
+	in float roughness) {
 	
 	roughness = pow2(roughness * 0.4);
-	
-	if(waterMask > 0.5) {
-		roughness = 0.08;
-	}
 	
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
