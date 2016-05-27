@@ -63,10 +63,6 @@ float GetTransparentDepth(in vec2 coord) {
 	return texture2D(depthtex1, coord).x;
 }
 
-float GetSmoothness(in vec2 coord) {
-	return texture2D(colortex1, texcoord).b;
-}
-
 float ExpToLinearDepth(in float depth) {
 	return 2.0 * near * (far + near - depth * (far - near));
 }
