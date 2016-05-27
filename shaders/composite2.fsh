@@ -12,13 +12,17 @@ uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D gdepthtex;
+uniform sampler2D depthtex1;
+uniform sampler2D noisetex;
 
+uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 
 uniform vec3 cameraPosition;
 
+uniform float frameTimeCounter;
 uniform float rainStrength;
 
 uniform float near;
@@ -51,6 +55,10 @@ float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
 
+float GetTransparentDepth(in vec2 coord) {
+	return texture2D(depthtex1, coord).x;
+}
+
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
@@ -73,6 +81,8 @@ vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
 vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
+
+#include "/lib/WaterWaves.fsh"
 
 void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, out float buffer1g) {
 	tex3.r = texture2D(colortex3, texcoord).r;
@@ -263,18 +273,22 @@ void main() {
 	CalculateMasks(mask);
 	
 	
-	vec3 normal = GetNormal(texcoord);
+	float depth1 = GetTransparentDepth(texcoord);
+	vec3  normal = GetNormal(texcoord);
+	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	smoothness = pow(smoothness, 2.2 * 2.2);
 	
-	if (mask.water > 0.5) smoothness = 0.8;
+	vec3 uColor = color;
 	
-	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
+	if (mask.water > 0.5)  { color = vec3(0.0, 0.25, 0.5); normal = (gbufferModelView * vec4(0.0, 1.0, 0.0, 0.0)).xyz; smoothness = 0.8; }
 	
 #ifdef PBR
-	ComputePBRReflection(color, smoothness, skyLightmap, sunlight, viewSpacePosition, normal, mask);
+	ComputePBRReflection(color, smoothness, skyLightmap, 1.0, viewSpacePosition, normal, mask);
 #else
-	ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, sunlight, mask);
+	ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, 1.0, mask);
 #endif
+	
+	if (mask.water > 0.5 && depth1 < 1.0) color = mix(color, uColor, 0.5);
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	

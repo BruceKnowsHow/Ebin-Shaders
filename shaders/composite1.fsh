@@ -164,24 +164,29 @@ void main() {
 			), 1.0); exit(); return; }
 	
 	
+	float depth1 = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
+	
 	vec3 tex3; float torchLightmap, skyLightmap, smoothness, sunlight; Mask mask;
 	
 	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness, sunlight);
 	
 	CalculateMasks(mask);
+	SetupImplicitMasks(mask, depth, depth1);
 	
 	
-	vec3  diffuse =          GetDiffuse(texcoord);
-	vec3  normal  =           GetNormal(texcoord);
-	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
-	
+	vec3 diffuse            = GetDiffuse(texcoord);
+	vec3 normal             = GetNormal(texcoord);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-#ifdef DEFERRED_SHADING
-	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition, sunlight);
 	
-	tex3 = vec3(Encode8to32(torchLightmap, skyLightmap, mask.materialIDs),
-	            Encode8to32(smoothness, sunlight, 0.0), 0.0);
+	tex3.r = Encode8to32(torchLightmap, skyLightmap, mask.materialIDs);
+	
+#ifdef DEFERRED_SHADING
+	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
+	
+	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition, sunlight);
+	
+	tex3.g = Encode8to32(smoothness, sunlight, 0.0);
 #else
 	vec3 composite = DecodeColor(texture2D(colortex2, texcoord).rgb);
 #endif
@@ -192,7 +197,7 @@ void main() {
 	
 	composite += GI * sunlightColor * diffuse;
 	
-	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, skyLightmap, mask);
+//	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, skyLightmap, mask);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);

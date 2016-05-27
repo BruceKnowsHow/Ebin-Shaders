@@ -29,23 +29,5 @@ float GetMaterialIDs(in int mc_ID) { // Gather material masks
 	return materialID;
 }
 
-float EncodeMaterialIDs(in float materialIDs, in float bit0, in float bit1, in float bit2, in float bit3) {
-	bit0 = float(bit0 > 0.5);
-	bit1 = float(bit1 > 0.5);
-	bit2 = float(bit2 > 0.5);
-	bit3 = float(bit3 > 0.5);
-	
-	materialIDs += 128.0 * bit0;
-	materialIDs +=  64.0 * bit1;
-	materialIDs +=  32.0 * bit2;
-	materialIDs +=  16.0 * bit3;
-	
-	materialIDs += 0.1;
-	materialIDs /= 255.0;
-	materialIDs  = 1.0 - materialIDs; // MaterialIDs are sent through the pipeline inverted so that when they're decoded, sky pixels (which are always written as 0.0 in certain situations) will be 1.0
-	
-	return materialIDs;
-}
-
 
 // End of #include "/lib/Materials.vsh"

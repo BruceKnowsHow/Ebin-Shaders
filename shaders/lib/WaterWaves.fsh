@@ -72,21 +72,25 @@ vec2 GetWaveDifferentials(in vec3 position) { // Get finite wave differentials f
 	return a - vec2(aX, aY);
 }
 
-vec3 GetWaveNormals(in vec3 position) {
+
+vec3 GetWaveNormals(in vec4 viewSpacePosition, in vec3 baseNormal) {
+	vec3 position = (gbufferModelViewInverse * viewSpacePosition).xyz + cameraPosition;
+	
 	vec2 diff = GetWaveDifferentials(position);
 	
 	vec3 normal;
 	
-	float viewVectorCoeff  = -dot(vertNormal, normalize(viewSpacePosition.xyz));
+	float viewVectorCoeff  = -dot(baseNormal, normalize(viewSpacePosition.xyz));
 	      viewVectorCoeff /= clamp(length(viewSpacePosition.xyz) * 0.05, 1.0, 10.0);
 	      viewVectorCoeff  = clamp01(viewVectorCoeff * 4.0);
 	      viewVectorCoeff  = sqrt(viewVectorCoeff);
 	
-	normal.xy = diff * viewVectorCoeff;
+	normal.xy = diff ;// * viewVectorCoeff;
 	normal.z  = sqrt(1.0 - pow2(normal.x) - pow2(normal.y)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 	
 	return normal;
 }
+
 
 
 // End of #include "/lib/WaterWaves.fsh"

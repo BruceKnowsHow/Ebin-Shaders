@@ -18,6 +18,7 @@ const bool shadowcolor1Nearest = false;
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
 uniform sampler2D gdepthtex;
+uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
 uniform sampler2D shadowcolor;
 uniform sampler2D shadowcolor1;
@@ -198,7 +199,10 @@ void main() {
 	
 	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness, sunlight);
 	
+	float depth1 = texture2D(depthtex1, texcoord).x;
+	
 	CalculateMasks(mask);
+	SetupImplicitMasks(mask, depth, depth1);
 	
 	
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);

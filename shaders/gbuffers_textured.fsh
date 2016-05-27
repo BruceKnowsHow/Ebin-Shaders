@@ -47,9 +47,9 @@ varying vec3 worldPosition;
 #include "/lib/Util.glsl"
 #include "/lib/DebugSetup.glsl"
 #include "/lib/CalculateFogFactor.glsl"
+#include "/lib/Masks.glsl"
 #ifdef FORWARD_SHADING
 #include "/lib/GlobalCompositeVariables.glsl"
-#include "/lib/Masks.glsl"
 #include "/lib/ShadingFunctions.fsh"
 #endif
 
@@ -61,10 +61,6 @@ vec4 GetDiffuse() {
 	return diffuse;
 }
 
-#include "/lib/WaterWaves.fsh"
-
-#include "/lib/Materials.glsl"
-
 vec4 GetNormal() {
 	vec4 normal     = texture2D(normals, texcoord);
 		 normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * tbnMatrix);
@@ -72,10 +68,8 @@ vec4 GetNormal() {
 	return normal;
 }
 
-void DoWaterFragment(out vec4 diffuse, out vec4 normal, out vec2 specularity) {
-	diffuse     = vec4(0.0, 0.25, 0.5, 0.6);
-	normal      = vec4(normalize(GetWaveNormals(worldPosition.xyz) * tbnMatrix), 0.0);
-	specularity = vec2(0.85, 0.0);
+void DoWaterFragment() {
+	gl_FragData[0] = vec4(0.0, 0.0, 0.0, 0.11);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
@@ -100,14 +94,12 @@ void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
 	
-	vec4 diffuse, normal; vec2 specularity;
+	if (abs(materialIDs - 4.0) < 0.5) { DoWaterFragment(); return; }
 	
-	if (abs(materialIDs - 4.0) < 0.5) DoWaterFragment(diffuse, normal, specularity);
-	else {
-		diffuse     = GetDiffuse();    if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
-		normal      = GetNormal();
-		specularity = GetSpecularity(normal.a, vertLightmap.t);	
-	}
+	vec4 diffuse     = GetDiffuse();    if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
+	vec4 normal      = GetNormal();
+	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	
+	
 	
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
 	
@@ -120,8 +112,8 @@ void main() {
 		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
 		gl_FragData[2] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
 	#else
-		Mask mask;
-		CalculateMasks(mask, encodedMaterialIDs);
+		Mask mask; mask.materialIDs = encodedMaterialIDs;
+		CalculateMasks(mask);
 		
 		float sunlight;
 		
