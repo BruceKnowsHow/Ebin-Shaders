@@ -263,7 +263,7 @@ void main() {
 	CalculateMasks(mask);
 	
 	
-	vec3 normal = (mask.sky < 0.5 ? GetNormal(texcoord) : vec3(0.0)); // These ternary statements avoid redundant texture lookups for sky pixels
+	vec3 normal = GetNormal(texcoord);
 	smoothness = pow(smoothness, 2.2 * 2.2);
 	
 	if (mask.water > 0.5) smoothness = 0.8;
