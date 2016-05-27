@@ -7,7 +7,7 @@
 
 /* DRAWBUFFERS:243 */
 
-uniform sampler2D colortex0;
+uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
@@ -64,7 +64,7 @@ float GetTransparentDepth(in vec2 coord) {
 }
 
 float GetSmoothness(in vec2 coord) {
-	return texture2D(colortex0, texcoord).b;
+	return texture2D(colortex1, texcoord).b;
 }
 
 float ExpToLinearDepth(in float depth) {
@@ -79,7 +79,7 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex0, coord).xy);
+	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
 void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {

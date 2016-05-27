@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:2305 */
+/* DRAWBUFFERS:2315 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;

@@ -15,7 +15,7 @@ const bool shadowtex1Nearest   = true;
 const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
-uniform sampler2D colortex0;
+uniform sampler2D colortex1;
 uniform sampler2D colortex3;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
@@ -60,7 +60,7 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex0, coord).xy);
+	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
 float GetMaterialID(in vec2 coord) {

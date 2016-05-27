@@ -5,9 +5,9 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:0 */
+/* DRAWBUFFERS:1 */
 
-uniform sampler2D colortex0;
+uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
@@ -79,7 +79,7 @@ vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex0, coord).xy);
+	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
 #include "/lib/WaterWaves.fsh"

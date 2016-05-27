@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-uniform sampler2D colortex0;
+uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D gdepthtex;
@@ -30,7 +30,7 @@ varying vec2 texcoord;
 
 
 vec3 GetColor(in vec2 coord) {
-	return DecodeColor(texture2D(colortex0, coord).rgb);
+	return DecodeColor(texture2D(colortex1, coord).rgb);
 }
 
 float GetDepth(in vec2 coord) {
@@ -89,7 +89,7 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	for(float i = 1.0; i <= sampleCount; i++) {
 		vec2 coord = texcoord - sampleStep * i;
 		
-		color += pow(texture2D(colortex0, clamp(coord, minCoord, maxCoord)).rgb, vec3(2.2));
+		color += pow(texture2D(colortex1, clamp(coord, minCoord, maxCoord)).rgb, vec3(2.2));
 	}
 	
 	color *= 1000.0 / max(sampleCount + 1.0, 1.0);

@@ -7,9 +7,9 @@
 
 /* DRAWBUFFERS:2 */
 
-const bool colortex0MipmapEnabled = true;
+const bool colortex1MipmapEnabled = true;
 
-uniform sampler2D colortex0;
+uniform sampler2D colortex1;
 
 uniform float viewWidth;
 uniform float viewHeight;
@@ -52,7 +52,7 @@ vec3 ComputeBloomTile(cint scale, vec2 offset) { // Computes a single bloom tile
 			
 			vec2 offset = vec2(i, j) * pixelSize;
 			
-			bloom       += pow(texture2D(colortex0, coord + offset).rgb, vec3(2.2)) * weight;
+			bloom       += pow(texture2D(colortex1, coord + offset).rgb, vec3(2.2)) * weight;
 			totalWeight += weight;
 		}
 	}
