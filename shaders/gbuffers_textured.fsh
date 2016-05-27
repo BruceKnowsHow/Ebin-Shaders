@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:2315 */
+/* DRAWBUFFERS:02315 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -69,7 +69,7 @@ vec4 GetNormal() {
 }
 
 void DoWaterFragment() {
-	gl_FragData[0] = vec4(0.0, 0.0, 0.0, 0.11);
+	gl_FragData[0] = vec4(EncodeNormal(vertNormal), 0.0, 1.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
@@ -108,9 +108,10 @@ void main() {
 		vec3 Colortex3 = vec3(Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
 		                      Encode8to32(specularity.r, 0.0, 0.0), 0.0);
 		
-		gl_FragData[0] = vec4(pow(diffuse.rgb, vec3(2.2)) * 0.05, diffuse.a);
-		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
-		gl_FragData[2] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
+		gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
+		gl_FragData[1] = vec4(pow(diffuse.rgb, vec3(2.2)) * 0.05, diffuse.a);
+		gl_FragData[2] = vec4(Colortex3.rgb, 1.0);
+		gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
 	#else
 		Mask mask; mask.materialIDs = encodedMaterialIDs;
 		CalculateMasks(mask);
@@ -120,10 +121,11 @@ void main() {
 		vec3 Colortex3 = vec3(Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
 		                      Encode8to32(specularity.r, 0.0, 0.0), 0.0);
 		
-		gl_FragData[0] = vec4(EncodeColor(composite), diffuse.a);
-		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);
-		gl_FragData[2] = vec4(EncodeNormal(normal.xyz).xy, 0.0, 1.0);
-		gl_FragData[3] = vec4(diffuse.rgb, 1.0);
+		gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
+		gl_FragData[1] = vec4(EncodeColor(composite), diffuse.a);
+		gl_FragData[2] = vec4(Colortex3.rgb, 1.0);
+		gl_FragData[3] = vec4(EncodeNormal(normal.xyz).xy, 0.0, 1.0);
+		gl_FragData[4] = vec4(diffuse.rgb, 1.0);
 	#endif
 	
 	exit();
