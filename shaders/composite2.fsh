@@ -280,7 +280,7 @@ void main() {
 	
 	vec3 uColor = color;
 	
-	if (mask.water > 0.5)  { color = vec3(0.0, 0.25, 0.5); normal = (gbufferModelView * vec4(0.0, 1.0, 0.0, 0.0)).xyz; smoothness = 0.8; }
+	if (mask.water > 0.5)  { color = vec3(0.0, 0.03, 0.35); normal = (gbufferModelView * vec4(0.0, 1.0, 0.0, 0.0)).xyz; smoothness = 0.85; }
 	
 #ifdef PBR
 	ComputePBRReflection(color, smoothness, skyLightmap, 1.0, viewSpacePosition, normal, mask);
@@ -288,7 +288,7 @@ void main() {
 	ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, 1.0, mask);
 #endif
 	
-	if (mask.water > 0.5 && depth1 < 1.0) color = mix(color, uColor, 0.5);
+	if (mask.water > 0.5 && depth1 < 1.0) color = mix(color, uColor, 0.2);
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	

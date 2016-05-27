@@ -18,6 +18,7 @@ uniform sampler2D noisetex;
 uniform sampler2D shadowtex1;
 uniform sampler2DShadow shadow;
 
+uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowProjection;
@@ -197,7 +198,11 @@ void main() {
 	
 	composite += GI * sunlightColor * diffuse;
 	
-//	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, normal, skyLightmap, mask);
+	vec3 wNormal = normal;
+	if (mask.water > 0.5) wNormal = (gbufferModelView * vec4(0.0, 1.0, 0.0, 0.0)).xyz;
+	
+	
+	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, wNormal, skyLightmap, mask);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);
