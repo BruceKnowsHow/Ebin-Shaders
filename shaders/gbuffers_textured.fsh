@@ -115,12 +115,10 @@ void main() {
 		Mask mask; mask.materialIDs = encodedMaterialIDs;
 		CalculateMasks(mask);
 		
-		float sunlight;
-		
-		vec3 composite = CalculateShadedFragment(pow(diffuse.rgb, vec3(2.2)), mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition, sunlight);
+		vec3 composite = CalculateShadedFragment(pow(diffuse.rgb, vec3(2.2)), mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
 		
 		vec3 Colortex3 = vec3(Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
-		                      Encode8to32(specularity.r, sunlight, 0.0), 0.0);
+		                      Encode8to32(specularity.r, 0.0, 0.0), 0.0);
 		
 		gl_FragData[0] = vec4(EncodeColor(composite), diffuse.a);
 		gl_FragData[1] = vec4(Colortex3.rgb, 1.0);

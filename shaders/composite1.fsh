@@ -82,11 +82,11 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex0, coord).xy);
 }
 
-void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, out float buffer1g) {
+void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
 	tex3.r = texture2D(colortex3, texcoord).r;
 	tex3.g = texture2D(colortex3, texcoord).g;
 	
-	float buffer1b;
+	float buffer1g, buffer1b;
 	
 	Decode32to8(tex3.r, buffer0r, buffer0g, buffer0b);
 	Decode32to8(tex3.g, buffer1r, buffer1g, buffer1b);
@@ -167,9 +167,9 @@ void main() {
 	
 	float depth1 = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
-	vec3 tex3; float torchLightmap, skyLightmap, smoothness, sunlight; Mask mask;
+	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness, sunlight);
+	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
 	
 	CalculateMasks(mask);
 	SetupImplicitMasks(mask, depth, depth1);
@@ -185,9 +185,7 @@ void main() {
 #ifdef DEFERRED_SHADING
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
-	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition, sunlight);
-	
-	tex3.g = Encode8to32(smoothness, sunlight, 0.0);
+	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 #else
 	vec3 composite = DecodeColor(texture2D(colortex2, texcoord).rgb);
 #endif
