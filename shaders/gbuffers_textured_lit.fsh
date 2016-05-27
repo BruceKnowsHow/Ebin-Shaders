@@ -61,101 +61,21 @@ vec4 GetDiffuse() {
 	return diffuse;
 }
 
-vec2 SmoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
-	coord *= noiseTextureResolution;
-	coord  = floor(coord) + cubesmooth(fract(coord)) + 0.5;
-	coord /= noiseTextureResolution;
-	
-	return coord;
-}
+#include "/lib/WaterWaves.fsh"
 
-float SharpenWave(in float wave) {
-	wave = 1.0 - abs(wave * 2.0 - 1.0);
-	
-	if (wave > 0.78) wave = 5.0 * wave - pow2(wave) * 2.5 - 1.6;
-	
-	return wave;
-}
+#include "/lib/Materials.glsl"
 
-float GetWave(in vec2 coord) {
-	return texture2D(noisetex, SmoothNoiseCoord(coord)).x;
-}
-
-float GetWaves(vec3 position, cfloat speed) {
-	vec2 pos  = position.xz + position.y;
-	     pos += TIME * speed * vec2(1.0, -1.0);
-	     pos *= 0.05;
-	
-	
-	float weight, waves, weights;
-	
-	
-	pos = pos / 2.1 - vec2(TIME * speed / 30.0, TIME * 0.03);
-	
-	weight   = 4.0;
-	waves   += GetWave(vec2(pos.x * 2.0, pos.y * 1.4 + pos.x * -2.1)) * weight;
-	weights += weight;
-	
-	
-	pos = pos / 1.5 + vec2(TIME / 20.0 * speed, 0.0);
-	
-	weight   = 17.0;
-	waves   += GetWave(vec2(pos.x, pos.y * 0.75 + pos.x * 1.1)) * weight;
-	weights += weight;
-	
-	
-	pos = pos / 1.5 - vec2(TIME / 55.0 * speed, 0.0);
-	
-	weight   = 15.0;
-	waves   += GetWave(vec2(pos.x, pos.y * 0.75 + pos.x * -1.7)) * weight;
-	weights += weight;
-	
-	
-	pos = pos / 1.9 + vec2(TIME / 155.0 * 0.8, 0.0);
-	
-	weight   = 29.0;
-	waves   += SharpenWave(GetWave(vec2(pos.x, pos.y * 0.8 + pos.x * -1.7))) * weight;
-	weights += weight;
-	
-	
-	return waves * WAVE_MULT / weights;
-}
-
-vec2 GetWaveDifferentials(in vec3 position) { // Get finite wave differentials for the world-space X and Z coordinates
-	cfloat speed = 0.35;
-	
-	float a  = GetWaves(position                      , speed);
-	float aX = GetWaves(position + vec3(0.1, 0.0, 0.0), speed);
-	float aY = GetWaves(position + vec3(0.0, 0.0, 0.1), speed);
-	
-	return a - vec2(aX, aY);
-}
-
-vec3 GetWaveNormals(in vec3 position) {
-	vec2 diff = GetWaveDifferentials(position);
-	
-	vec3 normal;
-	
-	float viewVectorCoeff  = -dot(vertNormal, normalize(viewSpacePosition.xyz));
-	      viewVectorCoeff /= clamp(length(viewSpacePosition.xyz) * 0.05, 1.0, 10.0);
-	      viewVectorCoeff  = clamp01(viewVectorCoeff * 4.0);
-	      viewVectorCoeff  = sqrt(viewVectorCoeff);
-	
-	normal.xy = diff * viewVectorCoeff;
-	normal.z  = sqrt(1.0 - pow2(normal.x) - pow2(normal.y)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
+vec4 GetNormal() {
+	vec4 normal     = texture2D(normals, texcoord);
+		 normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * tbnMatrix);
 	
 	return normal;
 }
 
-vec4 GetNormal() {
-	if (abs(materialIDs - 4.0) < 0.5)
-		return vec4(normalize(GetWaveNormals(worldPosition.xyz) * tbnMatrix), 1.0);
-	else {
-		vec4 normal     = texture2D(normals, texcoord);
-		     normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * tbnMatrix);
-		
-		return normal;
-	}
+void DoWaterFragment(out vec4 diffuse, out vec4 normal, out vec2 specularity) {
+	diffuse     = vec4(0.0, 0.25, 0.5, 0.6);
+	normal      = vec4(normalize(GetWaveNormals(worldPosition.xyz) * tbnMatrix), 0.0);
+	specularity = vec2(0.85, 0.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
@@ -175,16 +95,22 @@ vec2 GetSpecularity(in float height, in float skyLightmap) {
 	return vec2(smoothness, metalness);
 }
 
-#include "/lib/Materials.glsl"
-
 
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
-	vec4  diffuse            = GetDiffuse();    if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
-	vec4  normal             = GetNormal();
-	vec2  specularity        = GetSpecularity(normal.a, vertLightmap.t);
+	
+	vec4 diffuse, normal; vec2 specularity;
+	
+	if (abs(materialIDs - 4.0) < 0.5) DoWaterFragment(diffuse, normal, specularity);
+	else {
+		diffuse     = GetDiffuse();    if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
+		normal      = GetNormal();
+		specularity = GetSpecularity(normal.a, vertLightmap.t);	
+	}
+	
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
+	
 	
 	#ifdef DEFERRED_SHADING
 		vec3 Colortex3 = vec3(Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),

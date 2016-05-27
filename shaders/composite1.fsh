@@ -138,7 +138,7 @@ float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1
 	float UdotN = abs(dot(normalize(underwaterVector.xyz), normal));
 	
 	float depth = length(underwaterVector.xyz) * UdotN;
-	      depth = exp(-depth * 0.35);
+	      depth = exp(-depth * 0.4);
 	
 	float fogFactor = CalculateFogFactor(viewSpacePosition1, 10.0);
 	
