@@ -292,18 +292,19 @@ void GetWaterTBN(out mat3 tbnMatrix) {
 	tbnMatrix = transpose(mat3(tangent, binormal, normal));
 }
 
-vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec3 normal, in mat3 tbnMatrix) {
+vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in mat3 tbnMatrix) {
+	float VdotN        = dot(-normalize(viewSpacePosition.xyz), normalize(normal));
+	float surfaceDepth = sqrt(length(viewSpacePosition1.xyz - viewSpacePosition.xyz)) * VdotN;
+	
+	float fov = atan(1.0 / gbufferProjection[1].y) * 2.0 / RAD;
+	vec4  screenSpacePosition = gbufferProjection * viewSpacePosition;
 	normal = normalize(normal * inverse(tbnMatrix));
-	
-    float fov = atan(1.0 / gbufferProjection[1].y) * 2.0 / RAD;
-	
-	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
 	
 	
 	cfloat refractAmount = 0.5;
 	cfloat aberrationAmount = 1.0 + 0.2;
 	
-	vec2 refraction = normal.st / fov * 90.0 * refractAmount;
+	vec2 refraction = normal.st / fov * 90.0 * refractAmount * surfaceDepth;
 	
 	mat3x2 refractCoords = mat3x2(screenSpacePosition.st + refraction * aberrationAmount,
 	                              screenSpacePosition.st + refraction,
@@ -360,7 +361,7 @@ void main() {
 	
 	if (mask.water > 0.5) { color = vec3(0.0, 0.015, 0.25); normal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2], tbnMatrix); smoothness = 0.85; }
 	
-	vec3 color1 = GetRefractedColor(texcoord, viewSpacePosition, normal, tbnMatrix); // Underwater color
+	vec3 color1 = GetRefractedColor(texcoord, viewSpacePosition, viewSpacePosition1, normal, tbnMatrix); // Underwater color
 	
 	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, mask);
 	
