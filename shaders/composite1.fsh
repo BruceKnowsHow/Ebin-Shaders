@@ -24,6 +24,7 @@ uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowProjection;
 
 uniform vec3 cameraPosition;
+uniform vec3 upPosition;
 
 uniform float near;
 uniform float far;
@@ -129,10 +130,10 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 
 #include "/lib/Sky.fsh"
 
-float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal) {
+float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1) {
 	vec3 underwaterVector = viewSpacePosition.xyz - viewSpacePosition1.xyz;
 	
-	float UdotN = abs(dot(normalize(underwaterVector.xyz), normal));
+	float UdotN = abs(dot(normalize(underwaterVector.xyz), normalize(upPosition)));
 	
 	float depth = length(underwaterVector.xyz) * UdotN;
 	      depth = exp(-depth * 0.4);
@@ -142,16 +143,16 @@ float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1
 	return 1.0 - clamp(depth - fogFactor, 0.0, 1.0);
 }
 
-void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in float skyLightmap, in Mask mask) {
+void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in float skyLightmap, in Mask mask) {
 	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.1) * skylightColor * pow(skyLightmap, 4.0);
 	
 	if (mask.water > 0.5)
-		color = mix(color, waterVolumeColor, ComputeSkyAbsorbance(viewSpacePosition, viewSpacePosition1, normal));
+		color = mix(color, waterVolumeColor, ComputeSkyAbsorbance(viewSpacePosition, viewSpacePosition1));
 }
 
 
 void main() {
-	float depth = GetDepth(texcoord);
+	float depth             =                   GetDepth(texcoord);
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	if (depth >= 1.0) { // Sky pixels are quickly composited and returned
@@ -161,22 +162,22 @@ void main() {
 			), 1.0); exit(); return; }
 	
 	
-	float depth1 = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
-	
 	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	
 	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
 	
+	
+	vec3  diffuse            =                 GetDiffuse(texcoord);
+	vec3  normal             =                  GetNormal(texcoord);
+	float depth1             =        GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
+	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
+	
+	
 	CalculateMasks(mask);
 	SetupImplicitMasks(mask, depth, depth1);
 	
-	
-	vec3 diffuse            = GetDiffuse(texcoord);
-	vec3 normal             = GetNormal(texcoord);
-	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
-	
-	
 	tex3.r = Encode8to32(torchLightmap, skyLightmap, mask.materialIDs);
+	
 	
 #ifdef DEFERRED_SHADING
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
@@ -192,11 +193,9 @@ void main() {
 	
 	composite += GI * sunlightColor * diffuse;
 	
-	vec3 wNormal = normal;
-	if (mask.water > 0.5) wNormal = (gbufferModelView * vec4(0.0, 1.0, 0.0, 0.0)).xyz;
 	
+	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);
 	
-	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, wNormal, skyLightmap, mask);
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);
