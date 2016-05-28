@@ -237,7 +237,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 100.0;
 	
 	
-	for (int i = 1; i <= PBR_RAYS; i++) {
+	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon  = vec2(noise(texcoord * i), noise(texcoord * i * 3));
 		vec3 BRDFSkew = skew(epsilon, roughness);
 		
