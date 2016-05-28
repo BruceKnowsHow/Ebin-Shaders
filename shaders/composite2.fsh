@@ -297,20 +297,37 @@ vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec3 normal,
 	
     float fov = atan(1.0 / gbufferProjection[1].y) * 2.0 / RAD;
 	
-	
 	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
 	
-	vec2 refractedCoord = (screenSpacePosition.st + normal.st / fov * 145.0) / screenSpacePosition.w * 0.5 + 0.5;
+	
+	cfloat refractAmount = 0.5;
+	cfloat aberrationAmount = 1.0 + 0.2;
+	
+	vec2 refraction = normal.st / fov * 90.0 * refractAmount;
+	
+	mat3x2 refractCoords = mat3x2(screenSpacePosition.st + refraction * aberrationAmount,
+	                              screenSpacePosition.st + refraction,
+	                              screenSpacePosition.st + refraction);
+	
+	refractCoords = refractCoords / screenSpacePosition.w * 0.5 + 0.5;
 	
 	
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	vec2 minCoord  = pixelSize;
 	vec2 maxCoord  = 1.0 - pixelSize;
 	
-	refractedCoord = clamp(refractedCoord, minCoord, maxCoord);
+	refractCoords[0] = clamp(refractCoords[0], minCoord, maxCoord);
+	refractCoords[1] = clamp(refractCoords[1], minCoord, maxCoord);
+	refractCoords[2] = clamp(refractCoords[2], minCoord, maxCoord);
 	
 	
-	return GetColor(refractedCoord);
+	vec3 color;
+	
+	color.r = texture2D(colortex2, refractCoords[0]).r;
+	color.g = texture2D(colortex2, refractCoords[1]).g;
+	color.b = texture2D(colortex2, refractCoords[2]).b;
+	
+	return DecodeColor(color);
 }
 
 
@@ -343,7 +360,7 @@ void main() {
 	
 	if (mask.water > 0.5) { color = vec3(0.0, 0.015, 0.25); normal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2], tbnMatrix); smoothness = 0.85; }
 	
-	vec3 color1 = GetRefractedColor(texcoord, viewSpacePosition1, normal, tbnMatrix); // Underwater color
+	vec3 color1 = GetRefractedColor(texcoord, viewSpacePosition, normal, tbnMatrix); // Underwater color
 	
 	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, mask);
 	
