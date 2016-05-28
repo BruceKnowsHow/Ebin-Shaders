@@ -211,7 +211,7 @@ void main() {
 	
 	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
 	
-	if (mask.water > 0.5)
+	if (mask.water + mask.transparent > 0.5)
 		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); exit(); return; }
 	
 	

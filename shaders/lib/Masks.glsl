@@ -14,7 +14,7 @@ struct Mask {
 	float hand;
 	float sky;
 	
-	float translucent;
+	float transparent;
 	float metallic;
 };
 
@@ -65,12 +65,12 @@ void CalculateMasks(inout Mask mask) {
 	mask.hand   = GetMaterialMask(  5, mask.matIDs);
 	mask.sky    = GetMaterialMask(255, mask.matIDs);
 	
-	mask.translucent = mask.bit[0];
+	mask.transparent = mask.bit[0];
 	mask.metallic    = mask.bit[1];
 }
 
 void AddWaterMask(inout Mask mask, in float depth, in float depth1) {
-	mask.water = float(depth != depth1 && mask.translucent < 0.5); // 
+	mask.water = float(depth != depth1 && mask.transparent < 0.5); // 
 	
 	if (mask.water > 0.5) mask.matIDs = 4.0;
 	
