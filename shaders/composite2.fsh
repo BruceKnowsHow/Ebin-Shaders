@@ -158,7 +158,8 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 	return false;
 }
 
-void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in float sunlight, in Mask mask) {
+#ifndef PBR
+void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in float sunlight, in Mask mask) {
 	if (smoothness < 0.01) return;
 	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
@@ -200,7 +201,8 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	color = mix(color, reflection, fresnel * smoothness);
 }
 
-void ComputePBRReflection(inout vec3 color, in vec4 viewSpacePosition, in float smoothness, in float skyLightmap, in float sunlight, in vec3 normal, in Mask mask) {
+#else
+void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in float sunlight, in Mask mask) {
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
@@ -258,6 +260,7 @@ void ComputePBRReflection(inout vec3 color, in vec4 viewSpacePosition, in float 
 	
 	color = mix(color * (1.0 - mask.metallic * 0.9), reflection, alpha);
 }
+#endif
 
 void GetWaterTBN(out mat3 tbnMatrix) {
 	vec3 normal = DecodeNormal(texture2D(colortex0, texcoord).xy);
@@ -299,11 +302,7 @@ void main() {
 	if (mask.water > 0.5)  { color = vec3(0.0, 0.03, 0.35); normal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2], tbnMatrix); smoothness = 0.85; }
 	
 	
-#ifdef PBR
-	ComputePBRReflection(color, viewSpacePosition, smoothness, skyLightmap, 1.0, normal, mask);
-#else
-	ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, 1.0, mask);
-#endif
+	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, 1.0, mask);
 	
 	
 	if (mask.water > 0.5 && depth1 < 1.0) color = mix(color, color1, 0.2);
