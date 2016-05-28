@@ -67,11 +67,9 @@ void CalculateMasks(inout Mask mask) {
 	mask.metallic = mask.bit[0];
 }
 
-void SetupImplicitMasks(inout Mask mask, in float depth, in float depth1) {
-	mask.sky   = float(depth >= 1.0);
+void AddWaterMask(inout Mask mask, in float depth, in float depth1) {
 	mask.water = float(depth != depth1); // && mask.translucent < 0.5
 	
-	if (mask.sky > 0.5) mask.matIDs = 0.0;
 	if (mask.water > 0.5) mask.matIDs = 4.0;
 	
 	mask.materialIDs = EncodeMaterialIDs(mask.matIDs, mask.bit[0], mask.bit[1], mask.bit[2], mask.bit[3]);

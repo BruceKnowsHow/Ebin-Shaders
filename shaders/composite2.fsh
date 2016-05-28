@@ -86,14 +86,14 @@ vec3 GetNormal(in vec2 coord) {
 
 #include "/lib/WaterWaves.fsh"
 
-void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
-	tex3.r = texture2D(colortex3, texcoord).r;
-	tex3.g = texture2D(colortex3, texcoord).g;
+void GetColortex3(in vec2 coord, out vec2 Colortex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+	Colortex3.r = texture2D(colortex3, texcoord).r;
+	Colortex3.g = texture2D(colortex3, texcoord).g;
 	
 	float buffer1g, buffer1b;
 	
-	Decode32to8(tex3.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(tex3.g, buffer1r, buffer1g, buffer1b);
+	Decode32to8(Colortex3.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(Colortex3.g, buffer1r, buffer1g, buffer1b);
 }
 
 float GetVolumetricFog(in vec2 coord) {
@@ -276,17 +276,20 @@ void main() {
 		gl_FragData[0] = vec4(EncodeColor(color), 1.0); exit(); return; }
 	
 	
-	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	vec2 Colortex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
+	GetColortex3(texcoord, Colortex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
+	
+	
+	vec3  normal = GetNormal(texcoord);
+	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
+	float depth1 = GetTransparentDepth(texcoord);
+	
+	smoothness = pow(smoothness, 2.2 * 2.2);
+	
 	
 	CalculateMasks(mask);
 	
-	
-	float depth1 = GetTransparentDepth(texcoord);
-	vec3  normal = GetNormal(texcoord);
-	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
-	smoothness = pow(smoothness, 2.2 * 2.2);
 	
 	vec3 uColor = color;
 	
@@ -301,9 +304,12 @@ void main() {
 	ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, 1.0, mask);
 #endif
 	
+	
 	if (mask.water > 0.5 && depth1 < 1.0) color = mix(color, uColor, 0.2);
 	
+	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
+	
 	
 	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
 	

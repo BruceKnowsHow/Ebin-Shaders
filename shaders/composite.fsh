@@ -67,14 +67,14 @@ float GetMaterialID(in vec2 coord) {
 	return texture2D(colortex3, texcoord).b;
 }
 
-void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
-	tex3.r = texture2D(colortex3, texcoord).r;
-	tex3.g = texture2D(colortex3, texcoord).g;
+void GetColortex3(in vec2 coord, out vec2 Colortex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+	Colortex3.r = texture2D(colortex3, texcoord).r;
+	Colortex3.g = texture2D(colortex3, texcoord).g;
 	
 	float buffer1g, buffer1b;
 	
-	Decode32to8(tex3.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(tex3.g, buffer1r, buffer1g, buffer1b);
+	Decode32to8(Colortex3.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(Colortex3.g, buffer1r, buffer1g, buffer1b);
 }
 
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
@@ -195,25 +195,28 @@ void main() {
 		gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); return; }
 	
 	
-	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	vec2 Colortex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	
-	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
-	
-	float depth1 = texture2D(depthtex1, texcoord).x;
-	
-	CalculateMasks(mask);
-	SetupImplicitMasks(mask, depth, depth1);
+	GetColortex3(texcoord, Colortex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
 	
 	
 	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	vec2  noise2D           = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 2.0) * 2.0 - 1.0;
+	float depth1            = texture2D(depthtex1, texcoord).x;
+	
+	
+	CalculateMasks(mask);
+	AddWaterMask(mask, depth, depth1);
+	
 	
 	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
 	
 	if (mask.water > 0.5)
 		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); exit(); return; }
 	
+	
 	vec3 normal = GetNormal(texcoord);
+	
 	
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, noise2D, mask);
 	
