@@ -64,6 +64,14 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 #include "/lib/VertexDisplacements.vsh"
 #include "/lib/CalculateTBN.vsh"
 
+float GetTranslucentMask(in float materialIDs) {
+#ifdef gbuffers_water
+	return float(abs(materialIDs - 4.0) > 0.5);
+#endif
+	
+	return 0.0;
+}
+
 
 void main() {
 	color         = gl_Color.rgb;
@@ -73,7 +81,7 @@ void main() {
 	
 	vertLightmap = GetDefaultLightmap(lightmapCoord);
 	materialIDs  = GetMaterialIDs(int(mcID));
-	materialIDs1 = vec4(0.0, 0.0, 0.0, 0.0);
+	materialIDs1 = vec4(GetTranslucentMask(materialIDs), 0.0, 0.0, 0.0);
 	
 	
 	vec4 position = GetWorldSpacePosition();

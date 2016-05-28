@@ -102,7 +102,7 @@ void main() {
 	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	
 	
 	
-	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
+	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, materialIDs1.r, specularity.g, materialIDs1.b, materialIDs1.a);
 	
 	
 	#ifdef DEFERRED_SHADING
