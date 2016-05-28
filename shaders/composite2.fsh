@@ -7,10 +7,12 @@
 
 /* DRAWBUFFERS:1 */
 
+uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -257,6 +259,14 @@ void ComputePBRReflection(inout vec3 color, in float smoothness, in float skyLig
 	color = mix(color * (1.0 - mask.metallic * 0.9), reflection, alpha);
 }
 
+void GetWaterTBN(out mat3 tbnMatrix) {
+	vec3 normal = DecodeNormal(texture2D(colortex0, texcoord).xy);
+	vec3 tangent = DecodeNormal(texture2D(colortex6, texcoord).xy);
+	vec3 binormal = normalize(cross(normal, tangent));
+	
+	tbnMatrix = transpose(mat3(tangent, binormal, normal));
+}
+
 
 void main() {
 	vec3  color = GetColor(texcoord);
@@ -280,7 +290,10 @@ void main() {
 	
 	vec3 uColor = color;
 	
-	if (mask.water > 0.5)  { color = vec3(0.0, 0.03, 0.35); normal = (gbufferModelView * vec4(0.0, 1.0, 0.0, 0.0)).xyz; smoothness = 0.85; }
+	mat3 tbnMatrix;
+	GetWaterTBN(tbnMatrix);
+	
+	if (mask.water > 0.5)  { color = vec3(0.0, 0.03, 0.35); normal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2], tbnMatrix); smoothness = 0.85; }
 	
 #ifdef PBR
 	ComputePBRReflection(color, smoothness, skyLightmap, 1.0, viewSpacePosition, normal, mask);

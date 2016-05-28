@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:02315 */
+/* DRAWBUFFERS:023156 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -70,6 +70,7 @@ vec4 GetNormal() {
 
 void DoWaterFragment() {
 	gl_FragData[0] = vec4(EncodeNormal(vertNormal), 0.0, 1.0);
+	gl_FragData[5] = vec4(EncodeNormal(transpose(tbnMatrix)[0]), 0.0, 1.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
