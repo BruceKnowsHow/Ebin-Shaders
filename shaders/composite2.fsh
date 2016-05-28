@@ -159,7 +159,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 }
 
 #ifndef PBR
-void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in float sunlight, in Mask mask) {
+void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
 	if (smoothness < 0.01) return;
 	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
@@ -173,6 +173,9 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
 	vec3  sColor  = mix(vec3(0.15), color * 0.2, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
+	
+	
+	float sunlight = 1.0;
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
 	     reflectedSky *= clamp(pow(skyLightmap, 5.0) + sunlight, 0.002, 1.0);
@@ -202,7 +205,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 }
 
 #else
-void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in float sunlight, in Mask mask) {
+void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
@@ -216,6 +219,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	vec3 alpha = fresnel * smoothness;
 	
+	
+	float sunlight = 1.0;
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
 	     reflectedSky *= (pow(skyLightmap, 5.0) + sunlight) * 0.998 + 0.002;
@@ -262,6 +267,16 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 }
 #endif
 
+void CompositeWater(inout vec3 color, in vec3 color1, in float depth1, in float skyLightmap, in float waterMask) {
+	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.1) * skylightColor * pow(skyLightmap, 4.0);
+	
+	if (waterMask > 0.5 && depth1 < 1.0) {
+//		color1 = mix(color1, waterVolumeColor, 1.0 - skyLightmap);
+		
+		color = mix(color, color1, 0.4);
+	}
+}
+
 void GetWaterTBN(out mat3 tbnMatrix) {
 	vec3 normal = DecodeNormal(texture2D(colortex0, texcoord).xy);
 	vec3 tangent = DecodeNormal(texture2D(colortex6, texcoord).xy);
@@ -302,10 +317,10 @@ void main() {
 	if (mask.water > 0.5)  { color = vec3(0.0, 0.03, 0.35); normal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2], tbnMatrix); smoothness = 0.85; }
 	
 	
-	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, 1.0, mask);
+	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, mask);
 	
 	
-	if (mask.water > 0.5 && depth1 < 1.0) color = mix(color, color1, 0.2);
+	CompositeWater(color, color1, depth1, skyLightmap, mask.water);
 	
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
