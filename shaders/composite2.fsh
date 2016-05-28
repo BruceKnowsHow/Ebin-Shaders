@@ -295,9 +295,12 @@ void GetWaterTBN(out mat3 tbnMatrix) {
 vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec3 normal, in mat3 tbnMatrix) {
 	normal = normalize(normal * inverse(tbnMatrix));
 	
+    float fov = atan(1.0 / gbufferProjection[1].y) * 2.0 / RAD;
+	
+	
 	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
 	
-	vec2 refractedCoord = (screenSpacePosition.st + normal.st * 1.2) / screenSpacePosition.w * 0.5 + 0.5;
+	vec2 refractedCoord = (screenSpacePosition.st + normal.st / fov * 145.0) / screenSpacePosition.w * 0.5 + 0.5;
 	
 	
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
