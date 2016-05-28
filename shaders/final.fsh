@@ -44,17 +44,18 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-void GetColortex3(in vec2 coord, out vec3 tex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
-	tex3.r = texture2D(colortex3, texcoord).r;
-	tex3.g = texture2D(colortex3, texcoord).g;
+void GetColortex3(in vec2 coord, out vec2 Colortex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+	Colortex3.r = texture2D(colortex3, texcoord).r;
+	Colortex3.g = texture2D(colortex3, texcoord).g;
 	
 	float buffer1g, buffer1b;
 	
-	Decode32to8(tex3.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(tex3.g, buffer1r, buffer1g, buffer1b);
+	Decode32to8(Colortex3.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(Colortex3.g, buffer1r, buffer1g, buffer1b);
 }
 
 void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
+#ifdef MOTION_BLUR
 	if (mask.hand > 0.5) return;
 	
 	vec4 position = vec4(vec3(texcoord, depth) * 2.0 - 1.0, 1.0); // Signed [-1.0 to 1.0] screen space position
@@ -93,6 +94,7 @@ void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
 	}
 	
 	color *= 1000.0 / max(sampleCount + 1.0, 1.0);
+#endif
 }
 
 vec3 GetBloomTile(cint scale, vec2 offset) {
@@ -146,30 +148,31 @@ vec3 Uncharted2Tonemap(in vec3 color) {
 
 
 void main() {
-	vec3 tex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	
-//	GetColortex3(texcoord, tex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
-	
-//	CalculateMasks(mask);
-	
-	
 	float depth = GetDepth(texcoord);
 	vec3  color = GetColor(texcoord);
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	
-	#ifdef MOTION_BLUR
+	vec3 Colortex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	
+//	GetColortex3(texcoord, Colortex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
+	
+//	CalculateMasks(mask);
+	
+	
 	MotionBlur(color, depth, mask);
-	#endif
+	
 	
 	vec3[8] bloom = GetBloom();
 	
 	color = mix(color, pow(bloom[0], vec3(BLOOM_CURVE)), BLOOM_AMOUNT);
 	
+	
 	color = Uncharted2Tonemap(color);
 	
 	color = SetSaturationLevel(color, SATURATION);
+	
 	
 	gl_FragData[0] = vec4(color, 1.0);
 	

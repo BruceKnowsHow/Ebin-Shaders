@@ -200,7 +200,7 @@ void ComputeRaytracedReflection(inout vec3 color, in vec4 viewSpacePosition, in 
 	color = mix(color, reflection, fresnel * smoothness);
 }
 
-void ComputePBRReflection(inout vec3 color, in float smoothness, in float skyLightmap, in float sunlight, in vec4 viewSpacePosition, in vec3 normal, in Mask mask) {
+void ComputePBRReflection(inout vec3 color, in vec4 viewSpacePosition, in float smoothness, in float skyLightmap, in float sunlight, in vec3 normal, in Mask mask) {
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
@@ -291,21 +291,22 @@ void main() {
 	CalculateMasks(mask);
 	
 	
-	vec3 uColor = color;
+	vec3 color1 = color; // Underwater color
 	
 	mat3 tbnMatrix;
 	GetWaterTBN(tbnMatrix);
 	
 	if (mask.water > 0.5)  { color = vec3(0.0, 0.03, 0.35); normal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2], tbnMatrix); smoothness = 0.85; }
 	
+	
 #ifdef PBR
-	ComputePBRReflection(color, smoothness, skyLightmap, 1.0, viewSpacePosition, normal, mask);
+	ComputePBRReflection(color, viewSpacePosition, smoothness, skyLightmap, 1.0, normal, mask);
 #else
 	ComputeRaytracedReflection(color, viewSpacePosition, normal, smoothness, skyLightmap, 1.0, mask);
 #endif
 	
 	
-	if (mask.water > 0.5 && depth1 < 1.0) color = mix(color, uColor, 0.2);
+	if (mask.water > 0.5 && depth1 < 1.0) color = mix(color, color1, 0.2);
 	
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
