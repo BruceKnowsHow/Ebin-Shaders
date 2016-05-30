@@ -73,7 +73,7 @@ vec2 GetWaveDifferentials(in vec3 position) { // Get finite wave differentials f
 }
 
 
-vec3 GetWaveNormals(in vec4 viewSpacePosition, in vec3 baseNormal, in mat3 tbnMatrix) {
+vec3 GetWaveNormals(in vec4 viewSpacePosition, in vec3 baseNormal) {
 	vec3 position = (gbufferModelViewInverse * viewSpacePosition).xyz + cameraPosition;
 	
 	vec2 diff = GetWaveDifferentials(position);
@@ -88,7 +88,7 @@ vec3 GetWaveNormals(in vec4 viewSpacePosition, in vec3 baseNormal, in mat3 tbnMa
 	normal.xy = diff * viewVectorCoeff;
 	normal.z  = sqrt(1.0 - pow2(normal.x) - pow2(normal.y)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 	
-	return normalize(normal * tbnMatrix);
+	return normalize(normal);
 }
 
 
