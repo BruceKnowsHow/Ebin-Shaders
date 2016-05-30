@@ -67,14 +67,14 @@ float GetMaterialID(in vec2 coord) {
 	return texture2D(colortex3, texcoord).b;
 }
 
-void GetColortex3(in vec2 coord, out vec2 Colortex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
-	Colortex3.r = texture2D(colortex3, texcoord).r;
-	Colortex3.g = texture2D(colortex3, texcoord).g;
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+	encode.r = texture2D(buffer, texcoord).r;
+	encode.g = texture2D(buffer, texcoord).g;
 	
 	float buffer1g, buffer1b;
 	
-	Decode32to8(Colortex3.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(Colortex3.g, buffer1r, buffer1g, buffer1b);
+	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
 }
 
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
@@ -191,28 +191,27 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 void main() {
 	float depth = GetDepth(texcoord);
 	
-	if (depth >= 1.0) {
-		gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0); exit(); return; }
+	
+	if (depth >= 1.0) { gl_FragData[0] = vec4(vec3(0.0), 1.0); exit(); return; }
 	
 	
-	vec2 Colortex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	float depth1  = texture2D(depthtex1, texcoord).x;
+	vec2  noise2D = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 2.0) * 2.0 - 1.0;
 	
-	GetColortex3(texcoord, Colortex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
-	
-	
-	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
-	vec2  noise2D           = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 2.0) * 2.0 - 1.0;
-	float depth1            = texture2D(depthtex1, texcoord).x;
+	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	
-	CalculateMasks(mask);
-	AddWaterMask(mask, depth, depth1);
+	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
+	
+	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	
 	
 	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
 	
+	
 	if (mask.water + mask.transparent > 0.5)
-		{ gl_FragData[0] = vec4(0.0, 0.0, 0.0, volFog); exit(); return; }
+		{ gl_FragData[0] = vec4(vec3(0.0), volFog); exit(); return; }
 	
 	
 	vec3 normal = GetNormal(texcoord);

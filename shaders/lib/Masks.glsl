@@ -54,7 +54,7 @@ float GetMaterialMask(in float mask, in float materialID) {
 	return float(abs(materialID - mask) < 0.5);
 }
 
-void CalculateMasks(inout Mask mask) {
+Mask CalculateMasks(in Mask mask) {
 	mask.matIDs = mask.materialIDs;
 	
 	DecodeMaterialIDs(mask.matIDs, mask.bit);
@@ -67,14 +67,18 @@ void CalculateMasks(inout Mask mask) {
 	
 	mask.transparent = mask.bit[0];
 	mask.metallic    = mask.bit[1];
+	
+	return mask;
 }
 
-void AddWaterMask(inout Mask mask, in float depth, in float depth1) {
-	mask.water = float(depth != depth1 && mask.transparent < 0.5); // 
+Mask AddWaterMask(in Mask mask, in float depth, in float depth1) {
+	mask.water = float(depth != depth1 && mask.transparent < 0.5);
 	
 	if (mask.water > 0.5) mask.matIDs = 4.0;
 	
 	mask.materialIDs = EncodeMaterialIDs(mask.matIDs, mask.bit[0], mask.bit[1], mask.bit[2], mask.bit[3]);
+	
+	return mask;
 }
 
 

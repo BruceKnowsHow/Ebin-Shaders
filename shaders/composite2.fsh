@@ -93,14 +93,14 @@ vec3 GetNormal(in vec2 coord) {
 
 #include "/lib/WaterWaves.fsh"
 
-void GetColortex3(in vec2 coord, out vec2 Colortex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
-	Colortex3.r = texture2D(colortex3, texcoord).r;
-	Colortex3.g = texture2D(colortex3, texcoord).g;
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+	encode.r = texture2D(buffer, texcoord).r;
+	encode.g = texture2D(buffer, texcoord).g;
 	
 	float buffer1g, buffer1b;
 	
-	Decode32to8(Colortex3.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(Colortex3.g, buffer1r, buffer1g, buffer1b);
+	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
 }
 
 float GetVolumetricFog(in vec2 coord) {
@@ -167,7 +167,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 
 #ifndef PBR
 void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
-	if (smoothness < 0.01) return;
+	if (mask.water < 0.5) smoothness = pow(smoothness, 4.8);
 	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
@@ -180,6 +180,10 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
 	vec3  sColor  = mix(vec3(0.15), color * 0.2, vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
+	
+	vec3 alpha = fresnel * smoothness;
+	
+	if (length(alpha) < 0.01) return;
 	
 	
 	float sunlight = 1.0;
@@ -213,6 +217,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 
 #else
 void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
+	if (mask.water < 0.5) smoothness = pow(smoothness, 4.8);
+	
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
@@ -225,6 +231,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
 	vec3 alpha = fresnel * smoothness;
+	
+	if (length(alpha) < 0.01) return;
 	
 	
 	float sunlight = 1.0;
@@ -335,25 +343,22 @@ vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec4 viewSpa
 void main() {
 	float depth = GetDepth(texcoord);
 	
+	
 	if (depth >= 1.0) { gl_FragData[0] = vec4(texture2D(colortex2, texcoord).rgb, 1.0); exit(); return; }
 	
 	
-	vec2 Colortex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	
-	GetColortex3(texcoord, Colortex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
-	
-	
-	vec3  normal             = GetNormal(texcoord);
+	vec3  color              =            GetColor(texcoord);
+	vec3  normal             =           GetNormal(texcoord);
 	float depth1             = GetTransparentDepth(texcoord);
-	vec4  viewSpacePosition  = CalculateViewSpacePosition(texcoord, depth);
-	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	smoothness = pow(smoothness, 2.2 * 2.2);
+	vec4 viewSpacePosition  = CalculateViewSpacePosition(texcoord, depth );
+	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
-	CalculateMasks(mask);
+	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
 	
-	vec3 color  = GetColor(texcoord);
+	mask = CalculateMasks(mask);
 	
 	
 	mat3 tbnMatrix;

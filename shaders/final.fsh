@@ -44,14 +44,14 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-void GetColortex3(in vec2 coord, out vec2 Colortex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
-	Colortex3.r = texture2D(colortex3, texcoord).r;
-	Colortex3.g = texture2D(colortex3, texcoord).g;
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+	encode.r = texture2D(buffer, texcoord).r;
+	encode.g = texture2D(buffer, texcoord).g;
 	
 	float buffer1g, buffer1b;
 	
-	Decode32to8(Colortex3.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(Colortex3.g, buffer1r, buffer1g, buffer1b);
+	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
 }
 
 void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
@@ -154,11 +154,10 @@ void main() {
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	
-	vec3 Colortex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
+//	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
 	
-//	GetColortex3(texcoord, Colortex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
-	
-//	CalculateMasks(mask);
+//	mask = CalculateMasks(mask);
 	
 	
 	MotionBlur(color, depth, mask);

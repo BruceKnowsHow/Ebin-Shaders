@@ -79,14 +79,14 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
-void GetColortex3(in vec2 coord, out vec2 Colortex3, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
-	Colortex3.r = texture2D(colortex3, texcoord).r;
-	Colortex3.g = texture2D(colortex3, texcoord).g;
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+	encode.r = texture2D(buffer, texcoord).r;
+	encode.g = texture2D(buffer, texcoord).g;
 	
 	float buffer1g, buffer1b;
 	
-	Decode32to8(Colortex3.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(Colortex3.g, buffer1r, buffer1g, buffer1b);
+	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
+	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
 }
 
 void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float volFog) {
@@ -152,8 +152,8 @@ void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewS
 
 
 void main() {
-	float depth             =                   GetDepth(texcoord);
-	vec4  viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
+	float depth = GetDepth(texcoord);
+	
 	
 	if (depth >= 1.0) { // Sky pixels are quickly composited and returned
 		gl_FragData[0] = vec4( (Deferred_Shading ?
@@ -162,21 +162,20 @@ void main() {
 			), 1.0); exit(); return; }
 	
 	
-	vec2 Colortex3; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	vec3  diffuse =          GetDiffuse(texcoord);
+	vec3  normal  =           GetNormal(texcoord);
+	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
-	GetColortex3(texcoord, Colortex3, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
-	
-	
-	vec3  diffuse            =                 GetDiffuse(texcoord);
-	vec3  normal             =                  GetNormal(texcoord);
-	float depth1             =        GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
-	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
+	vec4 viewSpacePosition  = CalculateViewSpacePosition(texcoord, depth );
+	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
-	CalculateMasks(mask);
-	AddWaterMask(mask, depth, depth1);
+	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
 	
-	Colortex3.r = Encode8to32(torchLightmap, skyLightmap, mask.materialIDs);
+	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
+	
+	encode.r = Encode8to32(torchLightmap, skyLightmap, mask.materialIDs);
 	
 	
 #ifdef DEFERRED_SHADING
@@ -191,6 +190,7 @@ void main() {
 	vec3 GI; float volFog;
 	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
+	
 	composite += GI * sunlightColor * diffuse;
 	
 	
@@ -199,7 +199,7 @@ void main() {
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);
-	gl_FragData[2] = vec4(Colortex3.rg, 0.0, 1.0);
+	gl_FragData[2] = vec4(encode.rgb, 1.0);
 	
 	exit();
 }
