@@ -290,9 +290,7 @@ mat3 GetWaterTBN() {
 	return transpose(mat3(tangent, binormal, normal));
 }
 
-void AddWater(in vec4 viewSpacePosition, in float waterMask, inout vec3 color, inout vec3 normal, inout float smoothness, inout vec3 tangentNormal, inout mat3 tbnMatrix) {
-	if (waterMask < 0.5) return;
-	
+void AddWater(in vec4 viewSpacePosition, out vec3 color, out vec3 normal, out float smoothness, out vec3 tangentNormal, out mat3 tbnMatrix) {
 	color         = vec3(0.0, 0.015, 0.25);
 	tbnMatrix     = GetWaterTBN();
 	tangentNormal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2]);
@@ -363,7 +361,7 @@ void main() {
 	mask = CalculateMasks(mask);
 	
 	
-	vec3 normal; float depth1;
+	vec3 normal = vec3(1.0); float depth1 = 0.0;
 	
 	if (mask.water > 0.5) depth1 = GetTransparentDepth(texcoord);
 	else normal = GetNormal(texcoord);
@@ -372,8 +370,8 @@ void main() {
 	vec4 viewSpacePosition  = CalculateViewSpacePosition(texcoord, depth );
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	vec3 color; vec3 tangentNormal; mat3 tbnMatrix;
-	AddWater(viewSpacePosition, mask.water, color, normal, smoothness, tangentNormal, tbnMatrix);
+	vec3 color = vec3(0.0); vec3 tangentNormal = vec3(0.0); mat3 tbnMatrix;
+	if (mask.water > 0.5) AddWater(viewSpacePosition, color, normal, smoothness, tangentNormal, tbnMatrix);
 	
 	
 	vec3 uColor = GetRefractedColor(texcoord, viewSpacePosition, viewSpacePosition1, normal, tangentNormal, mask.water);
