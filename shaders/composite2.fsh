@@ -300,50 +300,53 @@ void AddWater(in vec4 viewSpacePosition, in float waterMask, inout vec3 color, i
 	smoothness    = 0.85;
 }
 
-vec3 GetRefractedColor(in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in vec3 tangentSpaceWave) {
-	float VdotN        = dot(-normalize(viewSpacePosition.xyz), normalize(normal));
-	float surfaceDepth = sqrt(length(viewSpacePosition1.xyz - viewSpacePosition.xyz)) * VdotN;
+mat3x2 GetRefractedCoordinates(in vec2 coord, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in vec3 tangentSpaceWave) {
+	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
 	
 	float fov = atan(1.0 / gbufferProjection[1].y) * 2.0 / RAD;
-	vec4  screenSpacePosition = gbufferProjection * viewSpacePosition;
 	
+	float VdotN        = dot(-normalize(viewSpacePosition.xyz), normalize(normal));
+	float surfaceDepth = sqrt(length(viewSpacePosition1.xyz - viewSpacePosition.xyz)) * VdotN;
 	
 	cfloat refractAmount = 0.5;
 	cfloat aberrationAmount = 1.0 + 0.2;
 	
 	vec2 refraction = tangentSpaceWave.st / fov * 90.0 * refractAmount * surfaceDepth;
 	
-	mat3x2 refractCoords = mat3x2(screenSpacePosition.st + refraction * aberrationAmount,
-	                              screenSpacePosition.st + refraction,
-	                              screenSpacePosition.st + refraction);
+	mat3x2 coords = mat3x2(screenSpacePosition.st + refraction * aberrationAmount,
+	                       screenSpacePosition.st + refraction,
+	                       screenSpacePosition.st + refraction);
 	
-	refractCoords = refractCoords / screenSpacePosition.w * 0.5 + 0.5;
-	
+	coords = coords / screenSpacePosition.w * 0.5 + 0.5;
 	
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	vec2 minCoord  = pixelSize;
 	vec2 maxCoord  = 1.0 - pixelSize;
 	
-	refractCoords[0] = clamp(refractCoords[0], minCoord, maxCoord);
-	refractCoords[1] = clamp(refractCoords[1], minCoord, maxCoord);
-	refractCoords[2] = clamp(refractCoords[2], minCoord, maxCoord);
+	coords[0] = clamp(coords[0], minCoord, maxCoord);
+	coords[1] = clamp(coords[1], minCoord, maxCoord);
+	coords[2] = clamp(coords[2], minCoord, maxCoord);
+	
+	return coords;
+}
+
+vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in vec3 tangentSpaceWave, in float waterMask) {
+	mat3x2 coords = ( waterMask > 0.5 ? 
+		GetRefractedCoordinates(coord, viewSpacePosition, viewSpacePosition1, normal, tangentSpaceWave) :
+		mat3x2(coord.st, coord.st, coord.st) );
 	
 	
-	vec3 color;
-	
-	color.r = texture2D(colortex2, refractCoords[0]).r;
-	color.g = texture2D(colortex2, refractCoords[1]).g;
-	color.b = texture2D(colortex2, refractCoords[2]).b;
+	vec3 color = vec3(texture2D(colortex2, coords[0]).r,
+	                  texture2D(colortex2, coords[1]).g,
+	                  texture2D(colortex2, coords[2]).b);
 	
 	return DecodeColor(color);
 }
 
-void CompositeWater(inout vec3 color, in float depth1, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in vec3 tangentNormal, in float waterMask) {
+void CompositeWater(inout vec3 color, in vec3 uColor, in float depth1, in float waterMask) {
 	if (waterMask < 0.5 || depth1 >= 1.0) return;
 	
-	vec3 ucolor = GetRefractedColor(viewSpacePosition, viewSpacePosition1, normal, tangentNormal);
-	
-	color = mix(color, ucolor, 0.2);
+	color = mix(color, uColor, 0.2);
 }
 
 
@@ -360,26 +363,27 @@ void main() {
 	mask = CalculateMasks(mask);
 	
 	
-	vec3 color, normal; float depth1;
+	vec3 normal; float depth1;
 	
-	if (mask.water < 0.5) {
-		color  =  GetColor(texcoord);
-		normal = GetNormal(texcoord);
-	} else
-		depth1 = GetTransparentDepth(texcoord);
+	if (mask.water > 0.5) depth1 = GetTransparentDepth(texcoord);
+	else normal = GetNormal(texcoord);
+	
 	
 	vec4 viewSpacePosition  = CalculateViewSpacePosition(texcoord, depth );
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	
-	vec3 tangentNormal; mat3 tbnMatrix;
+	vec3 color; vec3 tangentNormal; mat3 tbnMatrix;
 	AddWater(viewSpacePosition, mask.water, color, normal, smoothness, tangentNormal, tbnMatrix);
+	
+	
+	vec3 uColor = GetRefractedColor(texcoord, viewSpacePosition, viewSpacePosition1, normal, tangentNormal, mask.water);
+	if (mask.water < 0.5) color = uColor; // Save the underwater color until after reflections are applied
 	
 	
 	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, mask);
 	
 	
-	CompositeWater(color, depth1, viewSpacePosition, viewSpacePosition1, normal, tangentNormal, mask.water);
+	CompositeWater(color, uColor, depth1, mask.water);
 	
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
