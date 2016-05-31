@@ -12,7 +12,6 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
-uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -114,8 +113,6 @@ float noise(in vec2 coord) {
 #include "/lib/Sky.fsh"
 
 bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, cfloat rayGrowth, cint maxSteps, cint maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
-	if (dot(vec3(0.0, 0.0, -1.0), rayDirection) < 0.0) return false;
-	
 	vec3 rayStep = rayDirection * firstStepSize;
 	vec4 ray = vec4(startingViewPosition + rayStep, 1.0);
 	
@@ -283,8 +280,19 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 #endif
 
 mat3 GetWaterTBN() {
-	vec3 normal   = DecodeNormal(texture2D(colortex0, texcoord).xy);
-	vec3 tangent  = DecodeNormal(texture2D(colortex5, texcoord).xy);
+	vec3 normal  = DecodeNormal(Decode24(texture2D(colortex0, texcoord).x));
+	vec3 tangent = DecodeNormal(Decode24(texture2D(colortex0, texcoord).y));
+	
+	#define ANG 0.5 * RAD
+	
+	rotate(normal.yz, -ANG);
+	rotate(normal.xz, -ANG);
+	rotate(tangent.yz, -ANG);
+	rotate(tangent.xz, -ANG);
+	
+	normal  = normalize((gbufferModelView * vec4(normal , 0.0)).xyz);
+	tangent = normalize((gbufferModelView * vec4(tangent, 0.0)).xyz);
+	
 	vec3 binormal = normalize(cross(normal, tangent));
 	
 	return transpose(mat3(tangent, binormal, normal));

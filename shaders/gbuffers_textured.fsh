@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:02315 */
+/* DRAWBUFFERS:0231 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -69,8 +69,15 @@ vec4 GetNormal() {
 }
 
 void DoWaterFragment() {
-	gl_FragData[0] = vec4(EncodeNormal(vertNormal), 0.0, 1.0);
-	gl_FragData[4] = vec4(EncodeNormal(transpose(tbnMatrix)[0]), 0.0, 1.0);
+	vec3 normal  = normalize((gbufferModelViewInverse * vec4(transpose(tbnMatrix)[2], 0.0)).xyz);
+	vec3 tangent = normalize((gbufferModelViewInverse * vec4(transpose(tbnMatrix)[0], 0.0)).xyz);
+	
+	rotate(normal.xz, 0.5);
+	rotate(normal.yz, 0.5);
+	rotate(tangent.xz, 0.5);
+	rotate(tangent.yz, 0.5);
+	
+	gl_FragData[0] = vec4(Encode24(EncodeNormal(normal)), Encode24(EncodeNormal(tangent)), 0.0, 1.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {

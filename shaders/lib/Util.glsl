@@ -134,6 +134,25 @@ vec3 SetSaturationLevel(in vec3 color, in float level) {
 }
 
 
+float Encode24(in vec2 buffer) {
+	cvec2 encode = vec2(1.0, exp2(12.0));
+	
+	buffer = round(buffer * (exp2(12.0) - 1.0));
+	
+	return dot(buffer, encode);
+}
+
+vec2 Decode24(in float buffer) {
+	cvec2 decode = 1.0 / (exp2(12.0) - 1.0) / vec2(1.0, exp2(12.0));
+	
+	vec2 decoded;
+	
+	decoded.r = mod(buffer, exp2(12.0));
+	decoded.g = buffer - decoded.r;
+	
+	return decoded * decode;
+}
+
 float Encode8to32(in float buffer0, in float buffer1, in float buffer2) {
 	cvec3 encode = vec3(1.0, exp2(8.0), exp2(16.0));
 	

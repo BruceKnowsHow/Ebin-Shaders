@@ -81,13 +81,15 @@ vec3 GetNormal(in vec2 coord) {
 void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, inout vec3 diffuse) {
 	encode.r = texture2D(buffer, texcoord).r;
 	encode.g = texture2D(buffer, texcoord).g;
-	encode.b = texture2D(buffer, texcoord).b;
+	
 	
 	float buffer1g, buffer1b;
 	
 	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
 	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
 #ifdef FORWARD_SHADING
+	encode.b = texture2D(buffer, texcoord).b;
+	
 	Decode32to8(encode.b, diffuse.r, diffuse.g, diffuse.b);
 	
 	diffuse = pow(diffuse, vec3(2.2));
