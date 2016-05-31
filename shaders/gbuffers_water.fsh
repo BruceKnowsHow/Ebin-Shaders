@@ -72,12 +72,10 @@ void DoWaterFragment() {
 	vec3 normal  = normalize((gbufferModelViewInverse * vec4(transpose(tbnMatrix)[2], 0.0)).xyz);
 	vec3 tangent = normalize((gbufferModelViewInverse * vec4(transpose(tbnMatrix)[0], 0.0)).xyz);
 	
-	#define ANG 0.5 * RAD
-	
-	rotate(normal.xz, ANG);
-	rotate(normal.yz, ANG);
-	rotate(tangent.xz, ANG);
-	rotate(tangent.yz, ANG);
+	rotate(normal.xz, 0.5);
+	rotate(normal.yz, 0.5);
+	rotate(tangent.xz, 0.5);
+	rotate(tangent.yz, 0.5);
 	
 	gl_FragData[0] = vec4(Encode24(EncodeNormal(normal)), Encode24(EncodeNormal(tangent)), 0.0, 1.0);
 }

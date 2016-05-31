@@ -283,12 +283,10 @@ mat3 GetWaterTBN() {
 	vec3 normal  = DecodeNormal(Decode24(texture2D(colortex0, texcoord).x));
 	vec3 tangent = DecodeNormal(Decode24(texture2D(colortex0, texcoord).y));
 	
-	#define ANG 0.5 * RAD
-	
-	rotate(normal.yz, -ANG);
-	rotate(normal.xz, -ANG);
-	rotate(tangent.yz, -ANG);
-	rotate(tangent.xz, -ANG);
+	rotate(normal.yz, -0.5);
+	rotate(normal.xz, -0.5);
+	rotate(tangent.yz, -0.5);
+	rotate(tangent.xz, -0.5);
 	
 	normal  = normalize((gbufferModelView * vec4(normal , 0.0)).xyz);
 	tangent = normalize((gbufferModelView * vec4(tangent, 0.0)).xyz);
