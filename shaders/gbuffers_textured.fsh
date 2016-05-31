@@ -1,11 +1,11 @@
 #version 410 compatibility
-#define gbuffers_textured_lit
+#define gbuffers_textured
 #define fsh
 #define ShaderStage -1
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:023156 */
+/* DRAWBUFFERS:02315 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -70,7 +70,7 @@ vec4 GetNormal() {
 
 void DoWaterFragment() {
 	gl_FragData[0] = vec4(EncodeNormal(vertNormal), 0.0, 1.0);
-	gl_FragData[5] = vec4(EncodeNormal(transpose(tbnMatrix)[0]), 0.0, 1.0);
+	gl_FragData[4] = vec4(EncodeNormal(transpose(tbnMatrix)[0]), 0.0, 1.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
@@ -104,11 +104,11 @@ void main() {
 	
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, materialIDs1.r, specularity.g, materialIDs1.b, materialIDs1.a);
 	
+	vec3 Colortex3 = vec3(Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
+	                      Encode8to32(specularity.r, 0.0, 0.0),
+	                      Encode8to32(diffuse.r * diffuse.a, diffuse.g * diffuse.a, diffuse.b * diffuse.a));
 	
 	#ifdef DEFERRED_SHADING
-		vec3 Colortex3 = vec3(Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
-		                      Encode8to32(specularity.r, 0.0, 0.0), 0.0);
-		
 		gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
 		gl_FragData[1] = vec4(pow(diffuse.rgb, vec3(2.2)) * 0.05, diffuse.a);
 		gl_FragData[2] = vec4(Colortex3.rgb, 1.0);
@@ -119,14 +119,10 @@ void main() {
 		
 		vec3 composite = CalculateShadedFragment(pow(diffuse.rgb, vec3(2.2)), mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
 		
-		vec3 Colortex3 = vec3(Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
-		                      Encode8to32(specularity.r, 0.0, 0.0), 0.0);
-		
 		gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
 		gl_FragData[1] = vec4(EncodeColor(composite), diffuse.a);
 		gl_FragData[2] = vec4(Colortex3.rgb, 1.0);
 		gl_FragData[3] = vec4(EncodeNormal(normal.xyz).xy, 0.0, 1.0);
-		gl_FragData[4] = vec4(diffuse.rgb, 1.0);
 	#endif
 	
 	exit();

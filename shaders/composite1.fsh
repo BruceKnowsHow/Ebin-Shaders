@@ -11,7 +11,6 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
-uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -48,11 +47,11 @@ varying vec2 texcoord;
 #include "/lib/CalculateFogFactor.glsl"
 
 
-vec3 GetDiffuse(in vec2 coord) {
+void GetColor(in vec2 coord, out vec3 diffuse, out vec3 composite) {
 #ifdef FORWARD_SHADING
-	return pow(texture2D(colortex5, coord).rgb, vec3(2.2));
+	composite = DecodeColor(texture2D(colortex2, coord).rgb);
 #else
-	return texture2D(colortex2, coord).rgb * 20.0;
+	diffuse = texture2D(colortex2, coord).rgb * 20.0;
 #endif
 }
 
@@ -79,14 +78,20 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
-void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, inout vec3 diffuse) {
 	encode.r = texture2D(buffer, texcoord).r;
 	encode.g = texture2D(buffer, texcoord).g;
+	encode.b = texture2D(buffer, texcoord).b;
 	
 	float buffer1g, buffer1b;
 	
 	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
 	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
+#ifdef FORWARD_SHADING
+	Decode32to8(encode.b, diffuse.r, diffuse.g, diffuse.b);
+	
+	diffuse = pow(diffuse, vec3(2.2));
+#endif
 }
 
 void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float volFog) {
@@ -162,7 +167,9 @@ void main() {
 			), 1.0); exit(); return; }
 	
 	
-	vec3  diffuse =          GetDiffuse(texcoord);
+	vec3 diffuse, composite;
+	GetColor(texcoord, diffuse, composite);
+	
 	vec3  normal  =           GetNormal(texcoord);
 	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
@@ -170,8 +177,8 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
-	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
+	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask; vec3 diffuse1;
+	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness, diffuse);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	
@@ -181,9 +188,7 @@ void main() {
 #ifdef DEFERRED_SHADING
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
-	vec3 composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
-#else
-	vec3 composite = DecodeColor(texture2D(colortex2, texcoord).rgb);
+	composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 #endif
 	
 	

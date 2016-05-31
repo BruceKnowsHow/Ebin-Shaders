@@ -12,7 +12,7 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
-uniform sampler2D colortex6;
+uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -284,7 +284,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 
 mat3 GetWaterTBN() {
 	vec3 normal   = DecodeNormal(texture2D(colortex0, texcoord).xy);
-	vec3 tangent  = DecodeNormal(texture2D(colortex6, texcoord).xy);
+	vec3 tangent  = DecodeNormal(texture2D(colortex5, texcoord).xy);
 	vec3 binormal = normalize(cross(normal, tangent));
 	
 	return transpose(mat3(tangent, binormal, normal));
