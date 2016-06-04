@@ -145,7 +145,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 			for (float j = -range; j <= range; j++) {
 				vec2 coord = vec2(i, j) * pcfRotation;
 				
-				sunlight += shadow2DLod(shadow, vec3(coord * spread + position.st, position.z), 0).x;
+				sunlight += shadow2D(shadow, vec3(coord * spread + position.st, position.z)).x;
 			}
 		}
 		

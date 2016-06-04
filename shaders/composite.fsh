@@ -111,7 +111,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	
 	#include "lib/Samples.glsl"
 	
-	for(int i = 0; i < GI_SAMPLE_COUNT; i++) {
+	for (int i = 0; i < GI_SAMPLE_COUNT; i++) {
 		vec2 offset = samples[i] * scale + noise;
 		
 		vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
@@ -127,7 +127,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 		
 		vec3 sampleDiff = (GI_MODE == 1 ? shadowViewPosition.xyz : position.xyz) - samplePos.xyz;
 		
-		float distanceCoeff = lengthSquared(sampleDiff); // Inverse-square law
+		float distanceCoeff = lengthSquared(sampleDiff) + (GI_MODE == 1 ? 0.0 : 0.0); // Inverse-square law
 		      distanceCoeff = 1.0 / max(distanceCoeff, (GI_MODE == 1 ? pow(radius, 2) : 2.5e-4));
 		
 		vec3 sampleDir    = normalize(sampleDiff);
@@ -210,7 +210,7 @@ void main() {
 	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
 	
 	
-	if (mask.water > 0.5)
+	if (mask.transparent + mask.water> 0.5)
 		{ gl_FragData[0] = vec4(vec3(0.0), volFog); exit(); return; }
 	
 	

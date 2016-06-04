@@ -315,7 +315,7 @@ mat3x2 GetRefractedCoordinates(in vec2 coord, in vec4 viewSpacePosition, in vec4
 	cfloat refractAmount = 0.5;
 	cfloat aberrationAmount = 1.0 + 0.2;
 	
-	vec2 refraction = tangentSpaceWave.st / fov * 90.0 * refractAmount * surfaceDepth;
+	vec2 refraction = tangentSpaceWave.st / fov * 90.0 * refractAmount * min(surfaceDepth, 1.0);
 	
 	mat3x2 coords = mat3x2(screenSpacePosition.st + refraction * aberrationAmount,
 	                       screenSpacePosition.st + refraction,
