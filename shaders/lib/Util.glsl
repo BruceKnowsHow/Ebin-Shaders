@@ -1,6 +1,4 @@
-
 // Start of #include "/lib/Util.glsl"
-
 
 #define  PI 3.1415926 // Pi
 #define RAD 0.0174533 // Degrees per radian
@@ -89,50 +87,6 @@ float sum(in vec4 x) {
 	return dot(x, vec4(1.0));
 }
 
-float avg(in vec2 x) {
-	return dot(x, vec2(2.0));
-}
-
-float avg(in vec3 x) {
-	return dot(x, vec3(3.0));
-}
-
-float avg(in vec4 x) {
-	return dot(x, vec4(4.0));
-}
-
-float sumMult(in vec2 x, in float y) {
-	return dot(x, vec2(y));
-}
-
-float sumMult(in vec3 x, in float y) {
-	return dot(x, vec3(y));
-}
-
-float sumMult(in vec4 x, in float y) {
-	return dot(x, vec4(y));
-}
-
-
-float length(in vec2 x) {
-	return sqrt(dot(x, x));
-}
-
-float length(in vec3 x) {
-	return sqrt(dot(x, x));
-}
-
-float length(in vec4 x) {
-	return sqrt(dot(x, x));
-}
-
-
-vec3 SetSaturationLevel(in vec3 color, in float level) {
-	float luminance = max(0.1175, dot(color, lumaCoeff));
-	
-	return mix(vec3(luminance), color, level);
-}
-
 
 float Encode24(in vec2 buffer) {
 	cvec2 encode = vec2(1.0, exp2(12.0));
@@ -192,11 +146,26 @@ vec3 DecodeNormal(vec2 encodedNormal) {
 	return vec3(fenc * g, 1.0 - f * 0.5);
 }
 
+
+vec3 SetSaturationLevel(in vec3 color, in float level) {
+	float luminance = max(0.1175, dot(color, lumaCoeff));
+	
+	return mix(vec3(luminance), color, level);
+}
+
+
 void rotate(inout vec2 vector, in float radians) {
 	vector *= mat2(
 		cos(radians), -sin(radians),
 		sin(radians),  cos(radians));
 }
 
+void rotateDeg(inout vec2 vector, in float degrees) {
+	degrees = radians(degrees);
+	
+	vector *= mat2(
+		cos(degrees), -sin(degrees),
+		sin(degrees),  cos(degrees));
+}
 
 // End of #include "/lib/Util.glsl"

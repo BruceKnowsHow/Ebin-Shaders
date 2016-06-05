@@ -280,13 +280,17 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 #endif
 
 mat3 GetWaterTBN() {
-	vec3 normal  = DecodeNormal(Decode24(texture2D(colortex0, texcoord).x));
-	vec3 tangent = DecodeNormal(Decode24(texture2D(colortex0, texcoord).y));
+	vec3 normal = DecodeNormal(texture2D(colortex0, texcoord).xy);
+	     normal = normalize((gbufferModelViewInverse * vec4(normal, 0.0)).xyz);
 	
-	rotate(normal.yz, -0.5);
-	rotate(normal.xz, -0.5);
-	rotate(tangent.yz, -0.5);
-	rotate(tangent.xz, -0.5);
+	vec3 tangent = vec3(1.0, 0.0, 0.0);
+	
+	if      (normal.x >  0.5) tangent = vec3( 0.0, 0.0,  1.0);
+	else if (normal.x < -0.5) tangent = vec3( 0.0, 0.0, -1.0);
+	else if (normal.y >  0.5) tangent = vec3( 1.0, 0.0,  0.0);
+	else if (normal.y < -0.5) tangent = vec3(-1.0, 0.0,  0.0);
+	else if (normal.z >  0.5) tangent = vec3(-1.0, 0.0,  0.0);
+	else if (normal.z < -0.5) tangent = vec3( 1.0, 0.0,  0.0);
 	
 	normal  = normalize((gbufferModelView * vec4(normal , 0.0)).xyz);
 	tangent = normalize((gbufferModelView * vec4(tangent, 0.0)).xyz);
