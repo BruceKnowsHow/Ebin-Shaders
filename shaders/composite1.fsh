@@ -89,6 +89,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 	
 	if (mask.sky > 0.5) { volFog = 1.0; return; }
 	
+#if (defined GI_ENABLED || defined VOLUMETRIC_FOG)
 	depth = ExpToLinearDepth(depth);
 	
 	float totalWeights   = 0.0;
@@ -98,7 +99,9 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 		for(float j = -0.5; j <= 0.5; j++) {
 			vec2 offset = vec2(i, j) / vec2(viewWidth, viewHeight);
 			
-			float sampleDepth  = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x);
+			float sampleDepth = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x);
+			
+		#ifdef GI_ENABLED
 			vec3  sampleNormal = GetNormal(texcoord + offset * 8.0);
 			
 			float weight  = 1.0 - abs(depth - sampleDepth);
@@ -106,20 +109,26 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			      weight  = pow(weight, 32);
 			      weight  = max(0.1e-8, weight);
 			
+			GI += pow(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb, vec3(2.2)) * weight;
+			
+			totalWeights += weight;
+		#endif
+			
+		#ifdef VOLUMETRIC_FOG
 			float FogWeight = 1.0 - abs(depth - sampleDepth) * 10.0;
 			      FogWeight = pow(FogWeight, 32);
 			      FogWeight = max(0.1e-8, FogWeight);
 			
-			GI  += pow(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb, vec3(2.2)) * weight;
 			volFog += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).a * FogWeight;
 			
-			totalWeights   += weight;
 			totalFogWeight += FogWeight;
+		#endif
 		}
 	}
 	
-	GI  /= totalWeights;
+	GI /= totalWeights;
 	volFog /= totalFogWeight;
+#endif
 }
 
 #include "/lib/Sky.fsh"
