@@ -282,7 +282,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 #endif
 
 mat3 GetWaterTBN() {
-	vec3 normal = DecodeNormal(texture2D(colortex0, texcoord).xy);
+	vec3 normal = DecodeNormal(texture2D(colortex3, texcoord).xy);
 	     normal = normalize((gbufferModelViewInverse * vec4(normal, 0.0)).xyz);
 	
 	vec3 tangent = vec3(1.0, 0.0, 0.0);
@@ -368,7 +368,7 @@ void main() {
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	DecodeBuffer(texcoord, colortex0, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = CalculateMasks(mask);
 	

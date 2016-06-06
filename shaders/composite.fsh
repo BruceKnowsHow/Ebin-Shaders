@@ -15,8 +15,8 @@ const bool shadowtex1Nearest   = true;
 const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
+uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex3;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -61,10 +61,6 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 
 vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex1, coord).xy);
-}
-
-float GetMaterialID(in vec2 coord) {
-	return texture2D(colortex3, texcoord).b;
 }
 
 void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
@@ -204,7 +200,7 @@ void main() {
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	DecodeBuffer(texcoord, colortex0, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	
@@ -222,7 +218,7 @@ void main() {
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, noise2D, mask);
 	
 	
-	gl_FragData[0] = vec4(EncodeColor(GI), volFog);
+	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);
 	
 	exit();
 }

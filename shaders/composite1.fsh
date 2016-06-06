@@ -5,11 +5,11 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:243 */
+/* DRAWBUFFERS:240 */
 
+uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
-uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
@@ -110,7 +110,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			      FogWeight = pow(FogWeight, 32);
 			      FogWeight = max(0.1e-8, FogWeight);
 			
-			GI  += DecodeColor(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb) * weight;
+			GI  += pow(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb, vec3(2.2)) * weight;
 			volFog += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).a * FogWeight;
 			
 			totalWeights   += weight;
@@ -164,7 +164,7 @@ void main() {
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	DecodeBuffer(texcoord, colortex0, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	
@@ -184,7 +184,7 @@ void main() {
 	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
 	
-	composite += GI * sunlightColor * pow(texture2D(colortex5, texcoord).rgb, vec3(2.2));
+	composite += GI * sunlightColor * pow(texture2D(colortex5, texcoord).rgb, vec3(2.2)) * 5.0;
 	
 	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);

@@ -5,9 +5,9 @@
 #include "/lib/Syntax.glsl"
 
 
+// uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
-uniform sampler2D colortex3;
 uniform sampler2D gdepthtex;
 
 uniform mat4 gbufferModelViewInverse;
@@ -157,7 +157,7 @@ void main() {
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-//	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+//	DecodeBuffer(texcoord, colortex0, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 //	mask = CalculateMasks(mask);
 	

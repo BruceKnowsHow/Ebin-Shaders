@@ -15,7 +15,7 @@ vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
 	vec3 wave = vec3(0.0);
 	
 	float skylightWeight = lightmapCoord.t;
-	float grassWeight    = float(fract(texcoord.t * 256.0) < 0.01);
+	float grassWeight    = float(fract(texcoord.t * 64.0) < 0.01);
 	
 	switch(int(mc_Entity.x)) {
 		case 31:
