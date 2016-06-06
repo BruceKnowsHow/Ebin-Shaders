@@ -15,8 +15,9 @@ const float drynessHalflife          = 40.0;
 const int colortex0Format = RG16;
 const int colortex1Format = RGB16;
 const int colortex2Format = RGB16;
-const int colortex3Format = RGB32F;
+const int colortex3Format = RG16;
 const int colortex4Format = RGBA16;
+const int colortex5Format = RGB8;
 */
 
 const int noiseTextureResolution = 64;

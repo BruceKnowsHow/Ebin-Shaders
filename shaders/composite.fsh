@@ -67,14 +67,16 @@ float GetMaterialID(in vec2 coord) {
 	return texture2D(colortex3, texcoord).b;
 }
 
-void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r) {
-	encode.r = texture2D(buffer, texcoord).r;
-	encode.g = texture2D(buffer, texcoord).g;
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
+	encode.rg = texture2D(buffer, texcoord).rg;
 	
-	float buffer1g, buffer1b;
+	vec2 buffer0 = Decode16(encode.r);
+	buffer0r = buffer0.r;
+	buffer0g = buffer0.g;
 	
-	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
+	vec2 buffer1 = Decode16(encode.g);
+	buffer1r = buffer1.r;
+	buffer1g = buffer1.g;
 }
 
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
@@ -202,7 +204,7 @@ void main() {
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness);
+	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	

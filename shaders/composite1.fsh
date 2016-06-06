@@ -11,6 +11,7 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -70,22 +71,16 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
-void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, out float buffer1g, inout vec3 diffuse) {
-	encode.r = texture2D(buffer, texcoord).r;
-	encode.g = texture2D(buffer, texcoord).g;
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
+	encode.rg = texture2D(buffer, texcoord).rg;
 	
+	vec2 buffer0 = Decode16(encode.r);
+	buffer0r = buffer0.r;
+	buffer0g = buffer0.g;
 	
-	float buffer1b;
-	
-	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
-	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
-#ifdef FORWARD_SHADING
-	encode.b = texture2D(buffer, texcoord).b;
-	
-	Decode32to8(encode.b, diffuse.r, diffuse.g, diffuse.b);
-	
-	diffuse = pow(diffuse, vec3(2.2));
-#endif
+	vec2 buffer1 = Decode16(encode.g);
+	buffer1r = buffer1.r;
+	buffer1g = buffer1.g;
 }
 
 void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI, out float volFog) {
@@ -168,20 +163,18 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
-	vec3 encode; float torchLightmap, skyLightmap, smoothness, sunlight; vec3 diffuse = color; Mask mask;
-	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness, sunlight, diffuse);
+	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	
-	encode.r = Encode8to32(torchLightmap, skyLightmap, mask.materialIDs);
+	encode.g = Encode16(vec2(smoothness, mask.materialIDs));
 	
 	
 #ifdef DEFERRED_SHADING
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
-	vec3 composite = CalculateShadedFragment(color, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition, sunlight);
-	
-	encode.g = Encode8to32(smoothness, sunlight, 0.0);
+	vec3 composite = CalculateShadedFragment(color, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 #else
 	vec3 composite = color;
 #endif
@@ -191,8 +184,7 @@ void main() {
 	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
 	
-	composite += GI * sunlightColor * diffuse;
-//	composite += GI * 4.0 * sunlightColor * composite * (1.0 - pow(sunlight, 0.25) * 0.9);
+	composite += GI * sunlightColor * pow(texture2D(colortex5, texcoord).rgb, vec3(2.2));
 	
 	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);
