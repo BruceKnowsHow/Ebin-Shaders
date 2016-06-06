@@ -47,14 +47,6 @@ varying vec2 texcoord;
 #include "/lib/CalculateFogFactor.glsl"
 
 
-void GetColor(in vec2 coord, out vec3 diffuse, out vec3 composite) {
-#ifdef FORWARD_SHADING
-	composite = DecodeColor(texture2D(colortex2, coord).rgb);
-#else
-	diffuse = texture2D(colortex2, coord).rgb * 20.0;
-#endif
-}
-
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
@@ -162,16 +154,13 @@ void main() {
 	float depth = GetDepth(texcoord);
 	
 	
+	vec3 color = texture2D(colortex2, texcoord).rgb;
+	
 	if (depth >= 1.0) { // Sky pixels are quickly composited and returned
-		gl_FragData[0] = vec4( (Deferred_Shading ?
-			EncodeColor(texture2D(colortex2, texcoord).rgb * 20.0) :
-			texture2D(colortex2, texcoord).rgb
-			), 1.0); exit(); return; }
+		gl_FragData[0] = vec4((Deferred_Shading ? EncodeColor(color * 20.0) : color), 1.0); exit(); return; }
 	
 	
-	vec3 diffuse, composite;
-	GetColor(texcoord, diffuse, composite);
-	
+	color         = (Deferred_Shading ? color * 20.0 : DecodeColor(color));
 	vec3  normal  =           GetNormal(texcoord);
 	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
@@ -179,7 +168,7 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
-	vec3 encode; float torchLightmap, skyLightmap, smoothness, sunlight; Mask mask; vec3 diffuse1;
+	vec3 encode; float torchLightmap, skyLightmap, smoothness, sunlight; vec3 diffuse = color; Mask mask;
 	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness, sunlight, diffuse);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
@@ -190,9 +179,11 @@ void main() {
 #ifdef DEFERRED_SHADING
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
-	composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition, sunlight);
+	vec3 composite = CalculateShadedFragment(color, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition, sunlight);
 	
 	encode.g = Encode8to32(smoothness, sunlight, 0.0);
+#else
+	vec3 composite = color;
 #endif
 	
 	
