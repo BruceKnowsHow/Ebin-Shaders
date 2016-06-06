@@ -78,12 +78,12 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
-void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, inout vec3 diffuse) {
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer0b, out float buffer1r, out float buffer1g, inout vec3 diffuse) {
 	encode.r = texture2D(buffer, texcoord).r;
 	encode.g = texture2D(buffer, texcoord).g;
 	
 	
-	float buffer1g, buffer1b;
+	float buffer1b;
 	
 	Decode32to8(encode.r, buffer0r, buffer0g, buffer0b);
 	Decode32to8(encode.g, buffer1r, buffer1g, buffer1b);
@@ -179,8 +179,8 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
-	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask; vec3 diffuse1;
-	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness, diffuse);
+	vec3 encode; float torchLightmap, skyLightmap, smoothness, sunlight; Mask mask; vec3 diffuse1;
+	DecodeBuffer(texcoord, colortex3, encode, torchLightmap, skyLightmap, mask.materialIDs, smoothness, sunlight, diffuse);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	
@@ -190,7 +190,9 @@ void main() {
 #ifdef DEFERRED_SHADING
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
-	composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
+	composite = CalculateShadedFragment(diffuse, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition, sunlight);
+	
+	encode.g = Encode8to32(smoothness, sunlight, 0.0);
 #endif
 	
 	
@@ -199,6 +201,7 @@ void main() {
 	
 	
 	composite += GI * sunlightColor * diffuse;
+//	composite += GI * 4.0 * sunlightColor * composite * (1.0 - pow(sunlight, 0.25) * 0.9);
 	
 	
 	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);

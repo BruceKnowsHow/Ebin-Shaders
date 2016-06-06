@@ -103,20 +103,29 @@ void main() {
 	
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, materialIDs1.r, specularity.g, materialIDs1.b, materialIDs1.a);
 	
-	vec3 Colortex3 = vec3(Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
-	                      Encode8to32(specularity.r, 0.0, 0.0),
-	                      Encode8to32(diffuse.r * diffuse.a, diffuse.g * diffuse.a, diffuse.b * diffuse.a));
 	
 	#ifdef DEFERRED_SHADING
+		vec3 Colortex3 = vec3(
+			Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
+			Encode8to32(specularity.r, 0.0, 0.0),
+			Encode8to32(diffuse.r * diffuse.a, diffuse.g * diffuse.a, diffuse.b * diffuse.a));
+		
 		gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
 		gl_FragData[1] = vec4(pow(diffuse.rgb, vec3(2.2)) * 0.05, diffuse.a);
 		gl_FragData[2] = vec4(Colortex3.rgb, 1.0);
 		gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
 	#else
-		Mask mask; mask.materialIDs = encodedMaterialIDs;
+		float sunlight; Mask mask; mask.materialIDs = encodedMaterialIDs;
 		CalculateMasks(mask);
 		
-		vec3 composite = CalculateShadedFragment(pow(diffuse.rgb, vec3(2.2)), mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
+		vec3 composite = CalculateShadedFragment(pow(diffuse.rgb, vec3(2.2)), mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition, sunlight);
+		
+		
+		vec3 Colortex3 = vec3(
+			Encode8to32(vertLightmap.s, vertLightmap.t, encodedMaterialIDs),
+			Encode8to32(specularity.r, sunlight, 0.0),
+			Encode8to32(diffuse.r * diffuse.a, diffuse.g * diffuse.a, diffuse.b * diffuse.a));
+		
 		
 		gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
 		gl_FragData[1] = vec4(EncodeColor(composite), diffuse.a);
