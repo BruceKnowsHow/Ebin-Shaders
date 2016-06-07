@@ -1,4 +1,4 @@
-// Start of #include "/lib/Materials.vsh"
+// Start of #include "/lib/Vertex/Materials.vsh"
 
 float GetMaterialIDs(in int mc_ID) { // Gather material masks
 	float materialID;
@@ -27,4 +27,4 @@ float GetMaterialIDs(in int mc_ID) { // Gather material masks
 	return materialID;
 }
 
-// End of #include "/lib/Materials.vsh"
+// End of #include "/lib/Vertex/Materials.vsh"

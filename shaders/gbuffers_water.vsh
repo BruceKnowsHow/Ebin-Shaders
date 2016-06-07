@@ -50,7 +50,7 @@ vec2 GetDefaultLightmap(in vec2 lightmapCoord) { // Gets the lightmap from the d
 	return clamp((lightmapCoord * 1.032) - 0.032, 0.0, 1.0).st; // Default lightmap texture coordinates work somewhat as lightmaps, however they need to be adjusted to use the full range of 0.0-1.0
 }
 
-#include "/lib/Materials.glsl"
+#include "/lib/Vertex/Materials.vsh"
 
 vec4 GetWorldSpacePosition() {
 	return gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
@@ -60,9 +60,9 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 	return (isEyeInWater == 1 ? gbufferProjection : gl_ProjectionMatrix) * gbufferModelView * worldSpacePosition;
 }
 
-#include "/lib/Waving.vsh"
-#include "/lib/VertexDisplacements.vsh"
-#include "/lib/CalculateTBN.vsh"
+#include "/lib/Vertex/Waving.vsh"
+#include "/lib/Vertex/VertexDisplacements.vsh"
+#include "/lib/Vertex/CalculateTBN.vsh"
 
 float GetTransparentMask(in float materialIDs) {
 #ifdef gbuffers_water

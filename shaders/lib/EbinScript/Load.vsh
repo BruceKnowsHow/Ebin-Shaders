@@ -1,6 +1,4 @@
-
 // Start of #include "/lib/EbinScript/Load.vsh"
-
 
 #define time frameTimeCounter
 #define dayCycle sunAngle
@@ -10,6 +8,5 @@
 #else
 	#define position previousCameraPosition
 #endif
-
 
 // End of #include "/lib/EbinScript/Load.vsh"

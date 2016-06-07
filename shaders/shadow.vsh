@@ -41,9 +41,10 @@ vec4 WorldSpaceToShadowProjection1(in vec4 worldSpacePosition) {
 	return shadowProjection * shadowView * worldSpacePosition;
 }
 
-#include "/lib/Waving.vsh"
-#include "/lib/VertexDisplacements.vsh"
-#include "/lib/CalculateTBN.vsh"
+#include "/lib/Vertex/Waving.vsh"
+#include "/lib/Vertex/VertexDisplacements.vsh"
+#include "/lib/Vertex/CalculateTBN.vsh"
+
 #include "/lib/BiasFunctions.glsl"
 
 vec4 BiasShadowProjection(in vec4 position) {
