@@ -11,7 +11,7 @@ uniform int isEyeInWater;
 varying vec3 lightVector;
 
 // #include "/lib/Settings.glsl"
-// #include "/lib/Util.glsl"
+// #include "/lib/Utility.glsl"
 // #include "/lib/GlobalCompositeVariables.glsl"
 // #include "/lib/CalculateFogFactor.glsl"
 

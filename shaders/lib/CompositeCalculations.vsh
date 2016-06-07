@@ -6,7 +6,7 @@ uniform mat4 gbufferModelView;
 
 uniform vec3 upPosition;
 
-// #include "/lib/Util.glsl"
+// #include "/lib/Utility.glsl"
 // #include "/lib/ShadowViewMatrix.vsh"
 // #include "/lib/GlobalCompositeVariables.glsl"
 

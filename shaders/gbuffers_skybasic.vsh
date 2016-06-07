@@ -20,7 +20,7 @@ varying vec3 color;
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
-#include "/lib/Util.glsl"
+#include "/lib/Utility.glsl"
 #include "/lib/ShadowViewMatrix.vsh"
 #include "/lib/GlobalCompositeVariables.glsl"
 #include "/lib/DebugSetup.glsl"

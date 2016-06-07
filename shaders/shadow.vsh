@@ -26,7 +26,7 @@ varying vec2 lightmapCoord;
 varying vec3 vertNormal;
 
 #include "/lib/Settings.glsl"
-#include "/lib/Util.glsl"
+#include "/lib/Utility.glsl"
 #include "/lib/ShadowViewMatrix.vsh"
 
 vec4 GetWorldSpacePositionShadow() {

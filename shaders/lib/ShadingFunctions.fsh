@@ -16,7 +16,7 @@ uniform float viewHeight;
 varying vec3 lightVector;
 
 // #include "/lib/Settings.glsl"
-// #include "/lib/Util.glsl"
+// #include "/lib/Utility.glsl"
 
 */
 

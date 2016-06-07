@@ -44,7 +44,7 @@ varying vec3 worldPosition;
 
 #include "/lib/MenuInitializer.glsl"
 #include "/lib/Settings.glsl"
-#include "/lib/Util.glsl"
+#include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
 #include "/lib/CalculateFogFactor.glsl"
 #include "/lib/Masks.glsl"

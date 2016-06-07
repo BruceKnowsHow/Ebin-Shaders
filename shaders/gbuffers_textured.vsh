@@ -38,7 +38,7 @@ varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
 #include "/lib/Settings.glsl"
-#include "/lib/Util.glsl"
+#include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
 #ifdef FORWARD_SHADING
 #include "/lib/ShadowViewMatrix.vsh"

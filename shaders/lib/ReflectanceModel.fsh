@@ -2,7 +2,7 @@
 
 /* Prerequisites:
 
-// #include "/lib/Util.glsl"
+// #include "/lib/Utility.glsl"
 
 */
 

@@ -14,7 +14,7 @@ uniform float viewHeight;
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
-#include "/lib/Util.glsl"
+#include "/lib/Utility.glsl"
 #include "/lib/GlobalCompositeVariables.glsl"
 #include "/lib/DebugSetup.glsl"
 
