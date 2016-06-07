@@ -1,4 +1,4 @@
-// Start of #include "/lib/WaterWaves.fsh"
+// Start of #include "/lib/Fragment/WaterWaves.fsh"
 
 vec2 SmoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
 	coord *= noiseTextureResolution;
@@ -89,4 +89,4 @@ vec3 GetWaveNormals(in vec4 viewSpacePosition, in vec3 baseNormal) {
 	return normalize(normal);
 }
 
-// End of #include "/lib/WaterWaves.fsh"
+// End of #include "/lib/Fragment/WaterWaves.fsh"

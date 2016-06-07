@@ -44,7 +44,7 @@ varying vec2 texcoord;
 #include "/lib/DebugSetup.glsl"
 #include "/lib/GlobalCompositeVariables.glsl"
 #include "/lib/Masks.glsl"
-#include "/lib/ShadingFunctions.fsh"
+#include "/lib/Fragment/ShadingFunctions.fsh"
 #include "/lib/CalculateFogFactor.glsl"
 
 
@@ -131,7 +131,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 #endif
 }
 
-#include "/lib/Sky.fsh"
+#include "/lib/Fragment/Sky.fsh"
 
 float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1) {
 	vec3 underwaterVector = viewSpacePosition.xyz - viewSpacePosition1.xyz;

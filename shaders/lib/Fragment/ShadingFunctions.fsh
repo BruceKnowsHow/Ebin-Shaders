@@ -1,4 +1,4 @@
-// Start of #include "/lib/ShadingFunctions.fsh"
+// Start of #include "/lib/Fragment/ShadingFunctions.fsh"
 
 /* Prerequisites:
 
@@ -209,4 +209,4 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 	return composite;
 }
 
-// End of #include "/lib/ShadingFunctions.fsh"
+// End of #include "/lib/Fragment/ShadingFunctions.fsh"

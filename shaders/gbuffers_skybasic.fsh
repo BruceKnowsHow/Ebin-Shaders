@@ -38,7 +38,7 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-#include "/lib/Sky.fsh"
+#include "/lib/Fragment/Sky.fsh"
 
 
 void main() {

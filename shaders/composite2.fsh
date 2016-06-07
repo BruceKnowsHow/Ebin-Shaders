@@ -42,7 +42,7 @@ varying vec2 texcoord;
 #include "/lib/GlobalCompositeVariables.glsl"
 #include "/lib/Masks.glsl"
 #include "/lib/CalculateFogFactor.glsl"
-#include "/lib/ReflectanceModel.fsh"
+#include "/lib/Fragment/ReflectanceModel.fsh"
 
 const bool colortex2MipmapEnabled = true;
 
@@ -90,7 +90,7 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
-#include "/lib/WaterWaves.fsh"
+#include "/lib/Fragment/WaterWaves.fsh"
 
 void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
 	encode.rg = texture2D(buffer, texcoord).rg;
@@ -112,7 +112,7 @@ float noise(in vec2 coord) {
     return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
-#include "/lib/Sky.fsh"
+#include "/lib/Fragment/Sky.fsh"
 
 bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, cfloat rayGrowth, cint maxSteps, cint maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
 	vec3 rayStep = rayDirection * firstStepSize;

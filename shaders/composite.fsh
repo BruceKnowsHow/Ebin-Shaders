@@ -45,7 +45,7 @@ varying vec2 texcoord;
 #include "/lib/DebugSetup.glsl"
 #include "/lib/GlobalCompositeVariables.glsl"
 #include "/lib/Masks.glsl"
-#include "/lib/ShadingFunctions.fsh"
+#include "/lib/Fragment/ShadingFunctions.fsh"
 
 
 float GetDepth(in vec2 coord) {

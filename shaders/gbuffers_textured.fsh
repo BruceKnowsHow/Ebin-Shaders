@@ -50,7 +50,7 @@ varying vec3 worldPosition;
 #include "/lib/Masks.glsl"
 #ifdef FORWARD_SHADING
 #include "/lib/GlobalCompositeVariables.glsl"
-#include "/lib/ShadingFunctions.fsh"
+#include "/lib/Fragment/ShadingFunctions.fsh"
 #endif
 
 
