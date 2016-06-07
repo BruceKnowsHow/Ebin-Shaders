@@ -47,7 +47,7 @@ varying vec3 worldPosition;
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
 #include "/lib/CalculateFogFactor.glsl"
-#include "/lib/Masks.glsl"
+#include "/lib/Fragment/Masks.fsh"
 #ifdef FORWARD_SHADING
 #include "/lib/Uniform/GlobalCompositeVariables.glsl"
 #include "/lib/Fragment/ShadingFunctions.fsh"

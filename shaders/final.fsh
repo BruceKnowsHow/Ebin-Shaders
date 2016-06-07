@@ -26,7 +26,7 @@ varying vec2 texcoord;
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
-#include "/lib/Masks.glsl"
+#include "/lib/Fragment/Masks.fsh"
 
 
 vec3 GetColor(in vec2 coord) {
