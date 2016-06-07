@@ -1,6 +1,4 @@
-
 // Start of #include "/lib/Masks.glsl"
-
 
 struct Mask {
 	float materialIDs;
@@ -80,7 +78,5 @@ Mask AddWaterMask(in Mask mask, in float depth, in float depth1) {
 	
 	return mask;
 }
-
-
 
 // End of #include "/lib/Masks.glsl"

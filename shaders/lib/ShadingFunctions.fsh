@@ -1,4 +1,3 @@
-
 // Start of #include "/lib/ShadingFunctions.fsh"
 
 /* Prerequisites:
@@ -75,7 +74,7 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	float beta  = min(angleVN, angleLN);
 	float gamma = dot(eyeDir - normal * NdotV, lightVector - normal * NdotL);
 	
-	float roughnessSquared = square(roughness);
+	float roughnessSquared = pow2(roughness);
 	
 	float A = 1.0 -  0.5 * (roughnessSquared / (roughnessSquared + 0.57));
 	float B =       0.45 * (roughnessSquared / (roughnessSquared + 0.09));
@@ -209,6 +208,5 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 	
 	return composite;
 }
-
 
 // End of #include "/lib/ShadingFunctions.fsh"

@@ -1,6 +1,4 @@
-
 // Start of #include "/lib/Syntax.glsl"
-
 
 #ifdef fsh
 	#define varying in
@@ -33,6 +31,5 @@ float length(in vec3 x) {
 float length(in vec4 x) {
 	return sqrt(dot(x, x));
 }
-
 
 // End of #include "/lib/Syntax.glsl"

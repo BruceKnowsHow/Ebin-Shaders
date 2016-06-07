@@ -1,6 +1,4 @@
-
 // Start of #include "/lib/MenuInitializer.glsl"
-
 
 /* Force Optifine to recognize options
 
@@ -12,6 +10,5 @@
 #ifdef GI_MODE
 
 */
-
 
 // End of #include "/lib/MenuInitializer.glsl"

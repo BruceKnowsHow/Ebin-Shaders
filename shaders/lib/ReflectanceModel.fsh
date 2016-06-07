@@ -1,4 +1,3 @@
-
 // Start of #include "/lib/ReflectanceModel.fsh"
 
 /* Prerequisites:
@@ -6,7 +5,6 @@
 // #include "/lib/Util.glsl"
 
 */
-
 
 vec3 Fresnel(vec3 R0, float vdoth) {
 	vec3 fresnel;
@@ -247,6 +245,5 @@ vec3 CalculateSpecularHighlight(
 	
 	return fresnel * geometryFactor * microfacetDistribution * ldotn / (4.0 * ldotn * vdotn);
 }
-
 
 // End of #include "/lib/ReflectanceModel.fsh"

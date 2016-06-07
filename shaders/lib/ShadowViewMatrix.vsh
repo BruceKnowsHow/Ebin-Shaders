@@ -1,4 +1,3 @@
-
 // Start of #include "/lib/ShadowViewMatrix.vsh"
 
 /* Prerequisites:
@@ -76,6 +75,5 @@ float CalculateShadowView() {
 	
 	return isNight;
 }
-
 
 // End of #include "/lib/ShadowViewMatrix.vsh"

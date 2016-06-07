@@ -1,4 +1,3 @@
-
 // Start of #include "/lib/CompositeCalculations.vsh"
 
 /* Prerequisites:
@@ -13,7 +12,6 @@ uniform vec3 upPosition;
 
 */
 
-
 // {
 	float isNight = CalculateShadowView();
 	
@@ -27,23 +25,11 @@ uniform vec3 upPosition;
 	
 	cfloat timePower = 4.0;
 	
-//	horizonTime = cubesmooth(clamp01((1.0 - abs(LdotUp)) * 4.0 - 3.0));
-	
 	timeDay   = 1.0 - pow(1.0 - clamp01( LdotUp - 0.1) / 0.9, timePower);
 	timeNight = 1.0 - pow(1.0 - clamp01(-LdotUp), timePower);
 	
-	timeHorizon	= (1.0 - timeDay) * (1.0 - timeNight);// clamp01(1.0 - timeDay - timeNight);
+	timeHorizon	= (1.0 - timeDay) * (1.0 - timeNight);
 	
-	/*
-	timeDay      = sin( LdotUp * PI * 0.5);
-	timeNight    = sin(-LdotUp * PI * 0.5);
-	timeHorizon  = pow(1 + timeDay * timeNight, 4.0);
-	
-	float horizonClip = max0(0.9 - timeHorizon) / 0.9;
-	
-	timeDay = clamp01(timeDay * horizonClip);
-	timeNight = clamp01(timeNight * horizonClip);
-	*/
 	
 	float timeSunrise  = timeHorizon * timeDay;
 	float timeMoonrise = timeHorizon * timeNight;
@@ -59,12 +45,6 @@ uniform vec3 upPosition;
 	skylightColor =
 		mix(skylightDay, skylightSunrise, timeHorizon) * timeDay +
 		skylightNight * timeNight + skylightHorizon * timeHorizon;
-	
-	
-//	skyMainColor = skylightColor;
-//	horizonColor = skylightColor;
-//	sunGlowColor = skylightColor;
 // }
-
 
 // End of #include "/lib/CompositeCalculations.vsh"

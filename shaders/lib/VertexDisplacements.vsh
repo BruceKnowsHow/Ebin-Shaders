@@ -1,4 +1,3 @@
-
 // Start of #include "/lib/VertexDisplacements.vsh"
 
 /* Prerequisites:
@@ -31,6 +30,5 @@ vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
 	
 	return wave;
 }
-
 
 // End of #include "/lib/VertexDisplacements.vsh"

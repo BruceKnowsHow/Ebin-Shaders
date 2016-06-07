@@ -1,4 +1,3 @@
-
 // Start of #include "/lib/CalculateTBN.vsh"
 
 /* Prerequisites:
@@ -26,6 +25,5 @@ void CalculateTBN(in vec3 position, out mat3 tbnMatrix, out vec3 normal) {
 	
 	tbnMatrix = transpose(mat3(tangent, binormal, normal));
 }
-
 
 // End of #include "/lib/CalculateTBN.vsh"

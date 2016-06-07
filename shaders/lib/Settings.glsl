@@ -1,6 +1,4 @@
-
 // Start of #include "/lib/Settings.glsl"
-
 
 const int   shadowMapResolution      = 2048;  // [1024 2048 3072 4096]
 const float sunPathRotation          = -40.0;  // [-60.0 -50.0 -40.0 -30.0 -20.0 -10.0 0.0 10.0 20.0 30.0 40.0 50.0 60.0]
@@ -137,6 +135,5 @@ const int noiseTextureResolution = 64;
 
 
 cbool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
-
 
 // End of #include "/lib/Settings.glsl"

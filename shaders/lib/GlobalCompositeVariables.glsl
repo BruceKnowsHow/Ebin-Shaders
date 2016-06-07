@@ -1,6 +1,4 @@
-
 // Start of #include "/lib/GlobalCompositeVariables.glsl"
-
 
 varying vec3 lightVector;
 
@@ -12,10 +10,5 @@ varying vec3 colorHorizon;
 
 varying vec3 sunlightColor;
 varying vec3 skylightColor;
-
-// varying vec3 horizonColor;
-// varying vec3 skyMainColor;
-// varying vec3 sunGlowColor;
-
 
 // End of #include "/lib/GlobalCompositeVariables.glsl"

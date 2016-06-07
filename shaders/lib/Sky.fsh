@@ -1,4 +1,3 @@
-
 // Start of #include "/lib/Sky.fsh"
 
 /* Prerequisites:
@@ -115,6 +114,5 @@ vec3 CalculateSky(in vec4 viewSpacePosition, cbool sunSpot) {
 	
 	return (gradient + sunspot + atmosphere) * SKY_BRIGHTNESS;
 }
-
 
 // End of #include "/lib/Sky.fsh"

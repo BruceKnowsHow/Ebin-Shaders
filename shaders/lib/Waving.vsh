@@ -1,4 +1,3 @@
-
 // Start of #include "/lib/Waving.vsh"
 
 /* Prerequisites:
@@ -69,6 +68,5 @@ vec3 GetWavingWater(in vec3 position, in float magnitude) {
 	
 	return wave * magnitude;
 }
-
 
 // End of #include "/lib/Waving.vsh"
