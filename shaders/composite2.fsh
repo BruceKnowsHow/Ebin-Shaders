@@ -128,7 +128,7 @@ float GetSunlightVisibility(in vec4 viewSpacePosition) {
 	||  position.z < 0.0 || position.z > 1.0
 	    ) return 1.0;
 	
-	return shadow2D(shadow, position.xyz).x;
+	return pow2(shadow2D(shadow, position.xyz).x);
 }
 
 #include "/lib/Fragment/Sky.fsh"
@@ -255,10 +255,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	float sunlight = GetSunlightVisibility(viewSpacePosition);
 	
-	show(sunlight);
-	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
-	     reflectedSky *= (pow(skyLightmap, 5.0) + sunlight) * 0.998 + 0.002;
+	     reflectedSky *= (pow(skyLightmap, 5.0) + 1.0) * 0.998 + 0.002;
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
