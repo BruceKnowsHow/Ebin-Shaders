@@ -1,4 +1,4 @@
-// Start of #include "/lib/Poisson.glsl"
+// Start of #include "/lib/Samples/GI.glsl"
 
 #if GI_SAMPLE_COUNT == 20
 	cvec2[20] samples = vec2[20](
@@ -22,9 +22,8 @@
 		vec2( 0.8953143,  0.0710351),
 		vec2( 0.7211761, -0.6299928),
 		vec2(-0.6467265,  0.7329069));
-#endif
-
-#if GI_SAMPLE_COUNT == 40
+	
+#elif GI_SAMPLE_COUNT == 40
 	cvec2[40] samples = vec2[40](
 		vec2(-0.8500837, -0.1638091),
 		vec2(-0.6492744, -0.3556781),
@@ -66,9 +65,8 @@
 		vec2( 0.7901985,  0.5433547),
 		vec2( 0.2085643,  0.7671831),
 		vec2(-0.6390375,  0.7421936));
-#endif
-
-#if GI_SAMPLE_COUNT == 80
+	
+#elif GI_SAMPLE_COUNT == 80
 	cvec2[80] samples = vec2[80](
 		vec2( 0.4062509,  0.8598457),
 		vec2( 0.4099896,  0.6299807),
@@ -150,9 +148,8 @@
 		vec2(-0.1280939, -0.7548193),
 		vec2( 0.0319220, -0.8261531),
 		vec2(-0.0025101, -0.9833310));
-#endif
-
-#if GI_SAMPLE_COUNT == 128
+	
+#elif GI_SAMPLE_COUNT == 128
 	cvec2[128] samples = vec2[128](
 		vec2( 0.7427905, -0.2204209),
 		vec2( 0.8439732, -0.1025051),
@@ -282,9 +279,8 @@
 		vec2(-0.7521001,  0.6084672),
 		vec2(-0.5804936,  0.5022679),
 		vec2(-0.6655400,  0.7318430));
-#endif
-
-#if GI_SAMPLE_COUNT == 160
+	
+#elif GI_SAMPLE_COUNT == 160
 	cvec2[160] samples = vec2[160](
 		vec2(-0.6327311,  0.2057007),
 		vec2(-0.8516641,  0.1723533),
@@ -446,10 +442,8 @@
 		vec2( 0.9310325,  0.2553743),
 		vec2( 0.3347263,  0.7743101),
 		vec2( 0.8251485,  0.5354452));
-#endif
-
-
-#if GI_SAMPLE_COUNT == 256
+	
+#elif GI_SAMPLE_COUNT == 256
 	cvec2[256] samples = vec2[256](
 		vec2( 0.2966576, -0.9411677),
 		vec2( 0.1897487, -0.8451576),
@@ -709,4 +703,4 @@
 		vec2(-0.9944167, -0.0191173));
 #endif
 
-// End of #include "/lib/Poisson.glsl"
+// End of #include "/lib/Samples/GI.glsl"

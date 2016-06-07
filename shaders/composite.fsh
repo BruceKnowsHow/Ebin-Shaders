@@ -107,7 +107,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 	
 	noise *= scale * (GI_MODE == 1 ? 0.0 : 1.0);
 	
-	#include "lib/Samples.glsl"
+	#include "/lib/Samples/GI.glsl"
 	
 	for (int i = 0; i < GI_SAMPLE_COUNT; i++) {
 		vec2 offset = samples[i] * scale + noise;
