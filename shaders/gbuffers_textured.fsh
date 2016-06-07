@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:32015 */
+/* DRAWBUFFERS:320156 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -125,6 +125,10 @@ void main() {
 		gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
 		gl_FragData[4] = vec4(diffuse.rgb, diffuse.a);
 	#endif
+	
+#ifdef gbuffers_water
+	gl_FragData[5] = vec4(1.0, 0.0, 0.0, diffuse.a);
+#endif
 	
 	exit();
 }
