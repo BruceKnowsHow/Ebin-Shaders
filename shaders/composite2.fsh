@@ -15,11 +15,14 @@ uniform sampler2D colortex4;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
+uniform sampler2DShadow shadow; 
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
+uniform mat4 shadowModelView;
+uniform mat4 shadowProjection;
 
 uniform vec3 cameraPosition;
 
@@ -110,6 +113,22 @@ float GetVolumetricFog(in vec2 coord) {
 
 float noise(in vec2 coord) {
     return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+#include "/lib/Misc/BiasFunctions.glsl"
+
+float GetSunlightVisibility(in vec4 viewSpacePosition) {
+	vec4 position = gbufferModelViewInverse * viewSpacePosition;
+	position = shadowProjection * shadowModelView * position;
+	position.xyz = BiasShadowProjection(position.xyz);
+	position.xyz = position.xyz * 0.5 + 0.5;
+	
+	if (position.x < 0.0 || position.x > 1.0
+	||  position.y < 0.0 || position.y > 1.0
+	||  position.z < 0.0 || position.z > 1.0
+	    ) return 1.0;
+	
+	return shadow2D(shadow, position.xyz).x;
 }
 
 #include "/lib/Fragment/Sky.fsh"
@@ -234,7 +253,9 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	if (length(alpha) < 0.01) return;
 	
 	
-	float sunlight = 1.0;
+	float sunlight = GetSunlightVisibility(viewSpacePosition);
+	
+	show(sunlight);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
 	     reflectedSky *= (pow(skyLightmap, 5.0) + sunlight) * 0.998 + 0.002;
