@@ -4,7 +4,7 @@
 
 attribute vec4 at_tangent;
 
-// #include "/lib/VertexDisplacements.vsh"
+// #include "/lib/Vertex/VertexDisplacements.vsh"
 
 */
 

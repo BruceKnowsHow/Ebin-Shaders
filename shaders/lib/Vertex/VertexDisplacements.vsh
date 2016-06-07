@@ -3,7 +3,7 @@
 /* Prerequisites:
 
 // #include "/lib/Settings.glsl"
-// #include "/lib/Waving.vsh"
+// #include "/lib/Vertex/Waving.vsh"
 
 */
 
