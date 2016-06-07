@@ -157,19 +157,16 @@ void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewS
 
 void main() {
 	float depth = GetDepth(texcoord);
-	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
+	
+	if (depth >= 1.0) discard;
 	
 	
-	vec3 color = texture2D(colortex2, texcoord).rgb;
-	
-	if (depth >= 1.0) { // Sky pixels are quickly composited and returned
-		gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition, true)), 1.0); exit(); return; }
-	
-	
-	color         = (Deferred_Shading ? color * 20.0 : DecodeColor(color));
+	vec3  color   = texture2D(colortex2, texcoord).rgb;
+	      color   = (Deferred_Shading ? color * 20.0 : DecodeColor(color));
 	vec3  normal  =           GetNormal(texcoord);
 	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
+	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	

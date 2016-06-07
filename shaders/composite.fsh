@@ -189,8 +189,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
 void main() {
 	float depth = GetDepth(texcoord);
 	
-	
-	if (depth >= 1.0) { gl_FragData[0] = vec4(vec3(0.0), 1.0); exit(); return; }
+	if (depth >= 1.0) discard;
 	
 	
 	float depth1  = texture2D(depthtex1, texcoord).x;

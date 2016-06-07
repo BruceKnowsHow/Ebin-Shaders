@@ -362,9 +362,10 @@ void CompositeWater(inout vec3 color, in vec3 uColor, in float depth1, in float 
 
 void main() {
 	float depth = GetDepth(texcoord);
+	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	
-	if (depth >= 1.0) { gl_FragData[0] = vec4(texture2D(colortex2, texcoord).rgb, 1.0); exit(); return; }
+	if (depth >= 1.0) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition, true)), 1.0); exit(); return; }
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
@@ -379,7 +380,6 @@ void main() {
 	else normal = GetNormal(texcoord);
 	
 	
-	vec4 viewSpacePosition  = CalculateViewSpacePosition(texcoord, depth );
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	vec3 color = vec3(0.0); vec3 tangentNormal = vec3(0.0); mat3 tbnMatrix;
