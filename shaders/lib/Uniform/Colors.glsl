@@ -1,4 +1,4 @@
-// Start of #include "/lib/Colors.glsl"
+// Start of #include "/lib/Uniform/Colors.glsl"
 
 vec3 sunlightDay      = vec3(1.00, 1.00, 1.00);
 vec3 sunlightNight    = vec3(0.43, 0.65, 1.00);
@@ -21,4 +21,4 @@ skylightNight   *= 0.03 / length(skylightNight);
 skylightSunrise *= 0.01 / length(skylightSunrise);
 skylightHorizon *= 0.03 / length(skylightHorizon);
 
-// End of #include "/lib/Colors.glsl"
+// End of #include "/lib/Uniform/Colors.glsl"

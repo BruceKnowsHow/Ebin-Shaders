@@ -19,8 +19,8 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/ShadowViewMatrix.vsh"
-#include "/lib/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/ShadowViewMatrix.vsh"
+#include "/lib/Uniform/GlobalCompositeVariables.glsl"
 #include "/lib/DebugSetup.glsl"
 
 
@@ -29,7 +29,7 @@ void main() {
 	gl_Position = ftransform();
 	
 	
-	#include "/lib/CompositeCalculations.vsh"
+	#include "/lib/Uniform/CompositeCalculations.vsh"
 	
 	exit();
 }

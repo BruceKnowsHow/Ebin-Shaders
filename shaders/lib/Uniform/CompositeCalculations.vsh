@@ -1,4 +1,4 @@
-// Start of #include "/lib/CompositeCalculations.vsh"
+// Start of #include "/lib/Uniform/CompositeCalculations.vsh"
 
 /* Prerequisites:
 
@@ -7,8 +7,8 @@ uniform mat4 gbufferModelView;
 uniform vec3 upPosition;
 
 // #include "/lib/Utility.glsl"
-// #include "/lib/ShadowViewMatrix.vsh"
-// #include "/lib/GlobalCompositeVariables.glsl"
+// #include "/lib/Uniform/ShadowViewMatrix.vsh"
+// #include "/lib/Uniform/GlobalCompositeVariables.glsl"
 
 */
 
@@ -35,7 +35,7 @@ uniform vec3 upPosition;
 	float timeMoonrise = timeHorizon * timeNight;
 	
 	
-	#include "/lib/Colors.glsl"
+	#include "/lib/Uniform/Colors.glsl"
 	
 	
 	sunlightColor =
@@ -47,4 +47,4 @@ uniform vec3 upPosition;
 		skylightNight * timeNight + skylightHorizon * timeHorizon;
 // }
 
-// End of #include "/lib/CompositeCalculations.vsh"
+// End of #include "/lib/Uniform/CompositeCalculations.vsh"

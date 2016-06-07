@@ -28,7 +28,7 @@ varying vec2 texcoord;
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
 #include "/lib/CalculateFogFactor.glsl"
-#include "/lib/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/GlobalCompositeVariables.glsl"
 
 
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {

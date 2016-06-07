@@ -27,7 +27,7 @@ varying vec3 vertNormal;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/ShadowViewMatrix.vsh"
+#include "/lib/Uniform/ShadowViewMatrix.vsh"
 
 vec4 GetWorldSpacePositionShadow() {
 	return shadowModelViewInverse * shadowProjectionInverse * ftransform();

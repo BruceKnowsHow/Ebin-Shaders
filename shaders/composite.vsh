@@ -19,8 +19,8 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/ShadowViewMatrix.vsh"
-#include "/lib/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/ShadowViewMatrix.vsh"
+#include "/lib/Uniform/GlobalCompositeVariables.glsl"
 #include "/lib/DebugSetup.glsl"
 
 
@@ -32,7 +32,7 @@ void main() {
 	gl_Position.xy = ((gl_Position.xy * 0.5 + 0.5) * COMPOSITE0_SCALE) * 2.0 - 1.0;
 	
 	
-	#include "/lib/CompositeCalculations.vsh"
+	#include "/lib/Uniform/CompositeCalculations.vsh"
 	
 	exit();
 #else

@@ -41,8 +41,8 @@ varying vec3 worldPosition;
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
 #ifdef FORWARD_SHADING
-#include "/lib/ShadowViewMatrix.vsh"
-#include "/lib/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/ShadowViewMatrix.vsh"
+#include "/lib/Uniform/GlobalCompositeVariables.glsl"
 #endif
 
 
@@ -98,7 +98,7 @@ void main() {
 	
 	
 #ifdef FORWARD_SHADING
-	#include "/lib/CompositeCalculations.vsh"
+	#include "/lib/Uniform/CompositeCalculations.vsh"
 #endif
 	
 	exit();
