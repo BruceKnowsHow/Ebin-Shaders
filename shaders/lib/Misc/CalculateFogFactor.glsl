@@ -1,4 +1,4 @@
-// Start of #include "/lib/CalculateFogFactor.glsl"
+// Start of #include "/lib/Misc/CalculateFogFactor.glsl"
 
 /* Prerequisites:
 
@@ -28,4 +28,4 @@ float GetSkyAlpha(in float fogVolume, in float fogFactor) {
 	return min1(fogVolume * fogFactor + pow(fogFactor, 6) * float(Volumetric_Fog));
 }
 
-// End of #include "/lib/CalculateFogFactor.glsl"
+// End of #include "/lib/Misc/CalculateFogFactor.glsl"

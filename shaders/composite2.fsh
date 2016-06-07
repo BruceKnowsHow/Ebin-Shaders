@@ -41,7 +41,7 @@ varying vec2 texcoord;
 #include "/lib/DebugSetup.glsl"
 #include "/lib/Uniform/GlobalCompositeVariables.glsl"
 #include "/lib/Fragment/Masks.fsh"
-#include "/lib/CalculateFogFactor.glsl"
+#include "/lib/Misc/CalculateFogFactor.glsl"
 #include "/lib/Fragment/ReflectanceModel.fsh"
 
 const bool colortex2MipmapEnabled = true;

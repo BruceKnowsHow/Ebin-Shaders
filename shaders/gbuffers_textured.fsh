@@ -42,11 +42,11 @@ varying vec4  materialIDs1;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
-#include "/lib/MenuInitializer.glsl"
+#include "/lib/Misc/MenuInitializer.glsl"
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
-#include "/lib/CalculateFogFactor.glsl"
+#include "/lib/Misc/CalculateFogFactor.glsl"
 #include "/lib/Fragment/Masks.fsh"
 #ifdef FORWARD_SHADING
 #include "/lib/Uniform/GlobalCompositeVariables.glsl"

@@ -1,4 +1,4 @@
-// Start of #include "/lib/MenuInitializer.glsl"
+// Start of #include "/lib/Misc/MenuInitializer.glsl"
 
 /* Force Optifine to recognize options
 
@@ -11,4 +11,4 @@
 
 */
 
-// End of #include "/lib/MenuInitializer.glsl"
+// End of #include "/lib/Misc/MenuInitializer.glsl"

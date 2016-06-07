@@ -44,7 +44,7 @@ vec4 WorldSpaceToShadowSpace(in vec4 worldSpacePosition) {
 	return shadowProjection * shadowModelView * worldSpacePosition;
 }
 
-#include "/lib/BiasFunctions.glsl"
+#include "/lib/Misc/BiasFunctions.glsl"
 
 vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
 	coord *= vec2(viewWidth, viewHeight);

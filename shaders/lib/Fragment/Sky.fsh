@@ -13,7 +13,7 @@ varying vec3 lightVector;
 // #include "/lib/Settings.glsl"
 // #include "/lib/Utility.glsl"
 // #include "/lib/Uniform/GlobalCompositeVariables.glsl"
-// #include "/lib/CalculateFogFactor.glsl"
+// #include "/lib/Misc/CalculateFogFactor.glsl"
 
 */
 

@@ -45,7 +45,7 @@ vec4 WorldSpaceToShadowProjection1(in vec4 worldSpacePosition) {
 #include "/lib/Vertex/VertexDisplacements.vsh"
 #include "/lib/Vertex/CalculateTBN.vsh"
 
-#include "/lib/BiasFunctions.glsl"
+#include "/lib/Misc/BiasFunctions.glsl"
 
 vec4 BiasShadowProjection(in vec4 position) {
 	float biasCoeff = GetShadowBias(position.xy);
