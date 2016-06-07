@@ -103,6 +103,8 @@ void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolum
 	#endif
 }
 
+#include "/lib/Fragment/Clouds.fsh"
+
 vec3 CalculateSky(in vec4 viewSpacePosition, cbool sunSpot) {
 	if (isEyeInWater == 1) return vec3(0.0, 0.01, 0.1) * skylightColor; // waterVolumeColor from composite1
 	
@@ -111,8 +113,9 @@ vec3 CalculateSky(in vec4 viewSpacePosition, cbool sunSpot) {
 	vec3 gradient   = CalculateSkyGradient(viewSpacePosition, 1.0);
 	vec3 sunspot    = (sunSpot ? CalculateSunspot(viewSpacePosition) : vec3(0.0));
 	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
+	vec3 clouds = CompositeClouds(viewSpacePosition);
 	
-	return (gradient + sunspot + atmosphere) * SKY_BRIGHTNESS;
+	return (gradient + sunspot + atmosphere + clouds) * SKY_BRIGHTNESS;
 }
 
 // End of #include "/lib/Fragment/Sky.fsh"
