@@ -221,7 +221,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 		
 		vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 		
-		CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
+	//	CompositeFog(reflection, vec4(reflectionVector, 1.0), GetVolumetricFog(reflectedCoord.st));
 		
 		#ifdef REFLECTION_EDGE_FALLOFF
 			float angleCoeff = clamp(pow(dot(vec3(0.0, 0.0, 1.0), normal) + 0.15, 0.25) * 2.0, 0.0, 1.0) * 0.2 + 0.8;
@@ -322,7 +322,8 @@ mat3 GetWaterTBN() {
 	return transpose(mat3(tangent, binormal, normal));
 }
 
-void AddWater(in vec4 viewSpacePosition, out vec3 color, out vec3 normal, out float smoothness, out vec3 tangentNormal, out mat3 tbnMatrix) {
+void AddWater(in vec4 viewSpacePosition, inout Mask mask, out vec3 color, out vec3 normal, out float smoothness, out vec3 tangentNormal, out mat3 tbnMatrix) {
+	mask.metallic = 0.0;
 	color         = vec3(0.0, 0.015, 0.25);
 	tbnMatrix     = GetWaterTBN();
 	tangentNormal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2]);
@@ -403,7 +404,7 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	vec3 color = vec3(0.0); vec3 tangentNormal = vec3(0.0); mat3 tbnMatrix;
-	if (mask.water > 0.5) AddWater(viewSpacePosition, color, normal, smoothness, tangentNormal, tbnMatrix);
+	if (mask.water > 0.5) AddWater(viewSpacePosition, mask, color, normal, smoothness, tangentNormal, tbnMatrix);
 	
 	
 	vec3 uColor = GetRefractedColor(texcoord, viewSpacePosition, viewSpacePosition1, normal, tangentNormal, mask.water);
@@ -413,12 +414,12 @@ void main() {
 	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, mask);
 	
 	
-	CompositeWater(color, uColor, depth1, mask.water);
+//	CompositeWater(color, uColor, depth1, mask.water);
 	
 	
-	if (depth1 >= 1.0) color = mix(CalculateSky(viewSpacePosition, true), color, clamp01(mask.water + texture2D(colortex6, texcoord).r));
+//	if (depth1 >= 1.0) color = mix(CalculateSky(viewSpacePosition, true), color, clamp01(mask.water + texture2D(colortex6, texcoord).r));
 	
-	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
+//	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
 	
 	gl_FragData[0] = vec4(EncodeColor(color), 1.0);

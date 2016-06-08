@@ -176,7 +176,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 		rayIncrement *= 1.01; // Increase the step-size so that the sample-count decreases as the ray gets farther from the viewer
 	}
 	
-	fog /= max(weight, 0.1e-8);
+	fog /= max(weight, 1.0e-9);
 	fog  = pow(fog, VOLUMETRIC_FOG_POWER);
 	
 	return fog;
