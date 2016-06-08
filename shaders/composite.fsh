@@ -153,13 +153,13 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float 
 #endif
 }
 
-float ComputeVolumetricFog(in vec4 viewSpacePosition, in float noise) {
+float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 #ifdef VOLUMETRIC_FOG
 	float fog    = 0.0;
 	float weight = 0.0;
 	
 	float rayIncrement = gl_Fog.start / 64.0;
-	vec3  rayStep      = normalize(viewSpacePosition.xyz + vec3(0.0, 0.0, noise));
+	vec3  rayStep      = normalize(viewSpacePosition.xyz);
 	vec4  ray          = vec4(rayStep * gl_Fog.start, 1.0);
 	
 	mat4 ViewSpaceToShadowSpace = shadowProjection * shadowModelView * gbufferModelViewInverse; // Compose matrices outside of the loop to save computations
@@ -204,7 +204,7 @@ void main() {
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	
 	
-	float volFog = ComputeVolumetricFog(viewSpacePosition, noise2D.x);
+	float volFog = ComputeVolumetricFog(viewSpacePosition);
 	
 	
 	if (mask.transparent + mask.water> 0.5)
