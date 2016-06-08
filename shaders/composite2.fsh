@@ -205,10 +205,10 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	if (length(alpha) < 0.01) return;
 	
 	
-	float sunlight = 1.0;
+	float sunlight = GetSunlightVisibility(viewSpacePosition);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
-	     reflectedSky *= clamp(pow(skyLightmap, 5.0) + sunlight, 0.002, 1.0);
+	     reflectedSky *= clamp(pow(skyLightmap, 5.0) + 1.0, 0.002, 1.0);
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
