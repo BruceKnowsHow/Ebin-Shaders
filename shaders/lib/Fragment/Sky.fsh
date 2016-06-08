@@ -113,7 +113,7 @@ vec3 CalculateSky(in vec4 viewSpacePosition, cbool sunSpot) {
 	vec3 gradient   = CalculateSkyGradient(viewSpacePosition, 1.0);
 	vec3 sunspot    = (sunSpot ? CalculateSunspot(viewSpacePosition) : vec3(0.0));
 	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
-	vec3 clouds = CompositeClouds(viewSpacePosition);
+	vec3 clouds     = CompositeClouds(viewSpacePosition);
 	
 	return (gradient + sunspot + atmosphere + clouds) * SKY_BRIGHTNESS;
 }
