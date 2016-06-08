@@ -12,7 +12,6 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
-uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -185,9 +184,6 @@ void main() {
 #else
 	vec3 composite = color;
 #endif
-	
-	
-	if (depth1 >= 1.0) composite = mix(CalculateSky(viewSpacePosition, true), composite, texture2D(colortex6, texcoord).r);
 	
 	
 	vec3 GI; float volFog;
