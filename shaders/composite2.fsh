@@ -414,12 +414,12 @@ void main() {
 	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, mask);
 	
 	
-//	CompositeWater(color, uColor, depth1, mask.water);
+	CompositeWater(color, uColor, depth1, mask.water);
 	
 	
-//	if (depth1 >= 1.0) color = mix(CalculateSky(viewSpacePosition, true), color, clamp01(mask.water + texture2D(colortex6, texcoord).r));
+	if (depth1 >= 1.0) color = mix(CalculateSky(viewSpacePosition, true), color, clamp01(mask.water + texture2D(colortex6, texcoord).r));
 	
-//	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
+	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
 	
 	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
