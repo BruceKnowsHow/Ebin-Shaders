@@ -416,7 +416,7 @@ void main() {
 	CompositeWater(color, uColor, depth1, mask.water);
 	
 	
-	if (depth1 >= 1.0) color = mix(CalculateSky(viewSpacePosition, true), color, texture2D(colortex6, texcoord).r);
+	if (depth1 >= 1.0) color = mix(CalculateSky(viewSpacePosition, true), color, clamp01(mask.water + texture2D(colortex6, texcoord).r));
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
