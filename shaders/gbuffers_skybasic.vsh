@@ -5,5 +5,5 @@
 #include "/lib/Syntax.glsl"
 
 void main() {
-	return;
+	gl_Position = ftransform();
 }
