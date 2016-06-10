@@ -48,15 +48,20 @@ varying vec3 worldPosition;
 
 
 vec4 GetDiffuse() {
-	vec4 diffuse = vec4(color.rgb, 1.0);
+	vec4 diffuse  = vec4(color.rgb, 1.0);
 	     diffuse *= texture2D(texture, texcoord);
 	
 	return diffuse;
 }
 
 vec4 GetNormal() {
-	vec4 normal     = texture2D(normals, texcoord);
-		 normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * tbnMatrix);
+#ifdef NORMAL_MAPS
+	vec4 normal = texture2D(normals, texcoord);
+#else
+	vec4 normal = vec4(0.5, 0.5, 1.0, 1.0);
+#endif
+	
+	normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * tbnMatrix);
 	
 	return normal;
 }
@@ -66,6 +71,7 @@ void DoWaterFragment() {
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
+#ifdef SPECULARITY_MAPS
 	vec2 specular = texture2D(specular, texcoord).rg;
 	
 	float smoothness = specular.r;
@@ -80,6 +86,9 @@ vec2 GetSpecularity(in float height, in float skyLightmap) {
 	smoothness = clamp01(smoothness);
 	
 	return vec2(smoothness, metalness);
+#else
+	return vec2(0.0);
+#endif
 }
 
 
