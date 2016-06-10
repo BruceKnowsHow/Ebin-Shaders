@@ -58,7 +58,7 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 #include "/lib/Vertex/CalculateTBN.vsh"
 
 float GetTransparentMask(in float materialIDs) {
-#ifdef gbuffers_water
+#if defined gbuffers_water
 	return float(abs(materialIDs - 4.0) > 0.5);
 #endif
 	

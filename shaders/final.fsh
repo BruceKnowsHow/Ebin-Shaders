@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-// uniform sampler2D colortex0;
+uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D gdepthtex;
@@ -44,12 +44,8 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
-	encode.rg = texture2D(buffer, texcoord).rg;
-	
-	vec2 buffer0 = Decode16(encode.r);
-	buffer0r = buffer0.r;
-	buffer0g = buffer0.g;
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer1r, out float buffer1g) {
+	encode.g = texture2D(buffer, texcoord).g;
 	
 	vec2 buffer1 = Decode16(encode.g);
 	buffer1r = buffer1.r;
@@ -156,10 +152,10 @@ void main() {
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	
-	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-//	DecodeBuffer(texcoord, colortex0, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	vec3 encode; float smoothness; Mask mask;
+	DecodeBuffer(texcoord, colortex0, encode, smoothness, mask.materialIDs);
 	
-//	mask = CalculateMasks(mask);
+	mask = CalculateMasks(mask);
 	
 	
 	MotionBlur(color, depth, mask);

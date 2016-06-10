@@ -1,6 +1,10 @@
 // Start of #include "/lib/Vertex/Materials.vsh"
 
 float GetMaterialIDs(in int mc_ID) { // Gather material masks
+#if defined gbuffers_hand
+	return 5.0;
+#endif
+	
 	float materialID;
 	
 	switch(mc_ID) {
@@ -18,8 +22,6 @@ float GetMaterialIDs(in int mc_ID) { // Gather material masks
 		case 8:
 		case 9:
 			materialID = 4.0; break; // Water
-		case 79:
-			materialID = 5.0; break; // Ice
 		default:
 			materialID = 1.0;
 	}
