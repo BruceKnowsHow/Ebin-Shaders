@@ -2,13 +2,19 @@
 
 screen.Setup=Setup
 
-option.DEFAULT_TEXTURE_PACK=Default Resource Pack
-option.DEFAULT_TEXTURE_PACK.comment=Having this enabled will overwrite other settings!
+option.DEFAULT_TEXTURE_PACK=Default Texture Pack
+option.DEFAULT_TEXTURE_PACK.comment=Enabling this option will overwrite every other texture-pack setting with default texture-pack settings.
 
-option.PBR_TEXTURE_PACK=PBR Resource Pack
-option.PBR_TEXTURE_PACK.comment=Turn this off if you're not using a PBR Texture Pack.
+option.TEXTURE_PACK_RESOLUTION_SETTING=Texture Pack Resolution
 
-option.TEXTURE_PACK_RESOLUTION=Resource Pack Resolution
+option.NORMAL_MAPS=Normal Map Texture Pack
+option.NORMAL_MAPS.comment=Disable this if you're using a texture-pack that does not have normal-map textures.
+
+option.SPECULARITY_MAPS=Specular Map Texture Pack
+option.SPECULARITY_MAPS.comment=Disable this if you're using a texture-pack that does not have specularity textures.
+
+option.PBR_TEXTURE_PACK=PBR Texture Pack
+option.PBR_TEXTURE_PACK.comment=Enable this if you're using a PBR texture-pack.
 
 
 screen.Brightness=Brightness and Saturation

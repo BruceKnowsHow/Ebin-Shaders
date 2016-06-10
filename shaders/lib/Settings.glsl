@@ -25,7 +25,6 @@ const int noiseTextureResolution = 64;
 
 // GUI Settings
 //#define DEFAULT_TEXTURE_PACK
-#define TEXTURE_PACK_RESOLUTION 128 // [16 32 64 128 256 512]
 
 
 #define EXPOSURE            1.0  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0  8.0]
@@ -125,16 +124,26 @@ const int noiseTextureResolution = 64;
 	#define Volumetric_Fog false
 #endif
 
-#ifndef DEFAULT_TEXTURE_PACK
-	#define PBR_TEXTURE_PACK
+#ifdef DEFAULT_TEXTURE_PACK
+	#define TEXTURE_PACK_RESOLUTION 16
+#else
+	#define TEXTURE_PACK_RESOLUTION_SETTING 128 // [16 32 64 128 256 512]
+	
+	#define TEXTURE_PACK_RESOLUTION TEXTURE_PACK_RESOLUTION_SETTING
+	
+	#define NORMAL_MAPS
+	
+	#define SPECULARITY_MAPS
+	//#define PBR_TEXTURE_PACK
+	
+	#ifdef PBR_TEXTURE_PACK
+		#define PBR
+	#endif
 #endif
-
-#ifdef PBR_TEXTURE_PACK
-	#define PBR
-#endif
-
-
-
+/*
+#ifdef NORMAL_MAPS
+#ifdef SPECULARITY_MAPS
+*/
 cbool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
 
 // End of #include "/lib/Settings.glsl"
