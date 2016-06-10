@@ -62,6 +62,7 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 }
 
 float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in Mask mask) {
+#ifdef PBR
 	vec3 eyeDir = normalize(viewSpacePosition.xyz);
 	
 	float NdotL = dot(normal, lightVector);
@@ -86,6 +87,9 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
 	
 	return shading;
+#else
+	return GetLambertianShading(normal, mask);
+#endif
 }
 
 float ComputeDirectSunlight(in vec4 position, in float normalShading) {
