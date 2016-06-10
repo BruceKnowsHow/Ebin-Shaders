@@ -63,6 +63,8 @@ vec4 BiasShadowProjection(in vec4 position) {
 
 
 void main() {
+	if (abs(mc_Entity.x - 8.5) < 0.6) return; // Discard water
+	
 	CalculateShadowView();
 	
 	color         = gl_Color;
@@ -78,13 +80,6 @@ void main() {
 	
 	gl_Position = BiasShadowProjection(WorldSpaceToShadowProjection1(position));
 	
-	
-	#ifdef FORWARD_SHADING
-		if (abs(mc_Entity.x - 8.5) < 0.6) gl_Position.w = -1.0; // Remove water so that it doesn't cast shadows
-	#else
-		if (abs(mc_Entity.x - 8.5) < 0.6) color.rgb *= 0.0; // Make water black, so that it doesn't bounce light
-		if (abs(mc_Entity.x - 8.5) < 0.6) gl_Position.w = -1.0;
-	#endif
 	
 	#ifndef PLAYER_SHADOW
 	if (   mc_Entity.x == 0 // If the vertex is an entity

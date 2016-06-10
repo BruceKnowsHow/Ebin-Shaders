@@ -75,7 +75,7 @@ void main() {
 	vertLightmap = GetDefaultLightmap(lightmapCoord);
 	materialIDs  = GetMaterialIDs(int(mcID));
 	materialIDs1 = vec4(GetTransparentMask(materialIDs), 0.0, 0.0, 0.0);
-	show(color);
+	
 	
 	vec4 position = GetWorldSpacePosition();
 	
