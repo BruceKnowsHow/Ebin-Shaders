@@ -63,7 +63,7 @@ vec4 BiasShadowProjection(in vec4 position) {
 
 
 void main() {
-	if (abs(mc_Entity.x - 8.5) < 0.6) return; // Discard water
+	if (abs(mc_Entity.x - 8.5) < 0.6) { gl_Position = vec4(-1.0); return; } // Discard water
 	
 	CalculateShadowView();
 	

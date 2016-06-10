@@ -372,7 +372,7 @@ vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec4 viewSpa
 void CompositeWater(inout vec3 color, in vec3 uColor, in float depth1, in float waterMask) {
 	if (waterMask < 0.5 || depth1 >= 1.0) return;
 	
-	color = mix(color, uColor, 0.0);
+	color = mix(color, uColor, 0.4);
 }
 
 
