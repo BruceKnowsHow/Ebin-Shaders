@@ -1,47 +1,47 @@
-
 // Start of #include "/lib/DebugSetup.glsl"
 
-
-varying vec3 vDebug;
 vec3 Debug;
 
-
-#if defined vsh
-	#define Debug vDebug
+#if ShaderStage < 0
+	varying vec3 vDebug;
+	
+	#if ShaderStage == -2
+		#define Debug vDebug
+	#endif
 #endif
 
-void debug(in bool x) {
+
+void show(in bool x) {
 	Debug = vec3(float(x));
 }
 
-void debug(in float x) {
+void show(in float x) {
 	Debug = vec3(x);
 }
 
-void debug(in vec2 x) {
+void show(in vec2 x) {
 	Debug = vec3(length(x));
 }
 
-void debug(in vec3 x) {
+void show(in vec3 x) {
 	Debug = x;
 }
 
-void debug(in vec4 x) {
+void show(in vec4 x) {
 	Debug = x.rgb;
 }
 
-#if defined vsh
+#if ShaderStage == -2
 	#undef Debug
 #endif
 
 
-#define show debug    // debug() and show() can be used interchangeably
-
 void exit() {
-	Debug = max(Debug, vDebug);
+#if ShaderStage < 0
+	Debug = max(Debug, vDebug); // This will malfunction if you have a show() in both the vertex and fragment
+#endif
 	
 	#include "/lib/Debug.glsl"
 }
-
 
 // End of #include "/lib/DebugSetup.glsl"

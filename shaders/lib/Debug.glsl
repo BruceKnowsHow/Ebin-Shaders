@@ -1,14 +1,13 @@
 // Start of #include "/lib/Debug.glsl"
 
-//            Drawbuffers | ShaderStage | Primary Passthrough Stage?
-// 
-// gbuffers_textured_lit: 2306 | -1 | 
-// composite:             4    |  0 | No
-// composite1:            24   |  1 | Yes
-// composite2:            0    |  2 | Yes
-// composite3:            2    |  3 | No
-// final:                      |  7 | Yes
-//                        0123 <-- Reassignment order
+//    ShaderStage | Primary Passthrough Stage?
+//
+// gbuffers  : -1 | 
+// composite :  0 | No
+// composite1:  1 | Yes
+// composite2:  2 | Yes
+// composite3:  3 | No
+// final:       7 | Yes
 
 
 #ifdef DEBUG

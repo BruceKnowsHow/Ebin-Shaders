@@ -1,7 +1,7 @@
 #version 410 compatibility
 #define gbuffers_water
 #define vsh
-#define ShaderStage -10
+#define ShaderStage -2
 #include "/lib/Syntax.glsl"
 
 
