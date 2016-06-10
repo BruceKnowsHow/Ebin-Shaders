@@ -54,7 +54,7 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 }
 
 float GetLambertianShading(in vec3 normal, in Mask mask) {
-	float shading = dot(normal, lightVector);
+	float shading = max0(dot(normal, lightVector));
 	      shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
 	      shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
 	
