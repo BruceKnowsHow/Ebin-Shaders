@@ -9,6 +9,12 @@
 	#define varying out
 #endif
 
+//#define DEBUG
+
+#if (defined DEBUG && defined composite1)
+	#define discard return
+#endif
+
 
 #define cbool  const bool
 #define cuint  const uint
