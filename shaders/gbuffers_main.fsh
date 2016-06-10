@@ -1,4 +1,4 @@
-/* DRAWBUFFERS:320156 */
+/* DRAWBUFFERS:32015 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -108,11 +108,10 @@ void main() {
 	
 	vec3 encode = vec3(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)), 0.0);
 	
-	gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
+	gl_FragData[0] = vec4(1.0, 0.0, 0.0, diffuse.a);
 	gl_FragData[2] = vec4(encode.rgb, 1.0);
 	gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
 	gl_FragData[4] = vec4(diffuse.rgb, diffuse.a);
-	gl_FragData[5] = vec4(1.0, 0.0, 0.0, diffuse.a);
 	
 	#ifdef FORWARD_SHADING
 		Mask mask; mask.materialIDs = encodedMaterialIDs;
