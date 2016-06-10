@@ -157,7 +157,7 @@ void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewS
 void main() {
 	float depth = GetDepth(texcoord);
 	
-	if (depth >= 1.0) discard;
+	if (depth >= 1.0) { discard; }
 	
 	
 	vec3  color   = texture2D(colortex2, texcoord).rgb;
@@ -193,7 +193,7 @@ void main() {
 	composite += GI * sunlightColor * pow(texture2D(colortex5, texcoord).rgb, vec3(2.2)) * 5.0;
 	
 	
-	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);
+//	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);
 	
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);

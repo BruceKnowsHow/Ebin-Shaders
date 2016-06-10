@@ -75,14 +75,14 @@ void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float bu
 	buffer1g = buffer1.g;
 }
 
-vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, const in float radius, in vec2 noise, in Mask mask) {
+vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLightmap, const in float radius, in vec2 noise, in Mask mask) {
 #ifdef GI_ENABLED
-	float lightMult = 1.0;
+	float lightMult = skyLightmap;
 	
 	#ifdef GI_BOOST
 		float normalShading = GetLambertianShading(normal, mask);
 		
-		float sunlight = ComputeDirectSunlight(position, normalShading);
+		float sunlight = ComputeDirectSunlight(position, 1.0);
 		
 		lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
 		
@@ -189,7 +189,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 void main() {
 	float depth = GetDepth(texcoord);
 	
-	if (depth >= 1.0) discard;
+	if (depth >= 1.0) { discard; }
 	
 	
 	float depth1  = texture2D(depthtex1, texcoord).x;
@@ -214,7 +214,7 @@ void main() {
 	vec3 normal = GetNormal(texcoord);
 	
 	
-	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, GI_RADIUS, noise2D, mask);
+	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, skyLightmap, GI_RADIUS, noise2D, mask);
 	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);
