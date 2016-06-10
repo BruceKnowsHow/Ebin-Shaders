@@ -50,7 +50,7 @@ vec4 GetWorldSpacePosition() {
 }
 
 vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
-#ifndef gbuffers_hand
+#if !defined gbuffers_hand
 	return (isEyeInWater == 1 ? gbufferProjection : gl_ProjectionMatrix) * gbufferModelView * worldSpacePosition;
 #else
 	return gl_ProjectionMatrix * gbufferModelView * worldSpacePosition;

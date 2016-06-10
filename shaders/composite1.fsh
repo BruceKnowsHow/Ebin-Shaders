@@ -177,12 +177,12 @@ void main() {
 	encode.g = Encode16(vec2(smoothness, mask.materialIDs));
 	
 	
-#ifdef DEFERRED_SHADING
+#ifdef FORWARD_SHADING
+	vec3 composite = color;
+#else
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
 	vec3 composite = CalculateShadedFragment(color, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
-#else
-	vec3 composite = color;
 #endif
 	
 	

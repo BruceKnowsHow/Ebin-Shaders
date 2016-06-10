@@ -107,7 +107,6 @@ const int noiseTextureResolution = 64;
 	#define Forward_Shading  true
 	#define Deferred_Shading false
 #else
-	#define DEFERRED_SHADING
 	#define Forward_Shading  false
 	#define Deferred_Shading true
 #endif

@@ -108,13 +108,7 @@ void main() {
 	vec3 Colortex3 = vec3(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)), 0.0);
 	
 	
-	#ifdef DEFERRED_SHADING
-		gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
-		gl_FragData[1] = vec4(pow(diffuse.rgb, vec3(2.2)) * 0.05, diffuse.a);
-		gl_FragData[2] = vec4(Colortex3.rgb, 1.0);
-		gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
-		gl_FragData[4] = vec4(diffuse.rgb, diffuse.a);
-	#else
+	#ifdef FORWARD_SHADING
 		Mask mask; mask.materialIDs = encodedMaterialIDs;
 		mask = CalculateMasks(mask);
 		
@@ -126,9 +120,15 @@ void main() {
 		gl_FragData[2] = vec4(Colortex3.rgb, 1.0);
 		gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
 		gl_FragData[4] = vec4(diffuse.rgb, diffuse.a);
+	#else
+		gl_FragData[0] = vec4(0.0, 0.0, 0.0, diffuse.a);
+		gl_FragData[1] = vec4(pow(diffuse.rgb, vec3(2.2)) * 0.05, diffuse.a);
+		gl_FragData[2] = vec4(Colortex3.rgb, 1.0);
+		gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
+		gl_FragData[4] = vec4(diffuse.rgb, diffuse.a);
 	#endif
 	
-#ifdef gbuffers_water
+#if defined gbuffers_water
 	gl_FragData[5] = vec4(1.0, 0.0, 0.0, diffuse.a);
 #endif
 	
