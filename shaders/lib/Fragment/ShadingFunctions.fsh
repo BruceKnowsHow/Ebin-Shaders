@@ -177,7 +177,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	return sunlight;
 }
 
-vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
+vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
 	Shading shading;
 	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
 	
@@ -185,7 +185,7 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal);
 	shading.sunlight *= pow2(skyLightmap);
 	
-	shading.torchlight = 1.0 - pow(torchLightmap, 4.0);
+	shading.torchlight = 1.0 - pow(clamp01(torchLightmap - 0.075), 4.0);
 	shading.torchlight = 1.0 / pow(shading.torchlight, 2.0) - 1.0;
 	
 	shading.skylight = pow(skyLightmap, 4.0);
@@ -203,14 +203,12 @@ vec3 CalculateShadedFragment(in vec3 diffuse, in Mask mask, in float torchLightm
 	lightmap.torchlight = shading.torchlight * vec3(1.00, 0.25, 0.05);
 	
 	
-	vec3 composite = (
+	return vec3(
 	    lightmap.sunlight   * 6.0   * SUN_LIGHT_LEVEL
 	+   lightmap.skylight   * 0.35  * SKY_LIGHT_LEVEL
 	+   lightmap.ambient    * 0.015 * AMBIENT_LIGHT_LEVEL
-	+   lightmap.torchlight         * TORCH_LIGHT_LEVEL
-	    ) * diffuse;
-	
-	return composite;
+	+   lightmap.torchlight * 4.0   * TORCH_LIGHT_LEVEL
+	    );
 }
 
 // End of #include "/lib/Fragment/ShadingFunctions.fsh"
