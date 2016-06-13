@@ -48,6 +48,10 @@ varying vec2 texcoord;
 #include "/lib/Misc/CalculateFogFactor.glsl"
 
 
+vec3 GetDiffuse(in vec2 coord) {
+	return pow(texture2D(colortex5, coord).rgb, vec3(2.2));
+}
+
 float GetDepth(in vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
@@ -160,8 +164,7 @@ void main() {
 	if (depth >= 1.0) { discard; }
 	
 	
-	vec3  color   = texture2D(colortex2, texcoord).rgb;
-	      color   = (Deferred_Shading ? color * 20.0 : DecodeColor(color));
+	vec3  diffuse =          GetDiffuse(texcoord);
 	vec3  normal  =           GetNormal(texcoord);
 	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
@@ -178,11 +181,11 @@ void main() {
 	
 	
 #ifdef FORWARD_SHADING
-	vec3 composite = color;
+	vec3 composite = diffuse * DecodeColor(texture2D(colortex2, texcoord).rgb);
 #else
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
-	vec3 composite = CalculateShadedFragment(color, mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
+	vec3 composite = diffuse * CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 #endif
 	
 	
@@ -190,7 +193,7 @@ void main() {
 	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
 	
-	composite += GI * sunlightColor * pow(texture2D(colortex5, texcoord).rgb, vec3(2.2)) * 5.0;
+	composite += GI * sunlightColor * diffuse * 5.0;
 	
 	
 //	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);
