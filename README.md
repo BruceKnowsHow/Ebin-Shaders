@@ -10,4 +10,4 @@ This shaderpack was created after spending a lot of time editing [Sonic Ether's 
 This shaderpack is still a massive work in progress.
 
 
-![slide](https://raw.githubusercontent.com/BruceKnowsHow/Ebin-Shaders/master/images/ebin.png)
+![slide](https://raw.githubusercontent.com/wiki/BruceKnowsHow/Ebin-Shaders/images/cute-anime-bear.png)
