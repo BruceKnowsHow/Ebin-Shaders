@@ -201,8 +201,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		      distanceCoeff = 1.0 / max(distanceCoeff, 2.5e-4);
 		
 		vec3 sampleDir    = normalize(sampleDiff);
-		vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz;
-		shadowNormal = DecodeNormal(shadowNormal.xy) * 2.0 - 1.0;
+		vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
 		
 		float viewNormalCoeff   = max0(dot(      normal, sampleDir));
 		float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
