@@ -56,6 +56,10 @@ const int noiseTextureResolution = 64;
 #define SHADOW_TYPE 2 // [1 2 3]
 #define PLAYER_SHADOW
 
+#define COMPOSITE0_SCALE 0.40 // [0.25 0.33 0.40 0.50 0.75 1.00]
+//#define COMPOSITE0_NOISE
+#define COMPOSITE0_NOISE_SIZE 3 // [3 4]
+
 #define FOG_ENABLED
 #define FOG_POWER 3.0                      // [1.0 2.0 3.0 4.0 6.0 8.0]
 #define VOLUMETRIC_FOG_POWER 2.0           // [1.0 2.0 3.0 4.0]
@@ -68,9 +72,6 @@ const int noiseTextureResolution = 64;
 #define GI_BOOST
 #define GI_TRANSLUCENCE 0.2  // [0.0 0.2 0.4 0.6 0.8 1.0]
 #define GI_BRIGHTNESS   1.00 // [0.25 0.50 0.75 1.00 2.00 4.00]
-
-
-#define COMPOSITE0_SCALE 0.40 // [0.25 0.33 0.40 0.50 0.75 1.00]
 
 
 #define REFLECTION_EDGE_FALLOFF

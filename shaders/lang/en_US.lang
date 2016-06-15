@@ -105,6 +105,15 @@ option.PLAYER_SHADOW=Player Shadow
 option.PLAYER_SHADOW.comment=Whether or not the player casts a shadow
 
 
+screen.Composite0=GI & Volumetric Fog
+
+option.COMPOSITE0_SCALE=Resolution Coefficient
+option.COMPOSITE0_SCALE.comment=The resolution coefficient at which global illumination and volumetric fog are computed.
+
+option.COMPOSITE0_NOISE=Ditherred Noise
+option.COMPOSITE0_NOISE.comment=Helps hide artifacts due to low sample counts. Medium performance impact!. Causes flickering at lower resolutions!
+
+
 screen.Fog=Fog
 
 option.FOG_ENABLED=Fog Enabled
@@ -127,7 +136,7 @@ screen.Global_Illumination=Global Illumination
 option.GI_ENABLED=GI Enabled
 
 option.GI_MODE=GI Mode
-option.GI_MODE.comment=1: Better for natural terrain and general gameplay. 2: More Physically accurate. Higher values may have an unmeasured performance cost!
+option.GI_MODE.comment=1: Better for natural terrain and general gameplay. 2: Mix of 1 & 3. 3: More Physically accurate. Higher values may have medium performance cost!
 
 option.GI_RADIUS=GI Radius
 option.GI_RADIUS.comment=The radius of global illumination light bounces
@@ -142,10 +151,6 @@ option.GI_TRANSLUCENCE=GI Translucence
 option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "bounce through" surfaces, similar to subsurface scattering
 
 option.GI_BRIGHTNESS=GI Brightness
-
-
-option.COMPOSITE0_SCALE=Composite0 Scale
-option.COMPOSITE0_SCALE.comment=The resolution coefficient at which global illumination and volumetric fog are rendered.
 
 
 

@@ -26,7 +26,7 @@ void main() {
 	
 	vec3 shadowNormal = vertNormal;
 	
-#if GI_MODE == 2
+#if GI_MODE == 3
 	shadowNormal.z *= -1.0; // This is done here so that it can be avoided in the GI loop. Do not forget to correct for it.
 #endif
 	
