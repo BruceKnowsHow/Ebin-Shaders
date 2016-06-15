@@ -6,6 +6,21 @@
 
 */
 
+//Noise Functions
+
+vec2 Hammersley(uint i, uint N) {
+	return vec2(float(i) / float(N), float(bitfieldReverse(i)) * 2.3283064365386963e-10);
+}
+
+float randAngle() {
+	uint x = uint(gl_FragCoord.x);
+	uint y = uint(gl_FragCoord.y);
+	
+	return float(30u * pow(x, y) + 10u * x * y);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 vec3 Fresnel(vec3 R0, float vdoth) {
 	vec3 fresnel;
 	
@@ -102,7 +117,7 @@ vec3 phongSkew(in vec2 epsilon, in float roughness) {
 	// Uses the Phong sample skewing Functions
 	float Ap = (2.0 / pow2(roughness)) - 2.0;
 	float theta = acos(pow(epsilon.x, (2.0 / Ap + 2.0)));
-	float phi = 2.0 * PI * epsilon.y;
+	float phi = 2.0 * PI * epsilon.y + randAngle();
 	
 	float sin_theta = sin(theta);
 	

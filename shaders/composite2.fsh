@@ -252,8 +252,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	vec3 alpha = fresnel * smoothness;
 	
-	if (length(alpha) < 0.01) return;
-	
+	//if (length(alpha) < 0.01) return;
 	
 	float sunlight = GetSunlightVisibility(viewSpacePosition);
 	
