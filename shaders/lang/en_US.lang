@@ -157,6 +157,9 @@ option.GI_BRIGHTNESS=GI Brightness
 option.PBR=Physically Based Rendering
 option.PBR.comment=Physically Based Rendering or PBR is an effect that defines how light interacts with different materials. Needs a supported PBR resource pack!
 
+option.IOR=IOR
+option.IOR.comment=Changes how much light is allowed to reflect. If the game seems too shiny lower the number.
+
 option.PBR_SKEW=PBR Ray Skew
 option.PBR_SKEW.comment=Ray Skewing adds microfacets so the SSR. This will be higher quality the more rays you send. 1: Phong. 2: Beckmann. 3: GGX.
 
