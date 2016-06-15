@@ -404,7 +404,6 @@ void main() {
 	vec3 uColor = GetRefractedColor(texcoord, viewSpacePosition, viewSpacePosition1, normal, tangentNormal, mask.water);
 	if (mask.water < 0.5) color = uColor; // Save the underwater color until after reflections are applied
 	
-	show(normal);
 	ComputeReflectedLight(color, viewSpacePosition, normal, smoothness, skyLightmap, mask);
 	
 	
