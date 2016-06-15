@@ -62,7 +62,7 @@ const int noiseTextureResolution = 64;
 #define ATMOSPHERIC_SCATTERING_AMOUNT 1.00 // [0.00 0.25 0.50 0.75 1.00 2.00 4.00]
 
 #define GI_ENABLED
-#define GI_MODE         1    // [1 2]
+#define GI_MODE         1    // [1 2 3]
 #define GI_RADIUS       16   // [4 8 16 24 32]
 #define GI_SAMPLE_COUNT 80   // [20 40 80 128 160 256]
 #define GI_BOOST

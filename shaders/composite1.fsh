@@ -7,6 +7,8 @@
 
 /* DRAWBUFFERS:240 */
 
+const bool colortex4MipmapEnabled = true;
+
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
@@ -99,8 +101,12 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 	float totalWeights   = 0.0;
 	float totalFogWeight = 0.0;
 	
-	for(float i = -0.5; i <= 0.5; i++) {
-		for(float j = -0.5; j <= 0.5; j++) {
+	cfloat kernal = 4.0;
+	cfloat range = kernal - kernal * 0.5 - 0.5;
+	cfloat Lod = 2.0 - COMPOSITE0_SCALE * 2.0;  // mix(1.0, 0.0, COMPOSITE0_SCALE * 2.0 - 1.0)
+	
+	for(float i = -range; i <= range; i++) {
+		for(float j = -range; j <= range; j++) {
 			vec2 offset = vec2(i, j) / vec2(viewWidth, viewHeight);
 			
 			float sampleDepth = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x);
@@ -111,9 +117,9 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			float weight  = 1.0 - abs(depth - sampleDepth);
 			      weight *= dot(normal, sampleNormal);
 			      weight  = pow(weight, 32);
-			      weight  = max(0.1e-8, weight);
+			      weight  = max(1.0e-6, weight);
 			
-			GI += pow(texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).rgb, vec3(2.2)) * weight;
+			GI += pow(texture2DLod(colortex4, texcoord * COMPOSITE0_SCALE + offset * 2.0, Lod).rgb, vec3(2.2)) * weight;
 			
 			totalWeights += weight;
 		#endif
