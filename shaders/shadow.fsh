@@ -13,6 +13,7 @@ varying vec2 texcoord;
 varying vec3 vertNormal;
 
 #include "/lib/Settings.glsl"
+#include "/lib/Utility.glsl"
 
 
 void main() {
@@ -31,5 +32,5 @@ void main() {
 	
 	
 	gl_FragData[0] = vec4(diffuse.rgb, diffuse.a);
-	gl_FragData[1] = vec4(shadowNormal * 0.5 + 0.5, 1.0);
+	gl_FragData[1] = vec4(EncodeNormal(shadowNormal), 1.0, 1.0);
 }
