@@ -126,7 +126,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			      weight  = pow(weight, 32);
 			      weight  = max(1.0e-6, weight);
 			
-			GI += pow(texture2DLod(colortex4, texcoord * COMPOSITE0_SCALE + offset * 2.0, Lod).rgb, vec3(2.2)) * weight;
+			GI += pow(texture2DLod(colortex4, texcoord * COMPOSITE0_SCALE + offset, Lod).rgb, vec3(2.2)) * weight;
 			
 			totalWeights += weight;
 		#endif
