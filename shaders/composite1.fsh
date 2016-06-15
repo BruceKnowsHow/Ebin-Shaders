@@ -102,13 +102,15 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 	float totalFogWeight = 0.0;
 	
 #ifdef COMPOSITE0_NOISE
-	cfloat kernal = 4.0;
+	cfloat kernal = 2.0;
+	cfloat Lod = 2.0 - COMPOSITE0_SCALE * 2.0;
 #else
 	cfloat kernal = 2.0;
+	cfloat Lod = 0.0;
 #endif
 	
 	cfloat range = kernal - kernal * 0.5 - 0.5;
-	cfloat Lod = 2.0 - COMPOSITE0_SCALE * 2.0;  // mix(1.0, 0.0, COMPOSITE0_SCALE * 2.0 - 1.0)
+	
 	
 	for(float i = -range; i <= range; i++) {
 		for(float j = -range; j <= range; j++) {

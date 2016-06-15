@@ -104,7 +104,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position. Position can also be used for exponential comparisons (GI_MODE = 2)
 	normal   = -(shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
 	
-	cfloat brightness = 30.0 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	cfloat brightness = 22.5 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
 	cfloat scale      = radius / 256.0;
 	
 	vec3 GI = vec3(0.0);
@@ -179,12 +179,12 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	
 	float biasCoeff = GetShadowBias(position.xy);
 	
-	cfloat brightness = 16.0 * 10.0 * pow(radius, sqrt(2.0)) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	cfloat brightness = 100.0 * pow(radius, sqrt(2.0)) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
 	cfloat scale      = radius / 256.0;
 	
 	vec3 GI = vec3(0.0);
 	
-	noise *= 1.0;
+	noise *= scale;
 	
 	for(float x = -1.0; x <= 1.0; x += 1.0 / 4.0) {
 		for(float y = -1.0; y <= 1.0; y += 1.0 / 4.0) {
@@ -255,7 +255,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position. Position can also be used for exponential comparisons (GI_MODE = 2)
 	normal   = vec3(-1.0, -1.0,  1.0) * (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
 	
-	cfloat brightness = 0.0001 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	cfloat brightness = 0.000075 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
 	cfloat scale      = radius / 1024.0;
 	
 	vec3 GI = vec3(0.0);
