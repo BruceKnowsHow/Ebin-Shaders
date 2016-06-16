@@ -1,4 +1,4 @@
-/* DRAWBUFFERS:32015 */
+/* DRAWBUFFERS:3201 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -41,10 +41,6 @@ varying vec3 worldPosition;
 #include "/lib/DebugSetup.glsl"
 #include "/lib/Misc/CalculateFogFactor.glsl"
 #include "/lib/Fragment/Masks.fsh"
-#ifdef FORWARD_SHADING
-#include "/lib/Uniform/GlobalCompositeVariables.glsl"
-#include "/lib/Fragment/ShadingFunctions.fsh"
-#endif
 
 
 vec4 GetDiffuse() {
@@ -109,18 +105,9 @@ void main() {
 	vec3 encode = vec3(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)), 0.0);
 	
 	gl_FragData[0] = vec4(1.0, 0.0, 0.0, diffuse.a);
+	gl_FragData[1] = vec4(diffuse.rgb, diffuse.a);
 	gl_FragData[2] = vec4(encode.rgb, 1.0);
 	gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
-	gl_FragData[4] = vec4(diffuse.rgb, diffuse.a);
-	
-	#ifdef FORWARD_SHADING
-		Mask mask; mask.materialIDs = encodedMaterialIDs;
-		mask = CalculateMasks(mask);
-		
-		vec3 composite = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
-		
-		gl_FragData[1] = vec4(EncodeColor(composite), diffuse.a);
-	#endif
 	
 	exit();
 }

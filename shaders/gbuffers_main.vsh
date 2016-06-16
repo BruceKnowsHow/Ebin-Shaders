@@ -33,10 +33,6 @@ varying vec3 worldPosition;
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
-#ifdef FORWARD_SHADING
-#include "/lib/Uniform/ShadowViewMatrix.vsh"
-#include "/lib/Uniform/GlobalCompositeVariables.glsl"
-#endif
 
 
 vec2 GetDefaultLightmap(in vec2 lightmapCoord) { // Gets the lightmap from the default lighting engine, ignoring any texture pack lightmap. First channel is torch lightmap, second channel is sky lightmap.
@@ -93,10 +89,6 @@ void main() {
 	viewSpacePosition = gbufferModelView * position;
 	worldPosition     = position.xyz + cameraPosition;
 	
-	
-#ifdef FORWARD_SHADING
-	#include "/lib/Uniform/CompositeCalculations.vsh"
-#endif
 	
 	exit();
 }

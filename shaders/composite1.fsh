@@ -13,7 +13,6 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex4;
-uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -51,7 +50,7 @@ varying vec2 texcoord;
 
 
 vec3 GetDiffuse(in vec2 coord) {
-	return pow(texture2D(colortex5, coord).rgb, vec3(2.2));
+	return pow(texture2D(colortex2, coord).rgb, vec3(2.2));
 }
 
 float GetDepth(in vec2 coord) {
@@ -193,13 +192,9 @@ void main() {
 	encode.g = Encode16(vec2(smoothness, mask.materialIDs));
 	
 	
-#ifdef FORWARD_SHADING
-	vec3 composite = diffuse * DecodeColor(texture2D(colortex2, texcoord).rgb);
-#else
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
 	vec3 composite = diffuse * CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
-#endif
 	
 	
 	vec3 GI; float volFog;
