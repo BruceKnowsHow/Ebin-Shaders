@@ -89,8 +89,6 @@ const int noiseTextureResolution = 64;
 #define CUSTOM_HORIZON_HEIGHT
 #define HORIZON_HEIGHT 62 // [5 62 72 80 128 192 208]
 
-//#define FORWARD_SHADING
-
 
 #define DEBUG_VIEW 1 // [-1 0 1 2 3 7]
 
@@ -100,14 +98,6 @@ const int noiseTextureResolution = 64;
 	#define GI_Boost true
 #else
 	#define GI_Boost false
-#endif
-
-#ifdef FORWARD_SHADING
-	#define Forward_Shading  true
-	#define Deferred_Shading false
-#else
-	#define Forward_Shading  false
-	#define Deferred_Shading true
 #endif
 
 #ifdef FOG_ENABLED

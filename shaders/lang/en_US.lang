@@ -181,9 +181,6 @@ option.CUSTOM_HORIZON_HEIGHT=Custom Horizon Height
 
 option.HORIZON_HEIGHT=Horizon Height
 
-option.FORWARD_SHADING=Forward Shading Pipeline
-option.FORWARD_SHADING.comment=Computes shading on blocks that are underwater, behind glass, etc. High performance impact!
-
 
 screen.Misc=Misc
 
