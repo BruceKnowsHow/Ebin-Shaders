@@ -100,14 +100,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 	float totalWeights   = 0.0;
 	float totalFogWeight = 0.0;
 	
-#ifdef COMPOSITE0_NOISE
 	cfloat kernal = 2.0;
-	cfloat Lod = 2.0 - COMPOSITE0_SCALE * 2.0;
-#else
-	cfloat kernal = 2.0;
-	cfloat Lod = 0.0;
-#endif
-	
 	cfloat range = kernal - kernal * 0.5 - 0.5;
 	
 	
@@ -125,7 +118,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			      weight  = pow(weight, 32);
 			      weight  = max(1.0e-6, weight);
 			
-			GI += pow(texture2DLod(colortex4, texcoord * COMPOSITE0_SCALE + offset, Lod).rgb, vec3(2.2)) * weight;
+			GI += pow(texture2DLod(colortex4, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).rgb, vec3(2.2)) * weight;
 			
 			totalWeights += weight;
 		#endif
@@ -135,7 +128,7 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 			      FogWeight = pow(FogWeight, 32);
 			      FogWeight = max(0.1e-8, FogWeight);
 			
-			volFog += texture2D(colortex4, texcoord * COMPOSITE0_SCALE + offset).a * FogWeight;
+			volFog += texture2DLod(colortex4, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).a * FogWeight;
 			
 			totalFogWeight += FogWeight;
 		#endif
