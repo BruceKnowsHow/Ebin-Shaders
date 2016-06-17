@@ -71,88 +71,95 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 #endif
 }
 
-float ComputeDirectSunlight(in vec4 position, in float normalShading) {
+float HardShadows(in vec3 position) {
+	return pow2(shadow2D(shadow, position.xyz).x);
+}
+
+float UniformlySoftShadows(in vec3 position, in float biasCoeff) {
+	float spread = 1.0 * (1.0 - biasCoeff) / shadowMapResolution;
+	
+	cfloat range       = 1.0;
+	cfloat interval    = 1.0;
+	cfloat sampleCount = pow(range / interval * 2.0 + 1.0, 2.0); // Calculating the sample count outside of the for-loop is generally faster.
+	
+	float sunlight = 0.0;
+	
+	for (float i = -range; i <= range; i += interval)
+		for (float j = -range; j <= range; j += interval)
+			sunlight += shadow2D(shadow, vec3(position.xy + vec2(i, j) * spread, position.z)).x;
+	
+	sunlight /= sampleCount; // Average the samples by dividing the sum by the sample count.
+	
+	return pow2(sunlight);
+}
+
+float VariablySoftShadows(in vec3 position, in float biasCoeff) {
+	float vpsSpread = 0.4 / biasCoeff;
+	
+	vec2 randomAngle = GetDitherred2DNoise(texcoord, 64.0).xy * PI * 2.0;
+	
+	mat2 blockerRotation = mat2(
+		cos(randomAngle.x), -sin(randomAngle.x),
+	    sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix for blocker, high noise
+	
+	mat2 pcfRotation = mat2(
+		cos(randomAngle.x), -sin(randomAngle.x),
+		sin(randomAngle.x),  cos(randomAngle.x)); //Random Rotation Matrix for blocker, high noise
+	
+	float range       = 1.0;
+	float sampleCount = pow(range * 2.0 + 1.0, 2.0);
+	
+	float avgDepth = 0.0;
+	//Blocker Search
+	for(float i = -range; i <= range; i++) {
+		for(float j = -range; j <= range; j++) {
+			vec2 lookupPosition = position.xy + vec2(i, j) * 8 / shadowMapResolution * blockerRotation * vpsSpread;
+			float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
+			
+			avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
+		}
+	}
+	
+	avgDepth /= sampleCount;
+	avgDepth  = sqrt(avgDepth);
+	
+	float spread = avgDepth * 0.02 * vpsSpread + 0.45 / shadowMapResolution;
+	
+	range       = 2.0;
+	sampleCount = pow(range * 2.0 + 1.0, 2.0);
+	
+	float sunlight = 0.0;
+	
+	//PCF Blur
+	for (float i = -range; i <= range; i++) {
+		for (float j = -range; j <= range; j++) {
+			vec2 coord = vec2(i, j) * pcfRotation;
+			
+			sunlight += shadow2D(shadow, vec3(coord * spread + position.st, position.z)).x;
+		}
+	}
+	
+	return sunlight / sampleCount;
+}
+
+float ComputeDirectSunlight(in vec4 position, in float normalShading, cuint Shadow_Type) {
 	if (normalShading <= 0.0) return 0.0;
 	
-	float biasCoeff, sunlight;
+	float biasCoeff;
 	
 	position     = ViewSpaceToWorldSpace(position);
 	position     = WorldSpaceToShadowSpace(position);
 	position.xyz = BiasShadowProjection(position.xyz, biasCoeff);
 	position.xyz = position.xyz * 0.5 + 0.5;
 	
-	if (position.x < 0.0 || position.x > 1.0
-	||  position.y < 0.0 || position.y > 1.0
-	||  position.z < 0.0 || position.z > 1.0
-	    ) return 1.0;
+	if (any(greaterThan(abs(position.xyz - 0.5), vec3(0.5)))) return 1.0;
 	
-	#if SHADOW_TYPE == 3 // Variable softness
-		float vpsSpread = 0.4 / biasCoeff;
+	switch(Shadow_Type == 0 ? SHADOW_TYPE : Shadow_Type) {
+		case 2: return UniformlySoftShadows(position.xyz, biasCoeff);
+		case 3: return VariablySoftShadows(position.xyz, biasCoeff);
 		
-		vec2 randomAngle = GetDitherred2DNoise(gl_FragCoord.st / vec2(viewWidth, viewHeight), 64.0).xy * PI * 2.0;
-		
-		mat2 blockerRotation = mat2(
-			cos(randomAngle.x), -sin(randomAngle.x),
-		    sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix for blocker, high noise
-		
-		mat2 pcfRotation = mat2(
-			cos(randomAngle.x), -sin(randomAngle.x),
-			sin(randomAngle.x),  cos(randomAngle.x)); //Random Rotation Matrix for blocker, high noise
-		
-		float range       = 1.0;
-		float sampleCount = pow(range * 2.0 + 1.0, 2.0);
-		
-		float avgDepth = 0.0;
-		//Blocker Search
-		for(float i = -range; i <= range; i++) {
-			for(float j = -range; j <= range; j++) {
-				vec2 lookupPosition = position.xy + vec2(i, j) * 8 / shadowMapResolution * blockerRotation * vpsSpread;
-				float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
-				
-				avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
-			}
-		}
-		
-		avgDepth /= sampleCount;
-		avgDepth  = sqrt(avgDepth);
-		
-		float spread = avgDepth * 0.02 * vpsSpread + 0.45 / shadowMapResolution;
-		
-		range       = 2.0;
-		sampleCount = pow(range * 2.0 + 1.0, 2.0);
-		
-		//PCF Blur
-		for (float i = -range; i <= range; i++) {
-			for (float j = -range; j <= range; j++) {
-				vec2 coord = vec2(i, j) * pcfRotation;
-				
-				sunlight += shadow2D(shadow, vec3(coord * spread + position.st, position.z)).x;
-			}
-		}
-		
-		sunlight /= sampleCount;
-		
-	#elif SHADOW_TYPE == 2 // Fixed softness
-		float spread = 1.0 * (1.0 - biasCoeff) / shadowMapResolution;
-		
-		cfloat range       = 1.0;
-		cfloat interval    = 1.0;
-		cfloat sampleCount = pow(range / interval * 2.0 + 1.0, 2.0); // Calculating the sample count outside of the for-loop is generally faster.
-		
-		for (float i = -range; i <= range; i += interval)
-			for (float j = -range; j <= range; j += interval)
-				sunlight += shadow2D(shadow, vec3(position.xy + vec2(i, j) * spread, position.z)).x;
-		
-		sunlight /= sampleCount; // Average the samples by dividing the sum by the sample count.
-		
-		sunlight = pow2(sunlight);
-	#else // Hard
-		sunlight = shadow2D(shadow, position.xyz).x;
-		
-		sunlight = pow2(sunlight); // Fatten the shadow up to soften its penumbra (default hardware-filtered penumbra does not have a satisfying penumbra curve)
-	#endif
-	
-	return sunlight;
+		default: return HardShadows(position.xyz);
+	}
 }
 
 vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
@@ -160,7 +167,7 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
 	
 	shading.sunlight  = shading.normal;
-	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal);
+	shading.sunlight *= ComputeDirectSunlight(ViewSpacePosition, shading.normal, 0);
 	shading.sunlight *= pow2(skyLightmap);
 	
 	shading.torchlight = 1.0 - pow(clamp01(torchLightmap - 0.075), 4.0);

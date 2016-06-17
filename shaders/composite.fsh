@@ -87,7 +87,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	#ifdef GI_BOOST
 		float normalShading = GetLambertianShading(normal, mask);
 		
-		float sunlight = ComputeDirectSunlight(position, 1.0);
+		float sunlight = ComputeDirectSunlight(position, 1.0, 1);
 		
 		lightMult *= 1.0 - sunlight * normalShading * 4.0;
 		
@@ -159,7 +159,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	#ifdef GI_BOOST
 		float normalShading = GetLambertianShading(normal, mask);
 		
-		float sunlight = ComputeDirectSunlight(position, normalShading);
+		float sunlight = ComputeDirectSunlight(position, normalShading, 1);
 		
 		lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
 		
@@ -238,7 +238,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	#ifdef GI_BOOST
 		float normalShading = GetLambertianShading(normal, mask);
 		
-		float sunlight = ComputeDirectSunlight(position, 1.0);
+		float sunlight = ComputeDirectSunlight(position, 1.0, 1);
 		
 		lightMult *= 1.0 - sunlight * normalShading * 4.0;
 		
