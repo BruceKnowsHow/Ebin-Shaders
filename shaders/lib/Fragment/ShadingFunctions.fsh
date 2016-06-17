@@ -1,26 +1,5 @@
 // Start of #include "/lib/Fragment/ShadingFunctions.fsh"
 
-/* Prerequisites:
-
-uniform sampler2D shadowtex1;
-uniform sampler2DShadow shadow;
-uniform sampler2D noisetex;
-
-uniform mat4 gbufferModelViewInverse;
-uniform mat4 shadowModelView;
-uniform mat4 shadowProjection;
-
-uniform float viewWidth;
-uniform float viewHeight;
-
-varying vec3 lightVector;
-
-// #include "/lib/Settings.glsl"
-// #include "/lib/Utility.glsl"
-
-*/
-
-
 struct Shading {      // Contains scalar light levels without any color
 	float normal;     // Coefficient of light intensity based on the dot product of the normal vector and the light vector
 	float sunlight;
@@ -95,8 +74,7 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 	if (normalShading <= 0.0) return 0.0;
 	
-	float biasCoeff;
-	float sunlight;
+	float biasCoeff, sunlight;
 	
 	position     = ViewSpaceToWorldSpace(position);
 	position     = WorldSpaceToShadowSpace(position);
@@ -121,7 +99,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 			cos(randomAngle.x), -sin(randomAngle.x),
 			sin(randomAngle.x),  cos(randomAngle.x)); //Random Rotation Matrix for blocker, high noise
 		
-		float range       = 1;
+		float range       = 1.0;
 		float sampleCount = pow(range * 2.0 + 1.0, 2.0);
 		
 		float avgDepth = 0.0;
@@ -155,7 +133,7 @@ float ComputeDirectSunlight(in vec4 position, in float normalShading) {
 		sunlight /= sampleCount;
 		
 	#elif SHADOW_TYPE == 2 // Fixed softness
-		float spread   = 1.0 * (1.0 - biasCoeff) / shadowMapResolution;
+		float spread = 1.0 * (1.0 - biasCoeff) / shadowMapResolution;
 		
 		cfloat range       = 1.0;
 		cfloat interval    = 1.0;

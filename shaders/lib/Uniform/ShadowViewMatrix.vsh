@@ -1,20 +1,5 @@
 // Start of #include "/lib/Uniform/ShadowViewMatrix.vsh"
 
-/* Prerequisites:
-
-uniform mat4 shadowModelView;
-
-uniform vec3 cameraPosition;
-uniform vec3 previousCameraPosition;
-
-uniform float sunAngle;
-uniform float frameTimeCounter;
-
-// #include "/lib/Settings.glsl"
-
-*/
-
-
 varying mat4 shadowView;
 varying mat4 shadowViewInverse;
 

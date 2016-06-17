@@ -1,12 +1,6 @@
 // Start of #include "/lib/Fragment/ReflectanceModel.fsh"
 
-/* Prerequisites:
-
-// #include "/lib/Utility.glsl"
-
-*/
-
-//Noise Functions
+// Noise Functions
 
 vec2 Hammersley(uint i, uint N) {
 	return vec2(float(i) / float(N), float(bitfieldReverse(i)) * 2.3283064365386963e-10);

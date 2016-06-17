@@ -1,13 +1,5 @@
 // Start of #include "/lib/Misc/BiasFunctions.glsl"
 
-/* Prerequisites:
-
-// #include "/lib/Settings.glsl"
-// #include "/lib/Utility.glsl"
-
-*/
-
-
 float GetShadowBias(in vec2 shadowProjection) {
 	if (!biasShadowMap) return 1.0;
 

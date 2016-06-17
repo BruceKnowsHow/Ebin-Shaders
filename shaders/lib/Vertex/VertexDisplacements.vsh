@@ -1,13 +1,5 @@
 // Start of #include "/lib/Vertex/VertexDisplacements.vsh"
 
-/* Prerequisites:
-
-// #include "/lib/Settings.glsl"
-// #include "/lib/Vertex/Waving.vsh"
-
-*/
-
-
 vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
 	worldSpacePosition += cameraPosition.xyz;
 	

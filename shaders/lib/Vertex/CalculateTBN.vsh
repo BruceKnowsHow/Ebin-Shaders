@@ -1,14 +1,5 @@
 // Start of #include "/lib/Vertex/CalculateTBN.vsh"
 
-/* Prerequisites:
-
-attribute vec4 at_tangent;
-
-// #include "/lib/Vertex/VertexDisplacements.vsh"
-
-*/
-
-
 void CalculateTBN(in vec3 position, out mat3 tbnMatrix, out vec3 normal) {
 	vec3 tangent  = normalize(                  at_tangent.xyz );
 	vec3 binormal = normalize(-cross(gl_Normal, at_tangent.xyz));

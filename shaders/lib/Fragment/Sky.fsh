@@ -1,23 +1,5 @@
 // Start of #include "/lib/Fragment/Sky.fsh"
 
-/* Prerequisites:
-
-uniform mat4 gbufferModelViewInverse;
-
-uniform float far;
-
-uniform int isEyeInWater;
-
-varying vec3 lightVector;
-
-// #include "/lib/Settings.glsl"
-// #include "/lib/Utility.glsl"
-// #include "/lib/Uniform/GlobalCompositeVariables.glsl"
-// #include "/lib/Misc/CalculateFogFactor.glsl"
-
-*/
-
-
 float CalculateSunglow(in vec4 viewSpacePosition) {
 	float sunglow = max0(dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
 	      sunglow = pow(sunglow, 8.0);

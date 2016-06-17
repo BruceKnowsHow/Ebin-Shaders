@@ -1,17 +1,5 @@
 // Start of #include "/lib/Uniform/CompositeCalculations.vsh"
 
-/* Prerequisites:
-
-uniform mat4 gbufferModelView;
-
-uniform vec3 upPosition;
-
-// #include "/lib/Utility.glsl"
-// #include "/lib/Uniform/ShadowViewMatrix.vsh"
-// #include "/lib/Uniform/GlobalCompositeVariables.glsl"
-
-*/
-
 // {
 	float isNight = CalculateShadowView();
 	

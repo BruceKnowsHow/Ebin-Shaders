@@ -1,14 +1,5 @@
 // Start of #include "/lib/Vertex/Waving.vsh"
 
-/* Prerequisites:
-
-uniform float frameTimeCounter; 
-
-// #include "/lib/Settings.glsl"
-
-*/
-
-
 vec3 GetWavingGrass(in vec3 position, in float magnitude) {
 	vec3 wave = vec3(0.0);
 	
