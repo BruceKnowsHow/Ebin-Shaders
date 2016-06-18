@@ -1,7 +1,6 @@
 // #include "/lib/Uniform/ShadowViewMatrix.vsh"
 
 varying mat4 shadowView;
-varying mat4 shadowViewInverse;
 
 float timeCycle;
 float timeAngle;
@@ -45,18 +44,6 @@ float CalculateShadowView() {
 	        -A*C,    -B,         -A*D,  shadowModelView[1].w,
 	 B*C*E + D*F,  -A*E,  B*D*E - C*F,  shadowModelView[2].w,
 	 shadowModelView[3]);
-	
-	shadowViewInverse = mat4(
-	-E*D + F*B*C,  -C*A,  F*D + E*B*C,  0.0,
-	        -F*A,    -B,         -E*A,  0.0,
-	 F*B*D + E*C,  -A*D,  E*B*D - F*C,  0.0,
-	         0.0,   0.0,          0.0,  1.0);
-	
-//	shadowViewInverse = mat4(
-//	-E*D + F*B*C,  -C*A,  F*D + E*B*C,  shadowModelViewInverse[0].w,
-//	        -F*A,    -B,         -E*A,  shadowModelViewInverse[1].w,
-//	 F*B*D + E*C,  -A*D,  E*B*D - F*C,  shadowModelViewInverse[2].w,
-//	 shadowModelViewInverse[3]);
 	
 	return isNight;
 }
