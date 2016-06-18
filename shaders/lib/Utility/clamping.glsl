@@ -1,3 +1,5 @@
+// #include "/lib/Utility/clamping.glsl"
+
 float max0(in float x) {
 	return max(x, 0.0);
 }

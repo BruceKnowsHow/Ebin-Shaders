@@ -1,4 +1,4 @@
-// Start of #include "/lib/Fragment/ReflectanceModel.fsh"
+// #include "/lib/Fragment/ReflectanceModel.fsh"
 
 // Noise Functions
 
@@ -254,5 +254,3 @@ vec3 CalculateSpecularHighlight(
 	
 	return fresnel * geometryFactor * microfacetDistribution * ldotn / (4.0 * ldotn * vdotn);
 }
-
-// End of #include "/lib/Fragment/ReflectanceModel.fsh"

@@ -1,4 +1,4 @@
-// Start of #include "/lib/DebugSetup.glsl"
+// #include "/lib/DebugSetup.glsl"
 
 vec3 Debug;
 
@@ -43,5 +43,3 @@ void exit() {
 	
 	#include "/lib/Debug.glsl"
 }
-
-// End of #include "/lib/DebugSetup.glsl"

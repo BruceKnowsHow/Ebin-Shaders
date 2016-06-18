@@ -1,3 +1,5 @@
+// #include "/lib/Utility/evenPowRootLength.glsl"
+
 float pow2(in float x) {
 	return dot(x, x);
 }

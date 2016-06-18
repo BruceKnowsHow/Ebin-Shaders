@@ -1,4 +1,4 @@
-// Start of #include "/lib/Samples/GI.glsl"
+// #include "/lib/Samples/GI.glsl"
 
 #if GI_SAMPLE_COUNT == 20
 	cvec2[20] samples = vec2[20](
@@ -702,5 +702,3 @@
 		vec2(-0.0128854,  0.9939832),
 		vec2(-0.9944167, -0.0191173));
 #endif
-
-// End of #include "/lib/Samples/GI.glsl"

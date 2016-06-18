@@ -1,4 +1,4 @@
-// Start of #include "/lib/Vertex/CalculateTBN.vsh"
+// #include "/lib/Vertex/CalculateTBN.vsh"
 
 void CalculateTBN(in vec3 position, out mat3 tbnMatrix, out vec3 normal) {
 	vec3 tangent  = normalize(                  at_tangent.xyz );
@@ -16,5 +16,3 @@ void CalculateTBN(in vec3 position, out mat3 tbnMatrix, out vec3 normal) {
 	
 	tbnMatrix = transpose(mat3(tangent, binormal, normal));
 }
-
-// End of #include "/lib/Vertex/CalculateTBN.vsh"

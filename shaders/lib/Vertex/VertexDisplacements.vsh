@@ -1,4 +1,4 @@
-// Start of #include "/lib/Vertex/VertexDisplacements.vsh"
+// #include "/lib/Vertex/VertexDisplacements.vsh"
 
 vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
 	worldSpacePosition += cameraPosition.xyz;
@@ -22,5 +22,3 @@ vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
 	
 	return wave;
 }
-
-// End of #include "/lib/Vertex/VertexDisplacements.vsh"

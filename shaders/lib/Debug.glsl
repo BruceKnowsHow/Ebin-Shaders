@@ -1,4 +1,4 @@
-// Start of #include "/lib/Debug.glsl"
+// #include "/lib/Debug.glsl"
 
 //    ShaderStage | Primary Passthrough Stage?
 //
@@ -45,5 +45,3 @@
 		#endif
 	#endif
 #endif
-
-// End of #include "/lib/Debug.glsl"

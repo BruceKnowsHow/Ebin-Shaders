@@ -1,4 +1,4 @@
-// Start of #include "/lib/Fragment/ShadingFunctions.fsh"
+// #include "/lib/Fragment/ShadingFunctions.fsh"
 
 struct Shading {      // Contains scalar light levels without any color
 	float normal;     // Coefficient of light intensity based on the dot product of the normal vector and the light vector
@@ -195,5 +195,3 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	+   lightmap.torchlight * 4.0   * TORCH_LIGHT_LEVEL
 	    );
 }
-
-// End of #include "/lib/Fragment/ShadingFunctions.fsh"

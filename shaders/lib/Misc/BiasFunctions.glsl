@@ -1,4 +1,4 @@
-// Start of #include "/lib/Misc/BiasFunctions.glsl"
+// #include "/lib/Misc/BiasFunctions.glsl"
 
 float GetShadowBias(in vec2 shadowProjection) {
 	if (!biasShadowMap) return 1.0;
@@ -29,5 +29,3 @@ vec3 BiasShadowProjection(in vec3 position, out float biasCoeff) {
 vec3 BiasShadowProjection(in vec3 position) {
 	return position / vec3(vec2(GetShadowBias(position.xy)), 4.0);
 }
-
-// End of #include "/lib/Misc/BiasFunctions.glsl"

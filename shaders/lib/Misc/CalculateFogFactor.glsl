@@ -1,4 +1,4 @@
-// Start of #include "/lib/Misc/CalculateFogFactor.glsl"
+// #include "/lib/Misc/CalculateFogFactor.glsl"
 
 float CalculateFogFactor(in vec4 viewSpacePosition, in float power) {
 	#ifndef FOG_ENABLED
@@ -17,5 +17,3 @@ float CalculateFogFactor(in vec4 viewSpacePosition, in float power) {
 float GetSkyAlpha(in float fogVolume, in float fogFactor) {
 	return min1(fogVolume * fogFactor + pow(fogFactor, 6) * float(Volumetric_Fog));
 }
-
-// End of #include "/lib/Misc/CalculateFogFactor.glsl"

@@ -1,4 +1,4 @@
-// Start of #include "/lib/Utility.glsl"
+// #include "/lib/Utility.glsl"
 
 #define  PI 3.1415926 // Pi
 #define RAD 0.0174533 // Degrees per radian
@@ -26,5 +26,3 @@ vec3 SetSaturationLevel(in vec3 color, in float level) {
 	
 	return mix(vec3(luminance), color, level);
 }
-
-// End of #include "/lib/Utility.glsl"

@@ -1,4 +1,4 @@
-// Start of #include "/lib/Vertex/Materials.vsh"
+// #include "/lib/Vertex/Materials.vsh"
 
 float GetMaterialIDs(in int mc_ID) { // Gather material masks
 #if defined gbuffers_hand
@@ -28,5 +28,3 @@ float GetMaterialIDs(in int mc_ID) { // Gather material masks
 	
 	return materialID;
 }
-
-// End of #include "/lib/Vertex/Materials.vsh"

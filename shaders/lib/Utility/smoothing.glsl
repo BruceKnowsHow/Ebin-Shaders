@@ -1,3 +1,5 @@
+// #include "/lib/Utility/smoothing.glsl"
+
 float cubesmooth(in float x) { // Applies a subtle S-shaped curve, domain [0 to 1]
 	return x * x * (3.0 - 2.0 * x);
 }

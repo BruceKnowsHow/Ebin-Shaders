@@ -1,3 +1,5 @@
+// #include "/lib/Utility/encoding.glsl"
+
 float Encode16(in vec2 buffer) {
 	cvec2 encode = vec2(1.0, exp2(8.0));
 	

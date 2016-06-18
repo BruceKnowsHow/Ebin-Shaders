@@ -1,4 +1,4 @@
-// Start of #include "/lib/Fragment/Sky.fsh"
+// #include "/lib/Fragment/Sky.fsh"
 
 float CalculateSunglow(in vec4 viewSpacePosition) {
 	float sunglow = max0(dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
@@ -99,5 +99,3 @@ vec3 CalculateSky(in vec4 viewSpacePosition, cbool sunSpot) {
 	
 	return (gradient + sunspot + atmosphere + clouds) * SKY_BRIGHTNESS;
 }
-
-// End of #include "/lib/Fragment/Sky.fsh"

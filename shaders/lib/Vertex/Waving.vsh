@@ -1,4 +1,4 @@
-// Start of #include "/lib/Vertex/Waving.vsh"
+// #include "/lib/Vertex/Waving.vsh"
 
 vec3 GetWavingGrass(in vec3 position, in float magnitude) {
 	vec3 wave = vec3(0.0);
@@ -59,5 +59,3 @@ vec3 GetWavingWater(in vec3 position, in float magnitude) {
 	
 	return wave * magnitude;
 }
-
-// End of #include "/lib/Vertex/Waving.vsh"

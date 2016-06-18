@@ -1,4 +1,4 @@
-// Start of #include "/lib/Uniform/ShadowViewMatrix.vsh"
+// #include "/lib/Uniform/ShadowViewMatrix.vsh"
 
 varying mat4 shadowView;
 varying mat4 shadowViewInverse;
@@ -60,5 +60,3 @@ float CalculateShadowView() {
 	
 	return isNight;
 }
-
-// End of #include "/lib/Uniform/ShadowViewMatrix.vsh"

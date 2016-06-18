@@ -1,4 +1,4 @@
-// Start of #include "/lib/Uniform/CompositeCalculations.vsh"
+// #include "/lib/Uniform/CompositeCalculations.vsh"
 
 // {
 	float isNight = CalculateShadowView();
@@ -34,5 +34,3 @@
 		mix(skylightDay, skylightSunrise, timeHorizon) * timeDay +
 		skylightNight * timeNight + skylightHorizon * timeHorizon;
 // }
-
-// End of #include "/lib/Uniform/CompositeCalculations.vsh"
