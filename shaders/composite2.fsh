@@ -117,18 +117,14 @@ float noise(in vec2 coord) {
 
 #include "/lib/Misc/BiasFunctions.glsl"
 
-float GetSunlightVisibility(in vec4 viewSpacePosition) {
-	vec4 position = gbufferModelViewInverse * viewSpacePosition;
-	position = shadowProjection * shadowModelView * position;
-	position.xyz = BiasShadowProjection(position.xyz);
-	position.xyz = position.xyz * 0.5 + 0.5;
+float ComputeDirectSunlight(in vec4 viewSpacePosition, in float sunlightCoeff) {
+	if (sunlightCoeff <= 0.01) return 0.0;
 	
-	if (position.x < 0.0 || position.x > 1.0
-	||  position.y < 0.0 || position.y > 1.0
-	||  position.z < 0.0 || position.z > 1.0
-	    ) return 1.0;
+	vec3 shadowPosition = BiasShadowProjection((shadowProjection * shadowModelView * gbufferModelViewInverse * viewSpacePosition).xyz) * 0.5 + 0.5;
 	
-	return pow2(shadow2D(shadow, position.xyz).x);
+	if (any(greaterThan(abs(shadowPosition.xyz - 0.5), vec3(0.5)))) return 1.0;
+	
+	return pow2(shadow2D(shadow, shadowPosition.xyz).x);
 }
 
 #include "/lib/Fragment/Sky.fsh"
@@ -203,7 +199,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	if (length(alpha) < 0.01) return;
 	
 	
-	float sunlight = GetSunlightVisibility(viewSpacePosition);
+	float sunlight = ComputeDirectSunlight(viewSpacePosition, 1.0);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
 	     reflectedSky *= 1.0;
@@ -253,7 +249,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	//if (length(alpha) < 0.01) return;
 	
-	float sunlight = GetSunlightVisibility(viewSpacePosition);
+	float sunlight = ComputeDirectSunlight(viewSpacePosition, 1.0);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;

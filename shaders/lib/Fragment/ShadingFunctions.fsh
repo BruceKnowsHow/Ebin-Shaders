@@ -142,23 +142,20 @@ float VariablySoftShadows(in vec3 position, in float biasCoeff) {
 	return sunlight / sampleCount;
 }
 
-float ComputeDirectSunlight(in vec4 position, in float normalShading, cuint Shadow_Type) {
-	if (normalShading <= 0.01) return 0.0;
+float ComputeDirectSunlight(in vec4 viewSpacePosition, in float sunlightCoeff, cuint Shadow_Type) {
+	if (sunlightCoeff <= 0.01) return 0.0;
 	
 	float biasCoeff;
 	
-	position     = ViewSpaceToWorldSpace(position);
-	position     = WorldSpaceToShadowSpace(position);
-	position.xyz = BiasShadowProjection(position.xyz, biasCoeff);
-	position.xyz = position.xyz * 0.5 + 0.5;
+	vec3 shadowPosition = BiasShadowProjection(WorldSpaceToShadowSpace(ViewSpaceToWorldSpace(viewSpacePosition)).xyz, biasCoeff) * 0.5 + 0.5;
 	
-	if (any(greaterThan(abs(position.xyz - 0.5), vec3(0.5)))) return 1.0;
+	if (any(greaterThan(abs(shadowPosition.xyz - 0.5), vec3(0.5)))) return 1.0;
 	
 	switch(Shadow_Type == 0 ? SHADOW_TYPE : Shadow_Type) {
-		case 2: return UniformlySoftShadows(position.xyz, biasCoeff);
-		case 3: return VariablySoftShadows(position.xyz, biasCoeff);
+		case 2: return UniformlySoftShadows(shadowPosition.xyz, biasCoeff);
+		case 3: return VariablySoftShadows(shadowPosition.xyz, biasCoeff);
 		
-		default: return HardShadows(position.xyz);
+		default: return HardShadows(shadowPosition.xyz);
 	}
 }
 
