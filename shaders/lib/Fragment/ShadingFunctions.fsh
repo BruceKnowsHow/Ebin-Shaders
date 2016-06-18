@@ -84,9 +84,9 @@ float UniformlySoftShadows(in vec3 position, in float biasCoeff) {
 	
 	float sunlight = 0.0;
 	
-	for (float i = -range; i <= range; i += interval)
-		for (float j = -range; j <= range; j += interval)
-			sunlight += shadow2D(shadow, vec3(position.xy + vec2(i, j) * spread, position.z)).x;
+	for (float y = -range; y <= range; y += interval)
+		for (float x = -range; x <= range; x += interval)
+			sunlight += shadow2D(shadow, vec3(position.xy + vec2(x, y) * spread, position.z)).x;
 	
 	sunlight /= sampleCount; // Average the samples by dividing the sum by the sample count.
 	
@@ -111,9 +111,9 @@ float VariablySoftShadows(in vec3 position, in float biasCoeff) {
 	
 	float avgDepth = 0.0;
 	//Blocker Search
-	for(float i = -range; i <= range; i++) {
-		for(float j = -range; j <= range; j++) {
-			vec2 lookupPosition = position.xy + vec2(i, j) * 8 / shadowMapResolution * blockerRotation * vpsSpread;
+	for(float y = -range; y <= range; y++) {
+		for(float x = -range; x <= range; x++) {
+			vec2 lookupPosition = position.xy + vec2(x, y) * 8.0 / shadowMapResolution * blockerRotation * vpsSpread;
 			float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
 			
 			avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
@@ -131,9 +131,9 @@ float VariablySoftShadows(in vec3 position, in float biasCoeff) {
 	float sunlight = 0.0;
 	
 	//PCF Blur
-	for (float i = -range; i <= range; i++) {
-		for (float j = -range; j <= range; j++) {
-			vec2 coord = vec2(i, j) * pcfRotation;
+	for (float y = -range; y <= range; y++) {
+		for (float x = -range; x <= range; x++) {
+			vec2 coord = vec2(x, y) * pcfRotation;
 			
 			sunlight += shadow2D(shadow, vec3(coord * spread + position.st, position.z)).x;
 		}
@@ -143,7 +143,7 @@ float VariablySoftShadows(in vec3 position, in float biasCoeff) {
 }
 
 float ComputeDirectSunlight(in vec4 position, in float normalShading, cuint Shadow_Type) {
-	if (normalShading <= 0.0) return 0.0;
+	if (normalShading <= 0.01) return 0.0;
 	
 	float biasCoeff;
 	
