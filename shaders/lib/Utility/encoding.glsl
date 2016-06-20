@@ -38,3 +38,15 @@ vec3 DecodeNormal(vec2 encodedNormal) {
 	float g = sqrt(1.0 - f * 0.25);
 	return vec3(fenc * g, 1.0 - f * 0.5);
 }
+
+void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
+	encode.rg = texture2D(buffer, coord).rg;
+	
+	vec2 buffer0 = Decode16(encode.r);
+	buffer0r = buffer0.r;
+	buffer0g = buffer0.g;
+	
+	vec2 buffer1 = Decode16(encode.g);
+	buffer1r = buffer1.r;
+	buffer1g = buffer1.g;
+}

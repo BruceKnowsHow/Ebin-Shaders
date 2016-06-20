@@ -18,9 +18,9 @@ struct Lightmap {    // Contains vector light levels with color
 #include "/lib/Misc/BiasFunctions.glsl"
 #include "/lib/Fragment/Sunlight/GetSunlightShading.fsh"
 
-#if SHADOW_TYPE == 3
+#if SHADOW_TYPE == 3 && defined composite1
 	#include "/lib/Fragment/Sunlight/ComputeVariablySoftShadows.fsh"
-#elif SHADOW_TYPE == 2
+#elif SHADOW_TYPE == 2 && defined composite1
 	#include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
 #else
 	#include "/lib/Fragment/Sunlight/ComputeHardShadows.fsh"
