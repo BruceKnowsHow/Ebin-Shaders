@@ -260,14 +260,6 @@ void main() {
 	
 	composite += GI * sunlightColor * diffuse * 5.0;
 	
-	#define CUMMY 1
-	
-	cint cummy = 1;
-	
-	
-	#if CUMMY == cummy
-	show(true);
-	#endif
 	
 //	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);
 	
