@@ -1,5 +1,3 @@
-// #include "/lib/Fragment/Masks.fsh"
-
 struct Mask {
 	float materialIDs;
 	float matIDs;

@@ -1,5 +1,3 @@
-// #include "/lib/Vertex/VertexDisplacements.vsh"
-
 vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
 	worldSpacePosition += cameraPosition.xyz;
 	

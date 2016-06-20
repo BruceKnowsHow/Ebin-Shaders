@@ -1,5 +1,3 @@
-// #include "/lib/Utility/lengthSquared.glsl"
-
 float lengthSquared(in vec2 x) {
 	return dot(x, x);
 }

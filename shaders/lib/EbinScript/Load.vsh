@@ -1,5 +1,3 @@
-// #include "/lib/EbinScript/Load.vsh"
-
 #define time frameTimeCounter
 #define dayCycle sunAngle
 	

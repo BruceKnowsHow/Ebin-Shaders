@@ -1,5 +1,3 @@
-// #include "/lib/Fragment/Clouds.fsh"
-
 vec3 GetCloud(in vec3 worldSpacePosition) {
 	return vec3(float(abs(worldSpacePosition.x) < 100.0
 	               && abs(worldSpacePosition.z) < 100.0

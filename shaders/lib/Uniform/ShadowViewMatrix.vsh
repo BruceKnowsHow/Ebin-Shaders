@@ -1,5 +1,3 @@
-// #include "/lib/Uniform/ShadowViewMatrix.vsh"
-
 varying mat4 shadowView;
 
 float timeCycle;

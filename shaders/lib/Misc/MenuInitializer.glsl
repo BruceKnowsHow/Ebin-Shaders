@@ -1,5 +1,3 @@
-// #include "/lib/Misc/MenuInitializer.glsl"
-
 /* Force Optifine to recognize options
 
 #ifdef DEFAULT_TEXTURE_PACK

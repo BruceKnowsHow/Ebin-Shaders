@@ -1,5 +1,3 @@
-// #include "/lib/Syntax.glsl"
-
 #if defined fsh
 	#define varying in
 #endif

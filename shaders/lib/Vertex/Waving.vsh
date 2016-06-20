@@ -1,5 +1,3 @@
-// #include "/lib/Vertex/Waving.vsh"
-
 vec3 GetWavingGrass(in vec3 position, in float magnitude) {
 	vec3 wave = vec3(0.0);
 	

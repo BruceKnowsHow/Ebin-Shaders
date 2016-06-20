@@ -1,5 +1,3 @@
-// #include "/lib/Misc/CalculateFogFactor.glsl"
-
 float CalculateFogFactor(in vec4 viewSpacePosition, in float power) {
 	#ifndef FOG_ENABLED
 	return 0.0;

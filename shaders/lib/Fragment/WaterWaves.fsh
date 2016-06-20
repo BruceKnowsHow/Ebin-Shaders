@@ -1,5 +1,3 @@
-// #include "/lib/Fragment/WaterWaves.fsh"
-
 vec2 SmoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
 	coord *= noiseTextureResolution;
 	coord  = floor(coord) + cubesmooth(fract(coord)) + 0.5;

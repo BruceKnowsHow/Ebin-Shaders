@@ -1,5 +1,3 @@
-// #include "/lib/Utility.glsl"
-
 #define  PI 3.1415926 // Pi
 #define RAD 0.0174533 // Degrees per radian
 

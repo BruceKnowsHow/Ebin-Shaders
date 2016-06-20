@@ -45,7 +45,6 @@ varying vec2 texcoord;
 #include "/lib/DebugSetup.glsl"
 #include "/lib/Uniform/GlobalCompositeVariables.glsl"
 #include "/lib/Fragment/Masks.fsh"
-#include "/lib/Fragment/ShadingFunctions.fsh"
 
 
 float GetDepth(in vec2 coord) {
@@ -75,6 +74,10 @@ void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float bu
 	buffer1g = buffer1.g;
 }
 
+#include "/lib/Misc/BiasFunctions.glsl"
+#include "/lib/Fragment/Sunlight/GetSunlightShading.fsh"
+#include "/lib/Fragment/Sunlight/ComputeHardShadows.fsh"
+#include "/lib/Fragment/Sunlight/CalculateDirectSunlight.fsh"
 
 #if GI_MODE == 1
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLightmap, const in float radius, in vec2 noise, in Mask mask) {
@@ -85,11 +88,11 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	float lightMult = skyLightmap;
 	
 	#ifdef GI_BOOST
-		float normalShading = GetLambertianShading(normal, mask);
+		float sunlight  = GetLambertianShading(normal, mask);
+		      sunlight *= skyLightmap;
+		      sunlight  = CalculateDirectSunlight(position, sunlight);
 		
-		float sunlight = ComputeDirectSunlight(position, 1.0, 1);
-		
-		lightMult *= 1.0 - sunlight * normalShading * 4.0;
+		lightMult = 1.0 - sunlight * 4.0;
 		
 		if (lightMult < 0.05) return vec3(0.0);
 	#endif
@@ -159,7 +162,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	#ifdef GI_BOOST
 		float normalShading = GetLambertianShading(normal, mask);
 		
-		float sunlight = ComputeDirectSunlight(position, normalShading, 1);
+		float sunlight = ComputeDirectSunlight(position, normalShading);
 		
 		lightMult *= 1.0 - pow(sunlight, 1) * normalShading * 4.0;
 		
@@ -238,7 +241,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	#ifdef GI_BOOST
 		float normalShading = GetLambertianShading(normal, mask);
 		
-		float sunlight = ComputeDirectSunlight(position, 1.0, 1);
+		float sunlight = ComputeDirectSunlight(position, 1.0);
 		
 		lightMult *= 1.0 - sunlight * normalShading * 4.0;
 		

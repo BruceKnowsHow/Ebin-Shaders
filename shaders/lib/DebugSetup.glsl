@@ -1,5 +1,3 @@
-// #include "/lib/DebugSetup.glsl"
-
 vec3 Debug;
 
 #if ShaderStage < 0

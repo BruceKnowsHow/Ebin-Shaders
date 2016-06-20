@@ -1,5 +1,3 @@
-// #include "/lib/Fragment/ReflectanceModel.fsh"
-
 // Noise Functions
 
 vec2 Hammersley(uint i, uint N) {

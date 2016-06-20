@@ -1,5 +1,3 @@
-// #include "/lib/Uniform/CompositeCalculations.vsh"
-
 // {
 	float isNight = CalculateShadowView();
 	

@@ -1,5 +1,3 @@
-// #include "/lib/Uniform/GlobalCompositeVariables.glsl"
-
 varying vec3 lightVector;
 
 varying float timeDay;

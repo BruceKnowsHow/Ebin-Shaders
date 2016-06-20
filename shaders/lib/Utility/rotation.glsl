@@ -1,5 +1,3 @@
-// #include "/lib/Utility/rotation.glsl"
-
 void rotate(inout vec2 vector, in float radians) {
 	vector *= mat2(
 		cos(radians), -sin(radians),
