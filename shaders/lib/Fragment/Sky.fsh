@@ -32,9 +32,9 @@ vec3 CalculateSkyGradient(in vec4 viewSpacePosition, in float fogFactor) {
 	vec3 sunglowColor = mix(skylightColor, sunlightColor * 0.5, gradientCoeff * sunglow) * sunglow;
 	
 	
-	vec3 color  = primaryHorizonColor * gradientCoeff * 7.0; // Sky desaturates as it approaches the horizon
+	vec3 color  = primaryHorizonColor * gradientCoeff * 5.0; // Sky desaturates as it approaches the horizon
 	     color *= 1.0 + sunglowColor * 2.0;
-	     color += sunglowColor * 5.0;
+	     color += sunglowColor * 2.0;
 	
 	return color * 0.9;
 }
@@ -46,7 +46,7 @@ vec3 CalculateSunspot(in vec4 viewSpacePosition) {
 	      sunspot  = min(sunspot, 20.0);
 	      sunspot += 100.0 * float(sunspot == 20.0);
 	
-	return sunspot * sunlightColor * sunlightColor;
+	return sunspot * sunlightColor * sunlightColor * vec3(1.0, 0.8, 0.6);
 }
 
 vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {

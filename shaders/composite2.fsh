@@ -293,7 +293,7 @@ mat3 GetWaterTBN() {
 
 void AddWater(in vec4 viewSpacePosition, inout Mask mask, out vec3 color, out vec3 normal, out float smoothness, out vec3 tangentNormal, out mat3 tbnMatrix) {
 	mask.metallic = 0.0;
-	color         = vec3(0.0, 0.015, 0.25);
+	color         = vec3(0.0, 0.015, 0.2);
 	tbnMatrix     = GetWaterTBN();
 	tangentNormal = GetWaveNormals(viewSpacePosition, transpose(tbnMatrix)[2]);
 	normal        = normalize(tangentNormal * tbnMatrix);

@@ -132,9 +132,9 @@ vec3[8] GetBloom() {
 }
 
 vec3 Uncharted2Tonemap(in vec3 color) {
-	cfloat A = 0.15, B = 0.5, C = 0.1, D = 0.2, E = 0.02, F = 0.3, W = 11.2;
+	cfloat A = 0.25, B = 0.5, C = 0.07, D = 0.2, E = 0.02, F = 0.6, W = 11.2;
 	cfloat whiteScale = 1.0 / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F);
-	cfloat ExposureBias = 2.3 * EXPOSURE;
+	cfloat ExposureBias = 1.3 * EXPOSURE;
 	
 	vec3 curr = ExposureBias * color;
 	     curr = ((curr * (A * curr + C * B) + D * E) / (curr * (A * curr + B) + D * F)) - E / F;

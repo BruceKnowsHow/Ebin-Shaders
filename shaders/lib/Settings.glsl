@@ -23,13 +23,13 @@ const int noiseTextureResolution = 64;
 //#define DEFAULT_TEXTURE_PACK
 
 
-#define EXPOSURE            1.0  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0  8.0]
-#define SATURATION          1.15 // [0.00 0.50 1.00 1.15 1.30]
+#define EXPOSURE            0.8  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0  8.0]
+#define SATURATION          1.15 // [0.00 0.50 1.00 1.15 1.20 1.30]
 #define SUN_LIGHT_LEVEL     1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define SKY_LIGHT_LEVEL     1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define AMBIENT_LIGHT_LEVEL 1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
 #define TORCH_LIGHT_LEVEL   1.00 // [0.00 0.25 0.50 1.00 2.00 4.00 8.00 16.00]
-#define SKY_BRIGHTNESS      1.0  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0 8.0]
+#define SKY_BRIGHTNESS      0.8  // [0.2 0.4 0.6 0.8 1.0 2.0 4.0 8.0]
 
 
 #define BLOOM_ENABLED
