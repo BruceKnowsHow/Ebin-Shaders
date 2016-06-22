@@ -32,9 +32,9 @@ vec3 CalculateSkyGradient(in vec4 viewSpacePosition, in float fogFactor) {
 	vec3 sunglowColor = mix(skylightColor, sunlightColor * 0.5, gradientCoeff * sunglow) * sunglow;
 	
 	
-	vec3 color  = primaryHorizonColor * gradientCoeff * 5.0; // Sky desaturates as it approaches the horizon
+	vec3 color  = primaryHorizonColor * gradientCoeff * 8.0; // Sky desaturates as it approaches the horizon
 	     color *= 1.0 + sunglowColor * 2.0;
-	     color += sunglowColor * 2.0;
+	     color += sunglowColor * 5.0;
 	
 	return color * 0.9;
 }
