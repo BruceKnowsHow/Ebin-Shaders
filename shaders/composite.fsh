@@ -120,8 +120,11 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		float distanceCoeff = lengthSquared(sampleDiff); // Inverse-square law
 		      distanceCoeff = 1.0 / max(distanceCoeff, pow(radius, 2));
 		
-		vec3 sampleDir    = normalize(sampleDiff);
-		vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
+		vec3 sampleDir = normalize(sampleDiff);
+		
+		vec3 shadowNormal;
+		     shadowNormal.xy = texture2DLod(shadowcolor1, mapPos, sampleLOD).xy * 2.0 - 1.0;
+		     shadowNormal.z  = sqrt(1.0 - lengthSquared(shadowNormal.xy));
 		
 		float viewNormalCoeff   = max0(dot(      normal, sampleDir));
 		float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
@@ -196,8 +199,11 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 			
 			float distanceCoeff = lengthSquared(sampleDiff);
 			
-			vec3 sampleDir    = normalize(sampleDiff);
-			vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
+			vec3 sampleDir = normalize(sampleDiff);
+			
+			vec3 shadowNormal;
+			     shadowNormal.xy = texture2DLod(shadowcolor1, mapPos, sampleLOD).xy * 2.0 - 1.0;
+			     shadowNormal.z  = sqrt(1.0 - lengthSquared(shadowNormal.xy));
 			
 			float viewNormalCoeff   = max0(dot(      normal, sampleDir));
 			float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
@@ -271,8 +277,11 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		float distanceCoeff = lengthSquared(sampleDiff); // Inverse-square law
 		      distanceCoeff = 1.0 / max(distanceCoeff, 2.5e-4);
 		
-		vec3 sampleDir    = normalize(sampleDiff);
-		vec3 shadowNormal = texture2DLod(shadowcolor1, mapPos, sampleLOD).xyz * 2.0 - 1.0;
+		vec3 sampleDir = normalize(sampleDiff);
+		
+		vec3 shadowNormal;
+		     shadowNormal.xy = texture2DLod(shadowcolor1, mapPos, sampleLOD).xy * 2.0 - 1.0;
+		     shadowNormal.z  = -sqrt(1.0 - lengthSquared(shadowNormal.xy));
 		
 		float viewNormalCoeff   = max0(dot(      normal, sampleDir));
 		float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));

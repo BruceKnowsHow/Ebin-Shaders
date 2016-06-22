@@ -20,17 +20,12 @@ void main() {
 	vec4 diffuse  = color;
 	     diffuse *= texture2D(texture, texcoord);
 	
-	float NdotL = dot(vertNormal, vec3(0.0, 0.0, 1.0));
+	float NdotL = max0(dot(vertNormal, vec3(0.0, 0.0, 1.0)));
 	
 	diffuse.rgb *= pow(NdotL, 1.0 / 2.2);
 	
 	vec3 shadowNormal = vertNormal;
 	
-#if GI_MODE == 3
-	shadowNormal.z *= -1.0; // This is done here so that it can be avoided in the GI loop. Do not forget to correct for it.
-#endif
-	
-	
 	gl_FragData[0] = vec4(diffuse.rgb, diffuse.a);
-	gl_FragData[1] = vec4(shadowNormal * 0.5 + 0.5, 1.0);
+	gl_FragData[1] = vec4(shadowNormal.xy * 0.5 + 0.5, 0.0, 1.0);
 }
