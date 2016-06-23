@@ -48,7 +48,7 @@ varying vec2 texcoord;
 
 
 vec3 GetDiffuse(in vec2 coord) {
-	return pow(texture2D(colortex2, coord).rgb, vec3(2.2));
+	return texture2D(colortex2, coord).rgb;
 }
 
 float GetDepth(in vec2 coord) {
@@ -129,28 +129,6 @@ void BilateralUpsample(in vec3 normal, in float depth, in Mask mask, out vec3 GI
 #endif
 }
 
-#include "/lib/Fragment/Sky.fsh"
-
-float ComputeSkyAbsorbance(in vec4 viewSpacePosition, in vec4 viewSpacePosition1) {
-	vec3 underwaterVector = viewSpacePosition.xyz - viewSpacePosition1.xyz;
-	
-	float UdotN = abs(dot(normalize(underwaterVector.xyz), normalize(upPosition)));
-	
-	float depth = length(underwaterVector.xyz) * UdotN;
-	      depth = exp(-depth * 0.4);
-	
-	float fogFactor = CalculateFogFactor(viewSpacePosition1, 10.0);
-	
-	return 1.0 - clamp(depth - fogFactor, 0.0, 1.0);
-}
-
-void AddUnderwaterFog(inout vec3 color, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in float skyLightmap, in Mask mask) {
-	vec3 waterVolumeColor = vec3(0.0, 0.01, 0.1) * skylightColor * pow(skyLightmap, 4.0);
-	
-	if (mask.water > 0.5)
-		color = mix(color, waterVolumeColor, ComputeSkyAbsorbance(viewSpacePosition, viewSpacePosition1));
-}
-
 
 void main() {
 	float depth = GetDepth(texcoord);
@@ -176,17 +154,16 @@ void main() {
 	
 	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
 	
-	vec3 composite = diffuse * CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
+	vec3 composite = CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 	
 	
 	vec3 GI; float volFog;
 	BilateralUpsample(normal, depth, mask, GI, volFog);
 	
+	composite += GI * sunlightColor * 5.0;
 	
-	composite += GI * sunlightColor * diffuse * 5.0;
 	
-	
-//	AddUnderwaterFog(composite, viewSpacePosition, viewSpacePosition1, skyLightmap, mask);
+	composite *= pow(diffuse, vec3(2.2));
 	
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
