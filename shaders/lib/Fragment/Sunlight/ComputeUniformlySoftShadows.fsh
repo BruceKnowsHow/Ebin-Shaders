@@ -1,4 +1,12 @@
-float ComputeShadows(in vec3 position, in float biasCoeff) { // Soft shadows
+float ComputeUniformlySoftShadows(in vec4 viewSpacePosition, in float sunlightCoeff) { // Soft shadows
+	if (sunlightCoeff <= 0.01) return 0.0;
+	
+	float biasCoeff;
+	
+	vec3 shadowPosition = BiasShadowProjection((shadowProjection * shadowModelView * gbufferModelViewInverse * viewSpacePosition).xyz, biasCoeff) * 0.5 + 0.5;
+	
+	if (any(greaterThan(abs(shadowPosition.xyz - 0.5), vec3(0.5)))) return 1.0;
+	
 	float spread = (1.0 - biasCoeff) / shadowMapResolution;
 	
 	cfloat range       = 1.0;
@@ -9,9 +17,9 @@ float ComputeShadows(in vec3 position, in float biasCoeff) { // Soft shadows
 	
 	for (float y = -range; y <= range; y += interval)
 		for (float x = -range; x <= range; x += interval)
-			sunlight += shadow2D(shadow, vec3(position.xy + vec2(x, y) * spread, position.z)).x;
+			sunlight += shadow2D(shadow, vec3(shadowPosition.xy + vec2(x, y) * spread, shadowPosition.z)).x;
 	
 	sunlight /= sampleCount; // Average the samples by dividing the sum by the sample count.
 	
-	return pow2(sunlight);
+	return sunlightCoeff * pow2(sunlight);
 }

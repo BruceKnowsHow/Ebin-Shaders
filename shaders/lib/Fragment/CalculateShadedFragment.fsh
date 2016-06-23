@@ -20,14 +20,17 @@ struct Lightmap {    // Contains vector light levels with color
 
 #if SHADOW_TYPE == 3 && defined composite1
 	#include "/lib/Fragment/Sunlight/ComputeVariablySoftShadows.fsh"
+	#define ComputeShadows(x, y) ComputeVariablySoftShadows(x, y)
+	
 #elif SHADOW_TYPE == 2 && defined composite1
 	#include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
+	#define ComputeShadows(x, y) ComputeUniformlySoftShadows(x, y)
+	
 #else
 	#include "/lib/Fragment/Sunlight/ComputeHardShadows.fsh"
+	#define ComputeShadows(x, y) ComputeHardShadows(x, y)
+	
 #endif
-
-#include "/lib/Fragment/Sunlight/CalculateDirectSunlight.fsh"
-
 
 #if defined composite1
 // Underwater light caustics
@@ -41,7 +44,7 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	
 	shading.sunlight  = shading.normal;
 	shading.sunlight *= pow2(skyLightmap);
-	shading.sunlight  = CalculateDirectSunlight(ViewSpacePosition, shading.sunlight);
+	shading.sunlight  = ComputeShadows(ViewSpacePosition, shading.sunlight);
 	
 	#if defined composite1
 		// Underwater light caustics
@@ -69,7 +72,7 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	
 	return vec3(
 	    lightmap.sunlight   * 6.0   * SUN_LIGHT_LEVEL
-	+   lightmap.skylight   * 0.5  * SKY_LIGHT_LEVEL
+	+   lightmap.skylight   * 0.5   * SKY_LIGHT_LEVEL
 	+   lightmap.ambient    * 0.015 * AMBIENT_LIGHT_LEVEL
 	+   lightmap.torchlight * 3.0   * TORCH_LIGHT_LEVEL
 	    );

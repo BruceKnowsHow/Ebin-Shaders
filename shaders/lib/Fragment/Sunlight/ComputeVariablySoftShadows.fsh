@@ -5,7 +5,15 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 	return texture2D(noisetex, coord).xy;
 }
 
-float ComputeShadows(in vec3 position, in float biasCoeff) { // Variable softness shadows (PCSS)
+float ComputeVariablySoftShadows(in vec4 viewSpacePosition, in float sunlightCoeff) { // Variable softness shadows (PCSS)
+	if (sunlightCoeff <= 0.01) return 0.0;
+	
+	float biasCoeff;
+	
+	vec3 shadowPosition = BiasShadowProjection((shadowProjection * shadowModelView * gbufferModelViewInverse * viewSpacePosition).xyz, biasCoeff) * 0.5 + 0.5;
+	
+	if (any(greaterThan(abs(shadowPosition.xyz - 0.5), vec3(0.5)))) return 1.0;
+	
 	float vpsSpread = 0.4 / biasCoeff;
 	
 	vec2 randomAngle = GetDitherred2DNoise(texcoord, 64.0).xy * PI * 2.0;
@@ -25,10 +33,10 @@ float ComputeShadows(in vec3 position, in float biasCoeff) { // Variable softnes
 	//Blocker Search
 	for(float y = -range; y <= range; y++) {
 		for(float x = -range; x <= range; x++) {
-			vec2 lookupPosition = position.xy + vec2(x, y) * 8.0 / shadowMapResolution * blockerRotation * vpsSpread;
+			vec2 lookupPosition = shadowPosition.xy + vec2(x, y) * 8.0 / shadowMapResolution * blockerRotation * vpsSpread;
 			float depthSample = texture2DLod(shadowtex1, lookupPosition, 0).x;
 			
-			avgDepth += pow(clamp(position.z - depthSample, 0.0, 1.0), 1.7);
+			avgDepth += pow(clamp(shadowPosition.z - depthSample, 0.0, 1.0), 1.7);
 		}
 	}
 	
@@ -47,9 +55,9 @@ float ComputeShadows(in vec3 position, in float biasCoeff) { // Variable softnes
 		for (float x = -range; x <= range; x++) {
 			vec2 coord = vec2(x, y) * pcfRotation;
 			
-			sunlight += shadow2D(shadow, vec3(coord * spread + position.st, position.z)).x;
+			sunlight += shadow2D(shadow, vec3(coord * spread + shadowPosition.st, shadowPosition.z)).x;
 		}
 	}
 	
-	return sunlight / sampleCount;
+	return sunlightCoeff * sunlight / sampleCount;
 }

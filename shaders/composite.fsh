@@ -66,7 +66,6 @@ vec3 GetNormal(in vec2 coord) {
 #include "/lib/Misc/BiasFunctions.glsl"
 #include "/lib/Fragment/Sunlight/GetSunlightShading.fsh"
 #include "/lib/Fragment/Sunlight/ComputeHardShadows.fsh"
-#include "/lib/Fragment/Sunlight/CalculateDirectSunlight.fsh"
 
 #if GI_MODE == 1
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLightmap, const in float radius, in vec2 noise, in Mask mask) {
@@ -79,7 +78,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	#ifdef GI_BOOST
 		float sunlight  = GetLambertianShading(normal, mask);
 		      sunlight *= skyLightmap;
-		      sunlight  = CalculateDirectSunlight(position, sunlight);
+		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
 		
@@ -154,7 +153,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	#ifdef GI_BOOST
 		float sunlight  = GetLambertianShading(normal, mask);
 		      sunlight *= skyLightmap;
-		      sunlight  = CalculateDirectSunlight(position, sunlight);
+		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
 		
@@ -236,7 +235,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	#ifdef GI_BOOST
 		float sunlight  = GetLambertianShading(normal, mask);
 		      sunlight *= skyLightmap;
-		      sunlight  = CalculateDirectSunlight(position, sunlight);
+		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
 		
