@@ -220,10 +220,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	#define IOR 0.15 // [0.05 0.1 0.15 0.25 0.5]
 	
-	vec3 halfVector = normalize(lightVector + -normalize(viewSpacePosition.xyz));
-	
-	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), halfVector));
-	vec3  sColor  = mix(vec3(IOR), clamp(color * 0.1, 0.02, 0.99), vec3(mask.metallic));
+	float vdoth   = clamp01(dot(-normalize(viewSpacePosition.xyz), normal));
+	vec3  sColor  = mix(vec3(IOR), clamp(color * 0.25, 0.02, 0.99), vec3(mask.metallic));
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
 	vec3 alpha = fresnel * smoothness;
@@ -272,7 +270,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	reflection /= PBR_RAYS;
 	
-	color = mix(color * (1.0 - mask.metallic * 0.9), reflection, alpha);
+	color = mix(color * (1.0 - mask.metallic), reflection, alpha);
 }
 #endif
 
