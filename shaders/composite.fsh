@@ -35,6 +35,8 @@ uniform vec3 cameraPosition;
 uniform float viewWidth;
 uniform float viewHeight;
 
+uniform int isEyeInWater;
+
 varying mat4 shadowView;
 #define shadowModelView shadowView
 
@@ -62,6 +64,18 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
+void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
+	encode.rg = texture2D(colortex0, coord).rg;
+	
+	vec2 buffer0 = Decode16(encode.r);
+	buffer0r = buffer0.r;
+	buffer0g = buffer0.g;
+	
+	vec2 buffer1 = Decode16(encode.g);
+	buffer1r = buffer1.r;
+	buffer1g = buffer1.g;
+}
+
 
 #include "/lib/Misc/BiasFunctions.glsl"
 #include "/lib/Fragment/Sunlight/GetSunlightShading.fsh"
@@ -81,9 +95,9 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
-		
-		if (lightMult < 0.05) return vec3(0.0);
 	#endif
+	
+	if (lightMult < 0.05) return vec3(0.0);
 	
 	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	
@@ -95,7 +109,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position. Position can also be used for exponential comparisons (GI_MODE = 2)
 	normal   = -(shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
 	
-	cfloat brightness = 12.5 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	float  brightness = 12.5 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
 	cfloat scale      = radius / 256.0;
 	
 	vec3 GI = vec3(0.0);
@@ -156,9 +170,9 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
-		
-		if (lightMult < 0.05) return vec3(0.0);
 	#endif
+	
+	if (lightMult < 0.05) return vec3(0.0);
 	
 	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	
@@ -173,7 +187,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	
 	float biasCoeff = GetShadowBias(position.xy);
 	
-	cfloat brightness = 100.0 * pow(radius, sqrt(2.0)) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	float  brightness = 100.0 * pow(radius, sqrt(2.0)) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
 	cfloat scale      = radius / 256.0;
 	
 	vec3 GI = vec3(0.0);
@@ -238,9 +252,9 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
-		
-		if (lightMult < 0.05) return vec3(0.0);
 	#endif
+	
+	if (lightMult < 0.05) return vec3(0.0);
 	
 	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	
@@ -252,7 +266,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position. Position can also be used for exponential comparisons (GI_MODE = 2)
 	normal   = vec3(-1.0, -1.0,  1.0) * (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
 	
-	cfloat brightness = 0.000075 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	float  brightness = 0.000075 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
 	cfloat scale      = radius / 1024.0;
 	
 	vec3 GI = vec3(0.0);
@@ -349,7 +363,7 @@ void main() {
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, colortex0, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
 	
@@ -357,7 +371,7 @@ void main() {
 	float volFog = ComputeVolumetricFog(viewSpacePosition);
 	
 	
-	if (mask.transparent + mask.water> 0.5)
+	if (mask.transparent + float(isEyeInWater != mask.water) > 0.5)
 		{ gl_FragData[0] = vec4(vec3(0.0), volFog); exit(); return; }
 	
 	

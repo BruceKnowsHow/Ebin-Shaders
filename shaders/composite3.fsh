@@ -21,7 +21,7 @@ varying vec2 texcoord;
 #include "/lib/DebugSetup.glsl"
 
 
-vec3 ComputeBloomTile(cint scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
+vec3 ComputeBloomTile(cfloat scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
 	// Each bloom tile uses (1.0 / scale + pixelSize * 2.0) texcoord-units of the screen
 	
 	vec2  pixelSize = 1.0 / vec2(viewWidth, viewHeight);
@@ -39,7 +39,7 @@ vec3 ComputeBloomTile(cint scale, vec2 offset) { // Computes a single bloom tile
 	
 	cfloat range     = 2.0 * scale; // Sample radius has to be adjusted based on the scale of the bloom tile
 	cfloat interval  = 1.0 * scale;
-	float  maxLength = length(vec2(range));
+	cfloat maxLength = length(vec2(range));
 	
 	vec3  bloom       = vec3(0.0);
 	float totalWeight = 0.0;

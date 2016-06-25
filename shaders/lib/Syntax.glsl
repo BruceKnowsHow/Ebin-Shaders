@@ -24,14 +24,4 @@
 
 
 // In-built function overrides
-float length(in vec2 x) {
-	return sqrt(dot(x, x));
-}
-
-float length(in vec3 x) {
-	return sqrt(dot(x, x));
-}
-
-float length(in vec4 x) {
-	return sqrt(dot(x, x));
-}
+#define length(x) sqrt(dot(x, x))

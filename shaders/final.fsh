@@ -122,10 +122,10 @@ vec3[8] GetBloom() {
 	
 	bloom[0] = vec3(0.0);
 	
-	for (int index = 1; index < bloom.length(); index++)
+	for (int index = 1; index <= 7; index++)
 		bloom[0] += bloom[index];
 	
-	bloom[0] /= bloom.length() - 1.0;
+	bloom[0] /= 7.0;
 #endif
 	
 	return bloom;
