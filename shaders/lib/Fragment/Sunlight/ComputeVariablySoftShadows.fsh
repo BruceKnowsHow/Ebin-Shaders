@@ -41,9 +41,8 @@ float ComputeVariablySoftShadows(in vec4 viewSpacePosition, in float sunlightCoe
 	}
 	
 	avgDepth /= sampleCount;
-	avgDepth  = sqrt(avgDepth);
 	
-	float spread = avgDepth * 0.02 * vpsSpread + 0.45 / shadowMapResolution;
+	float spread = sqrt(avgDepth) * 0.02 * vpsSpread + 0.45 / shadowMapResolution;
 	
 	range       = 2.0;
 	sampleCount = pow(range * 2.0 + 1.0, 2.0);

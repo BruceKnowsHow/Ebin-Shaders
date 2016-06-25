@@ -35,6 +35,8 @@ uniform vec3 cameraPosition;
 uniform float viewWidth;
 uniform float viewHeight;
 
+uniform int isEyeInWater;
+
 varying mat4 shadowView;
 #define shadowModelView shadowView
 
@@ -81,9 +83,9 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
-		
-		if (lightMult < 0.05) return vec3(0.0);
 	#endif
+	
+	if (lightMult < 0.05) return vec3(0.0);
 	
 	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	
@@ -156,9 +158,9 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
-		
-		if (lightMult < 0.05) return vec3(0.0);
 	#endif
+	
+	if (lightMult < 0.05) return vec3(0.0);
 	
 	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	
@@ -238,9 +240,9 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		      sunlight  = ComputeHardShadows(position, sunlight);
 		
 		lightMult = 1.0 - sunlight * 4.0;
-		
-		if (lightMult < 0.05) return vec3(0.0);
 	#endif
+	
+	if (lightMult < 0.05) return vec3(0.0);
 	
 	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
 	
@@ -357,7 +359,7 @@ void main() {
 	float volFog = ComputeVolumetricFog(viewSpacePosition);
 	
 	
-	if (mask.transparent + mask.water> 0.5)
+	if (mask.transparent + float(isEyeInWater != mask.water) > 0.5)
 		{ gl_FragData[0] = vec4(vec3(0.0), volFog); exit(); return; }
 	
 	
