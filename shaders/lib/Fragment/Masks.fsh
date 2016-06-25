@@ -38,12 +38,17 @@ void DecodeMaterialIDs(inout float matID, out float[4] bit) {
 	
 	if (matID < 254.5) {
 		bit[0] = float(matID >= 128.0);
+		matID -= bit[0] * 128.0;
+		
 		bit[1] = float(matID >=  64.0);
+		matID -= bit[1] * 64.0;
+		
 		bit[2] = float(matID >=  32.0);
+		matID -= bit[2] * 32.0;
+		
 		bit[3] = float(matID >=  16.0);
+		matID -= bit[3] * 16.0;
 	}
-	
-	matID -= 128.0 * bit[0] + 64.0 * bit[1] + 32.0 * bit[2] + 16.0 * bit[3];
 }
 
 float GetMaterialMask(in float mask, in float materialID) {
@@ -62,7 +67,7 @@ Mask CalculateMasks(in Mask mask) {
 	mask.sky    = GetMaterialMask(255, mask.matIDs);
 	
 	mask.transparent = mask.bit[0];
-	mask.metallic    = mask.bit[1];
+	mask.metallic    = mask.bit[3];
 	
 	return mask;
 }
