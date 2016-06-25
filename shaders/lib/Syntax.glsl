@@ -21,7 +21,3 @@
 #define cvec2  const vec2
 #define cvec3  const vec3
 #define cvec4  const vec4
-
-
-// In-built function overrides
-#define length(x) sqrt(dot(x, x))
