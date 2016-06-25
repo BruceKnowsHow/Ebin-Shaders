@@ -93,7 +93,17 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex1, coord).xy);
 }
 
-#include "/lib/Fragment/WaterWaves.fsh"
+void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
+	encode.rg = texture2D(colortex0, coord).rg;
+	
+	vec2 buffer0 = Decode16(encode.r);
+	buffer0r = buffer0.r;
+	buffer0g = buffer0.g;
+	
+	vec2 buffer1 = Decode16(encode.g);
+	buffer1r = buffer1.r;
+	buffer1g = buffer1.g;
+}
 
 float GetVolumetricFog(in vec2 coord) {
 	return texture2D(colortex4, coord).a;
@@ -103,6 +113,8 @@ float noise(in vec2 coord) {
     return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
+
+#include "/lib/Fragment/WaterWaves.fsh"
 
 #include "/lib/Fragment/CalculateShadedFragment.fsh"
 
@@ -361,7 +373,7 @@ void main() {
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, colortex0, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = CalculateMasks(mask);
 	
