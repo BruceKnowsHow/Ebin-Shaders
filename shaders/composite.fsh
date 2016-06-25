@@ -49,8 +49,10 @@ varying vec2 texcoord;
 #include "/lib/Fragment/Masks.fsh"
 
 
+#define texture2DRaw(x, y) texelFetch(x, ivec2(y * vec2(viewWidth, viewHeight)), 0)
+
 float GetDepth(in vec2 coord) {
-	return texture2D(gdepthtex, coord).x;
+	return texture2DRaw(gdepthtex, coord).x;
 }
 
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
@@ -61,11 +63,11 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex1, coord).xy);
+	return DecodeNormal(texture2DRaw(colortex1, coord).xy);
 }
 
 void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
-	encode.rg = texture2D(colortex0, coord).rg;
+	encode.rg = texture2DRaw(colortex0, coord).rg;
 	
 	vec2 buffer0 = Decode16(encode.r);
 	buffer0r = buffer0.r;
@@ -351,7 +353,7 @@ void main() {
 	if (depth >= 1.0) { discard; }
 	
 	
-	float depth1  = texture2D(depthtex1, texcoord).x;
+	float depth1 = texture2DRaw(depthtex1, texcoord).x;
 	
 #ifdef COMPOSITE0_NOISE
 	vec2 noise2D = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 4.0) * 2.0 - 1.0;
@@ -366,7 +368,7 @@ void main() {
 	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
-	
+	show(mask.transparent);
 	
 	float volFog = ComputeVolumetricFog(viewSpacePosition);
 	
