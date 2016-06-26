@@ -67,7 +67,7 @@ Mask CalculateMasks(in Mask mask) {
 	mask.sky    = GetMaterialMask(255, mask.matIDs);
 	
 	mask.transparent = mask.bit[0];
-	mask.metallic    = mask.bit[3];
+	mask.metallic    = mask.bit[1];
 	
 	return mask;
 }

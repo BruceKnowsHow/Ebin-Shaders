@@ -380,7 +380,7 @@ void main() {
 	
 	if (mask.water + mask.transparent > 0.5) depth1 = GetTransparentDepth(texcoord);
 	else normal = GetNormal(texcoord);
-	
+	show(mask.metallic);
 	
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
