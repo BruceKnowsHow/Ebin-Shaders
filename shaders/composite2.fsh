@@ -9,7 +9,6 @@
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D gdepthtex;
@@ -51,11 +50,11 @@ const bool colortex2MipmapEnabled = true;
 
 
 vec3 GetColor(in vec2 coord) {
-	return DecodeColor(texture2D(colortex2, coord).rgb);
+	return DecodeColor(texture2D(colortex0, coord).rgb);
 }
 
 vec3 GetColorLod(in vec2 coord, in float lod) {
-	return DecodeColor(texture2DLod(colortex2, coord, lod).rgb);
+	return DecodeColor(texture2DLod(colortex0, coord, lod).rgb);
 }
 
 float GetDepth(in vec2 coord) {
@@ -94,7 +93,7 @@ vec3 GetNormal(in vec2 coord) {
 }
 
 void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
-	encode.rg = texture2D(colortex0, coord).rg;
+	encode.rg = texture2D(colortex1, coord).ba;
 	
 	vec2 buffer0 = Decode16(encode.r);
 	buffer0r = buffer0.r;
@@ -352,9 +351,9 @@ vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec4 viewSpa
 		mat3x2(coord.st, coord.st, coord.st) );
 	
 	
-	vec3 color = vec3(texture2D(colortex2, coords[0]).r,
-	                  texture2D(colortex2, coords[1]).g,
-	                  texture2D(colortex2, coords[2]).b);
+	vec3 color = vec3(texture2D(colortex0, coords[0]).r,
+	                  texture2D(colortex0, coords[1]).g,
+	                  texture2D(colortex0, coords[2]).b);
 	
 	return DecodeColor(color);
 }
@@ -406,7 +405,7 @@ void main() {
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
 	
-	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
+	gl_FragData[0] = vec4(EncodeColor(color), encode.g);
 	
 	exit();
 }

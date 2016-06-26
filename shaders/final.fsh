@@ -7,7 +7,6 @@
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex2;
 uniform sampler2D gdepthtex;
 
 uniform mat4 gbufferModelViewInverse;
@@ -44,12 +43,8 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-void DecodeBuffer(in vec2 coord, sampler2D buffer, out vec3 encode, out float buffer1r, out float buffer1g) {
-	encode.g = texture2D(buffer, texcoord).g;
-	
-	vec2 buffer1 = Decode16(encode.g);
-	buffer1r = buffer1.r;
-	buffer1g = buffer1.g;
+float GetMaterialIDs(in vec2 coord) {
+	return Decode16(texture2D(colortex1, coord).a).g;
 }
 
 void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
@@ -102,7 +97,7 @@ vec3 GetBloomTile(cint scale, vec2 offset) {
 	     coord /= scale;
 	     coord += offset + pixelSize;
 	
-	return DecodeColor(texture2D(colortex2, coord).rgb);
+	return DecodeColor(texture2D(colortex0, coord).rgb);
 }
 
 vec3[8] GetBloom() {
@@ -152,8 +147,8 @@ void main() {
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
 	
 	
-	vec3 encode; float smoothness; Mask mask;
-	DecodeBuffer(texcoord, colortex0, encode, smoothness, mask.materialIDs);
+	Mask mask;
+	mask.materialIDs = GetMaterialIDs(texcoord);
 	
 	mask = CalculateMasks(mask);
 	

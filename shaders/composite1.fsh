@@ -4,13 +4,12 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:240 */
+/* DRAWBUFFERS:041 */
 
 const bool colortex4MipmapEnabled = true;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex2;
 uniform sampler2D colortex4;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
@@ -48,7 +47,7 @@ varying vec2 texcoord;
 
 
 vec3 GetDiffuse(in vec2 coord) {
-	return texture2D(colortex2, coord).rgb;
+	return texture2D(colortex0, coord).rgb;
 }
 
 float GetDepth(in vec2 coord) {
@@ -75,7 +74,7 @@ vec3 GetNormal(in vec2 coord) {
 }
 
 void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
-	encode.rg = texture2D(colortex0, coord).rg;
+	encode.rg = texture2D(colortex1, coord).ba;
 	
 	vec2 buffer0 = Decode16(encode.r);
 	buffer0r = buffer0.r;
@@ -180,7 +179,7 @@ void main() {
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);
-	gl_FragData[2] = vec4(encode.rgb, 1.0);
+	gl_FragData[2] = vec4(texture2D(colortex1, texcoord).rg, encode.rg);
 	
 	exit();
 }

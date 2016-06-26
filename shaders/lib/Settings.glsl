@@ -8,9 +8,8 @@ const float wetnessHalflife          = 200.0;
 const float drynessHalflife          = 40.0;
 
 /*
-const int colortex0Format = RG16;
-const int colortex1Format = RGB16;
-const int colortex2Format = RGB16;
+const int colortex0Format = RGB16;
+const int colortex1Format = RGBA16;
 const int colortex3Format = RG16;
 const int colortex4Format = RGBA8;
 */
