@@ -49,7 +49,7 @@ varying vec2 texcoord;
 #include "/lib/Fragment/Masks.fsh"
 
 
-#define texture2DRaw(x, y) texelFetch(x, ivec2(y * vec2(viewWidth, viewHeight)), 0)
+#define texture2DRaw(x, y) texelFetch(x, ivec2(y * vec2(viewWidth, viewHeight)), 0) // texture2DRaw bypasses downscaled interpolation, which causes issues with encoded buffers
 
 float GetDepth(in vec2 coord) {
 	return texture2DRaw(gdepthtex, coord).x;

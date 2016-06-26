@@ -137,7 +137,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 		if (any(greaterThan(abs(screenSpacePosition.xyz - 0.5), vec3(0.5))) || ray.z < maxRayDepth)
 			return false;
 		
-		float sampleDepth = GetDepth(screenSpacePosition.st);
+		float sampleDepth = GetTransparentDepth(screenSpacePosition.st);
 		
 		viewSpacePosition = CalculateViewSpacePosition(screenSpacePosition.st, sampleDepth);
 		
