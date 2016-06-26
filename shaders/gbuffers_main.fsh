@@ -1,4 +1,4 @@
-/* DRAWBUFFERS:3201 */
+/* DRAWBUFFERS:301 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -92,7 +92,8 @@ void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
 #if defined gbuffers_water
-	if (abs(materialIDs - 4.0) < 0.5) { DoWaterFragment(); return; }
+	if (abs(materialIDs - 4.0) < 0.5) { DoWaterFragment(); exit(); return; }
+	else discard;
 #endif
 	
 	vec4 diffuse     = GetDiffuse();    if (diffuse.a < 0.1000003) discard; // Non-transparent surfaces will be invisible if their alpha is less than ~0.1000004. This basically throws out invisible leaf and tall grass fragments.
@@ -104,10 +105,12 @@ void main() {
 	
 	vec3 encode = vec3(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)), 0.0);
 	
-	gl_FragData[0] = vec4(1.0, 0.0, 0.0, diffuse.a);
 	gl_FragData[1] = vec4(diffuse.rgb, diffuse.a);
-	gl_FragData[2] = vec4(encode.rgb, 1.0);
-	gl_FragData[3] = vec4(EncodeNormal(normal.xyz), 0.0, 1.0);
+	gl_FragData[2] = vec4(EncodeNormal(normal.xyz), encode.rg);
+	
+#if defined gbuffers_water
+	gl_FragData[0] = vec4(1.0, 0.0, 0.0, diffuse.a);
+#endif
 	
 	exit();
 }

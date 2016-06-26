@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:2 */
+/* DRAWBUFFERS:0 */
 
 const bool colortex1MipmapEnabled = true;
 

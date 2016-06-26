@@ -56,9 +56,9 @@ vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
 }
 
 void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolume) {
-	#ifndef FOG_ENABLED
+#ifndef FOG_ENABLED
 	color += CalculateAtmosphereScattering(viewSpacePosition);
-	#else
+#else
 	
 	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
 	color += atmosphere * SKY_BRIGHTNESS;

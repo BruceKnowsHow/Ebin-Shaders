@@ -15,7 +15,6 @@ const bool shadowtex1Nearest   = true;
 const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
-uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
@@ -49,7 +48,7 @@ varying vec2 texcoord;
 #include "/lib/Fragment/Masks.fsh"
 
 
-#define texture2DRaw(x, y) texelFetch(x, ivec2(y * vec2(viewWidth, viewHeight)), 0)
+#define texture2DRaw(x, y) texelFetch(x, ivec2(y * vec2(viewWidth, viewHeight)), 0) // texture2DRaw bypasses downscaled interpolation, which causes issues with encoded buffers
 
 float GetDepth(in vec2 coord) {
 	return texture2DRaw(gdepthtex, coord).x;
@@ -67,7 +66,7 @@ vec3 GetNormal(in vec2 coord) {
 }
 
 void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
-	encode.rg = texture2DRaw(colortex0, coord).rg;
+	encode.rg = texture2DRaw(colortex1, coord).ba;
 	
 	vec2 buffer0 = Decode16(encode.r);
 	buffer0r = buffer0.r;
