@@ -106,7 +106,11 @@ void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float 
 }
 
 float GetVolumetricFog(in vec2 coord) {
+#ifdef VOLUMETRIC_FOG
 	return texture2D(colortex4, coord).a;
+#endif
+	
+	return 1.0;
 }
 
 float noise(in vec2 coord) {

@@ -13,5 +13,11 @@ float CalculateFogFactor(in vec4 viewSpacePosition, in float power) {
 }
 
 float GetSkyAlpha(in float fogVolume, in float fogFactor) {
-	return min1(fogVolume * fogFactor + pow(fogFactor, 6) * float(Volumetric_Fog));
+	float alpha = fogVolume * fogFactor;
+	
+#ifdef VOLUMETRIC_FOG
+	alpha += pow(fogFactor, 6);
+#endif
+	
+	return min1(alpha);
 }
