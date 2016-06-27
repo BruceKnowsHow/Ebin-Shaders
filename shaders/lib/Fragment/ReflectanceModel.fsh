@@ -240,7 +240,8 @@ vec3 CalculateSpecularHighlight(
 	in vec3 viewVector,
 	in float roughness) {
 	
-	roughness = pow2(roughness * 0.4);
+	roughness = pow2(roughness * 0.5);
+	roughness = clamp01(roughness);
 	
 	vec3 halfVector = normalize(lightVector + viewVector);
 	

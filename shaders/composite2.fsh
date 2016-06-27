@@ -240,6 +240,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	vec3  fresnel = Fresnel(sColor, vdoth);
 	
 	vec3 alpha = fresnel * smoothness;
+	if(mask.metallic > 0.1) alpha = sColor;
 	
 	//This breaks some things.
 	//if (length(alpha) < 0.01) return;
@@ -247,23 +248,22 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), false);
-	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
+	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, fresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight * (smoothness + 0.1);
 	
 	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 100.0;
 	
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
-		vec2 epsilon  = vec2(noise(texcoord * i), noise(texcoord * i * 3));
-		vec3 BRDFSkew = skew(epsilon, roughness);
+		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
+		vec3 BRDFSkew = skew(epsilon, pow2(roughness));
 		
-		vec3 reflectDir  = normalize(normal + BRDFSkew * roughness / 12.0);
+		vec3 reflectDir  = normalize(BRDFSkew * roughness / 8.0 + normal);
 		     reflectDir *= sign(dot(normal, reflectDir));
 		
 		vec3 rayDirection = reflect(normalize(viewSpacePosition.xyz), reflectDir);
 		
-		
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) { //this is much faster I tested
-			reflection += offscreen + 0.1 * mask.metallic;
+			reflection += offscreen + 0.5 * mask.metallic;
 		} else {
 			vec3 reflectionVector = normalize(reflectedViewSpacePosition.xyz - viewSpacePosition.xyz) * length(reflectedViewSpacePosition.xyz); // This is not based on any physical property, it just looked around when I was toying around
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
