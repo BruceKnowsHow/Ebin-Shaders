@@ -1,6 +1,6 @@
-float GetMaterialIDs(in int mc_ID) { // Gather material masks
+float GetMaterialIDs(in int mc_ID, out float isWater) { // Gather material masks
 #if defined gbuffers_hand
-	return 5.0;
+	return 3.0;
 #endif
 	
 	float materialID;
@@ -12,16 +12,16 @@ float GetMaterialIDs(in int mc_ID) { // Gather material masks
 		case 59:                     // Wheat
 		case 83:                     // Sugar Cane
 		case 175:                    // Double Tall Grass
-			materialID = 2.0; break; // Grass
+			materialID = 1.0; break; // Grass
 		case 18:                     // Generic leaves
 		case 106:                    // Vines
 		case 161:                    // New leaves
-			materialID = 3.0; break; // Leaves
+			materialID = 2.0; break; // Leaves
 		case 8:
 		case 9:
-			materialID = 4.0; break; // Water
+			isWater    = 1.0; break; // Water
 		default:
-			materialID = 1.0;
+			materialID = 0.0;
 	}
 	
 	return materialID;
