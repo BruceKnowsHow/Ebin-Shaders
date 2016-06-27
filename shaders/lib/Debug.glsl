@@ -22,13 +22,13 @@
 			
 		#elif ShaderStage == 1
 			#if DEBUG_VIEW != 0
-				gl_FragData[0] = vec4(texture2D(colortex2, texcoord).rgb, 1.0);
+				gl_FragData[0] = vec4(texture2D(colortex0, texcoord).rgb, 1.0);
 			#else
 				gl_FragData[0] = vec4(texture2D(colortex4, texcoord).rgb, 1.0);
 			#endif
 			
 		#elif ShaderStage == 2
-			gl_FragData[0] = vec4(texture2D(colortex2, texcoord).rgb, 1.0);
+			gl_FragData[0] = vec4(texture2D(colortex0, texcoord).rgb, 1.0);
 			
 		#elif ShaderStage == 3
 			discard;
@@ -37,7 +37,7 @@
 			#if DEBUG_VIEW != 3
 				gl_FragData[0] = vec4(texture2D(colortex1, texcoord).rgb, 1.0);
 			#else
-				gl_FragData[0] = vec4(texture2D(colortex2, texcoord).rgb, 1.0);
+				gl_FragData[0] = vec4(texture2D(colortex0, texcoord).rgb, 1.0);
 			#endif
 			
 		#endif

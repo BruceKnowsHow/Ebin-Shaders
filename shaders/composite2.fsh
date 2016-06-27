@@ -9,7 +9,7 @@
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex3;
+uniform sampler2D colortex2;
 uniform sampler2D colortex4;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
@@ -290,7 +290,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 #endif
 
 mat3 GetWaterTBN() {
-	vec3 normal = DecodeNormal(texture2D(colortex3, texcoord).xy);
+	vec3 normal = DecodeNormal(texture2D(colortex2, texcoord).xy);
 	
 	vec3 worldNormal = normalize((gbufferModelViewInverse * vec4(normal, 0.0)).xyz);
 	
@@ -400,7 +400,7 @@ void main() {
 	CompositeWater(color, uColor, depth1, mask.water);
 	
 	
-	if (depth1 >= 1.0) color = mix(CalculateSky(viewSpacePosition, true), color, clamp01(mask.water + texture2D(colortex3, texcoord).r));
+	if (depth1 >= 1.0) color = mix(CalculateSky(viewSpacePosition, true), color, clamp01(mask.water + texture2D(colortex2, texcoord).r));
 	
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
