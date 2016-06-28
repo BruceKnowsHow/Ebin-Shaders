@@ -4,14 +4,14 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:043 */
+/* DRAWBUFFERS:073 */
 
-const bool colortex4MipmapEnabled = true;
+const bool colortex7MipmapEnabled = true;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex3;
-uniform sampler2D colortex4;
+uniform sampler2D colortex7;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -107,7 +107,7 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 			      weight  = pow(weight, 32);
 			      weight  = max(1.0e-6, weight);
 			
-			GI += pow(texture2DLod(colortex4, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).rgb, vec3(2.2)) * weight;
+			GI += pow(texture2DLod(colortex7, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).rgb, vec3(2.2)) * weight;
 			
 			totalWeights += weight;
 		#endif
@@ -117,7 +117,7 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 			      FogWeight = pow(FogWeight, 32);
 			      FogWeight = max(0.1e-8, FogWeight);
 			
-			volFog += texture2DLod(colortex4, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).a * FogWeight;
+			volFog += texture2DLod(colortex7, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).a * FogWeight;
 			
 			totalFogWeight += FogWeight;
 		#endif
