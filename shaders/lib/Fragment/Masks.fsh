@@ -6,14 +6,11 @@ struct Mask {
 	
 	float grass;
 	float leaves;
+	float water;
 	float hand;
 	
 	float metallic;
-	
 	float transparent;
-	float water;
-	float midGlass;
-	float midWater;
 };
 
 float EncodeMaterialIDs(in float materialIDs, in float bit0, in float bit1, in float bit2, in float bit3) {
@@ -62,23 +59,23 @@ Mask CalculateMasks(in Mask mask) {
 	
 	DecodeMaterialIDs(mask.matIDs, mask.bit);
 	
-	mask.grass  = GetMaterialMask(  1, mask.matIDs);
-	mask.leaves = GetMaterialMask(  2, mask.matIDs);
-	mask.hand   = GetMaterialMask(  3, mask.matIDs);
+	mask.grass  = GetMaterialMask(  2, mask.matIDs);
+	mask.leaves = GetMaterialMask(  3, mask.matIDs);
+	mask.water  = GetMaterialMask(  4, mask.matIDs);
+	mask.hand   = GetMaterialMask(  5, mask.matIDs);
 	
 	mask.metallic    = mask.bit[0];
+	mask.transparent = mask.bit[1];
 	
 	return mask;
 }
 
-
-#if ShaderStage >= 0 && ShaderStage < 7
-Mask AddWaterMask(in Mask mask) {
-	mask.transparent = texture2D(colortex6, texcoord).r;
-	mask.water = texture2D(colortex6, texcoord).r;
-	mask.midGlass = texture2D(colortex6, texcoord).r;
-	mask.midWater = texture2D(colortex6, texcoord).r;
+Mask AddWaterMask(in Mask mask, in float depth, in float depth1) {
+	mask.water = float(depth != depth1 && mask.transparent < 0.5);
+	
+	if (mask.water > 0.5) mask.matIDs = 4.0;
+	
+	mask.materialIDs = EncodeMaterialIDs(mask.matIDs, mask.bit[0], mask.bit[1], mask.bit[2], mask.bit[3]);
 	
 	return mask;
 }
-#endif

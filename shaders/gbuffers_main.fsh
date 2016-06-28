@@ -1,4 +1,4 @@
-/* DRAWBUFFERS:201356 */
+/* DRAWBUFFERS:2013 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -63,11 +63,10 @@ vec4 GetNormal() {
 }
 
 void DoWaterFragment() {
-	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(0.85, 0.5)));
-	
-	gl_FragData[0] = vec4(EncodeNormal(transpose(tbnMatrix)[2]), encode.r, 1.0);
-	gl_FragData[3] = vec4(encode.g, 0.0, 0.0, 1.0);
-	gl_FragData[5] = vec4(1.0, 1.0, 0.0, 0.5);
+	gl_FragData[0] = vec4(EncodeNormal(transpose(tbnMatrix)[2]), 0.0, 1.0);
+	gl_FragData[1] = vec4(0.0);
+	gl_FragData[2] = vec4(0.0);
+	gl_FragData[3] = vec4(0.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
@@ -97,7 +96,7 @@ void main() {
 	
 #if defined gbuffers_water
 	if (abs(materialIDs - 4.0) < 0.5) { DoWaterFragment(); exit(); return; }
-	else discard;
+//	else discard;
 #endif
 	
 	vec4 diffuse = GetDiffuse();
@@ -110,21 +109,14 @@ void main() {
 	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	
 	
 	
-	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
+	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, 1.0, materialIDs1.g, materialIDs1.b, materialIDs1.a);
 	
-#if !defined gbuffers_water
-	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)));
+	vec3 encode = vec3(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)), 0.0);
 	
-	gl_FragData[0] = vec4(1.0);
-	gl_FragData[1] = vec4(diffuse.rgb, 1.0);
-	gl_FragData[2] = vec4(EncodeNormal(normal.xyz), encode.rg);
-#else
-	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, 1.0)));
-	
-	gl_FragData[0] = vec4(EncodeNormal(normal.xyz), encode.r, 1.0);
+	gl_FragData[0] = vec4(1.0, 0.0, 0.0, diffuse.a);
+	gl_FragData[1] = vec4(diffuse.rgb, diffuse.a);
+	gl_FragData[2] = vec4(EncodeNormal(normal.xyz), encode.r, 1.0);
 	gl_FragData[3] = vec4(encode.g, 0.0, 0.0, 1.0);
-	gl_FragData[5] = vec4(1.0, 0.0, 1.0, diffuse.a);
-#endif
 	
 	exit();
 }

@@ -10,9 +10,8 @@
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
+uniform sampler2D colortex3;
 uniform sampler2D colortex4;
-uniform sampler2D colortex5;
-uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -95,7 +94,8 @@ vec3 GetNormal(in vec2 coord) {
 }
 
 void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
-	encode.rg = texture2D(colortex1, coord).ba;
+	encode.r = texture2D(colortex1, coord).b;
+	encode.g = texture2D(colortex3, coord).r;
 	
 	vec2 buffer0 = Decode16(encode.r);
 	buffer0r = buffer0.r;
@@ -407,7 +407,7 @@ void main() {
 	CompositeFog(color, viewSpacePosition, GetVolumetricFog(texcoord));
 	
 	
-	gl_FragData[0] = vec4(EncodeColor(color), encode.g);
+	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
 	
 	exit();
 }

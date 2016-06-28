@@ -16,8 +16,7 @@ const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
 uniform sampler2D colortex1;
-uniform sampler2D colortex5;
-uniform sampler2D colortex6;
+uniform sampler2D colortex3;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -68,7 +67,8 @@ vec3 GetNormal(in vec2 coord) {
 }
 
 void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
-	encode.rg = texture2DRaw(colortex1, coord).ba;
+	encode.r = texture2D(colortex1, coord).b;
+	encode.g = texture2D(colortex3, coord).r;
 	
 	vec2 buffer0 = Decode16(encode.r);
 	buffer0r = buffer0.r;
@@ -368,9 +368,8 @@ void main() {
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
-//	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
-	mask = CalculateMasks(mask);
-	
+	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
+	show(mask.transparent);
 	
 	float volFog = ComputeVolumetricFog(viewSpacePosition);
 	

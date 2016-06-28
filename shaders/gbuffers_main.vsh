@@ -23,7 +23,6 @@ varying vec3 vertNormal;
 varying mat3 tbnMatrix;
 varying vec2 vertLightmap;
 
-varying float isWater;
 varying float mcID;
 varying float materialIDs;
 varying vec4  materialIDs1;
@@ -60,7 +59,15 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 
 float GetTransparentMask(in float materialIDs) {
 #if defined gbuffers_water
-	return 1.0 - isWater;
+	return float(abs(materialIDs - 8.5) > 0.6);
+#endif
+	
+	return 0.0;
+}
+
+float GetWaterMask(in float materialIDs) {
+#if defined gbuffers_water
+	return float(abs(materialIDs - 8.5) < 0.6);
 #endif
 	
 	return 0.0;
@@ -74,8 +81,8 @@ void main() {
 	mcID          = mc_Entity.x;
 	
 	vertLightmap = GetDefaultLightmap(lightmapCoord);
-	materialIDs  = GetMaterialIDs(int(mcID), isWater);
-	materialIDs1 = vec4(0.0, GetTransparentMask(materialIDs), 0.0, 0.0);
+	materialIDs  = GetMaterialIDs(int(mcID));
+	materialIDs1 = vec4(0.0, GetTransparentMask(mcID), 0.0, 0.0);
 	
 	
 	vec4 position = GetWorldSpacePosition();

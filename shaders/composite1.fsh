@@ -4,16 +4,16 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:04 */
+/* DRAWBUFFERS:043 */
 
 const bool colortex4MipmapEnabled = true;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
+uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
-uniform sampler2D colortex5;
-uniform sampler2D colortex6;
 uniform sampler2D noisetex;
 uniform sampler2D shadowtex1;
 uniform sampler2DShadow shadow;
@@ -51,6 +51,10 @@ vec3 GetDiffuse(in vec2 coord) {
 	return texture2D(colortex0, coord).rgb;
 }
 
+float GetDepth(in vec2 coord) {
+	return texture2D(gdepthtex, coord).x;
+}
+
 float GetTransparentDepth(in vec2 coord) {
 	return texture2D(depthtex1, coord).x;
 }
@@ -71,7 +75,8 @@ vec3 GetNormal(in vec2 coord) {
 }
 
 void DecodeBuffer(in vec2 coord, out vec3 encode, out float buffer0r, out float buffer0g, out float buffer1r, out float buffer1g) {
-	encode.rg = texture2D(colortex1, coord).ba;
+	encode.r = texture2D(colortex1, coord).b;
+	encode.g = texture2D(colortex3, coord).r;
 	
 	vec2 buffer0 = Decode16(encode.r);
 	buffer0r = buffer0.r;
@@ -103,7 +108,7 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 		for(float j = -range; j <= range; j++) {
 			vec2 offset = vec2(i, j) / vec2(viewWidth, viewHeight);
 			
-			float sampleDepth = ExpToLinearDepth(texture2D(depthtex1, texcoord + offset * 8.0).x);
+			float sampleDepth = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x);
 			
 		#ifdef GI_ENABLED
 			vec3  sampleNormal = GetNormal(texcoord + offset * 8.0);
@@ -137,29 +142,34 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 
 
 void main() {
-	float depth1 = GetTransparentDepth(texcoord);
+	float depth = GetDepth(texcoord);
 	
-	if (depth1 >= 1.0) { discard; }
+	if (depth >= 1.0) { discard; }
 	
 	
-	vec3 diffuse = GetDiffuse(texcoord);
-	vec3 normal  = GetNormal(texcoord);
+	vec3  diffuse =          GetDiffuse(texcoord);
+	vec3  normal  =           GetNormal(texcoord);
+	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
+	vec4 viewSpacePosition  = CalculateViewSpacePosition(texcoord, depth);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
-//	mask = AddWaterMask(CalculateMasks(mask));
-	mask = CalculateMasks(mask);
+	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
+	
+	encode.g = Encode16(vec2(smoothness, mask.materialIDs));
 	
 	
-	vec3 composite = CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition1);
+	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
+	
+	vec3 composite = CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 	
 	
 	vec3 GI; float volFog;
-	BilateralUpsample(normal, depth1, GI, volFog);
+	BilateralUpsample(normal, depth, GI, volFog);
 	
 	composite += GI * sunlightColor * 5.0;
 	
@@ -169,6 +179,7 @@ void main() {
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);
+	gl_FragData[2] = vec4(encode.g, 0.0, 0.0, 1.0);
 	
 	exit();
 }
