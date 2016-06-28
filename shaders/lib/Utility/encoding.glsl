@@ -1,20 +1,20 @@
-float Encode16(in vec2 buffer) {
+float Encode16(in vec2 encodedBuffer) {
 	cvec2 encode = vec2(1.0, exp2(8.0));
 	
-	buffer = round(buffer * 255.0);
+	encodedBuffer = round(encodedBuffer * 255.0);
 	
-	return dot(buffer, encode) / (exp2(16.0) - 1.0);
+	return dot(encodedBuffer, encode) / (exp2(16.0) - 1.0);
 }
 
-vec2 Decode16(in float buffer) {
+vec2 Decode16(in float encodedBuffer) {
 	cvec2 decode = 1.0 / (exp2(8.0) - 1.0) / vec2(1.0, exp2(8.0));
 	
 	vec2 decoded;
 	
-	buffer *= exp2(16.0) - 1.0;
+	encodedBuffer *= exp2(16.0) - 1.0;
 	
-	decoded.r = mod(buffer, exp2(8.0));
-	decoded.g = buffer - decoded.r;
+	decoded.r = mod(encodedBuffer, exp2(8.0));
+	decoded.g = encodedBuffer - decoded.r;
 	
 	return decoded * decode;
 }
