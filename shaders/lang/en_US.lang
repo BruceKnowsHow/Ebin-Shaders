@@ -135,6 +135,9 @@ screen.Global_Illumination=Global Illumination
 
 option.GI_ENABLED=GI Enabled
 
+option.PLAYER_GI_BOUNCE=Player GI Bounce
+option.PLAYER_GI_BOUNCE.comment=If this is enabled the player will cause GI to bounce off the player. This usually looks unnatural so it is off be default.
+
 option.GI_MODE=GI Mode
 option.GI_MODE.comment=1: Better for natural terrain and general gameplay. 2: Mix of 1 & 3. 3: More Physically accurate. Higher values may have medium performance cost!
 

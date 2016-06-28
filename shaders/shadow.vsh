@@ -88,4 +88,12 @@ void main() {
 		&& abs(position.z) < 1.0
 	) color.a = 0.0;
 	#endif
+	
+	#ifndef PLAYER_GI_BOUNCE
+	if (   mc_Entity.x == 0 // If the vertex is an entity
+		&& abs(position.x) < 1.0
+		&& position.y > -0.1 &&  position.y < 2.0 // Check if the vertex is in A bounding box around the player, so that at least non-near entities still cast shadows
+		&& abs(position.z) < 1.0
+	) color.rgb = vec3(0.0);
+	#endif
 }
