@@ -109,7 +109,7 @@ void main() {
 	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	
 	
 	
-	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, 1.0, materialIDs1.g, materialIDs1.b, materialIDs1.a);
+	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
 	
 	vec3 encode = vec3(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)), 0.0);
 	
