@@ -15,6 +15,7 @@ const bool shadowtex1Nearest   = true;
 const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
+uniform sampler2D colortex4;
 uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;

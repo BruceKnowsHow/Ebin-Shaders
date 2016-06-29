@@ -413,7 +413,7 @@ void main() {
 		tbnMatrix[2] = DecodeNormal(texture2D(colortex1, texcoord).xy);
 		tbnMatrix[1] = normalize(cross(tbnMatrix[2], tbnMatrix[0]));
 		
-		if (mask.water > 10.5) {
+		if (mask.water > 0.5) {
 			tangentNormal = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
 			smoothness = 0.85;
 		} else {

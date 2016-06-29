@@ -8,6 +8,7 @@
 
 const bool colortex7MipmapEnabled = true;
 
+uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
@@ -151,7 +152,7 @@ void main() {
 	encode.g = Encode16(vec2(smoothness, mask.materialIDs));
 	
 	
-	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition0);
+	vec4 dryViewSpacePosition = (mask.transparent > 0.5 ? viewSpacePosition1 : viewSpacePosition0);
 	
 	vec3 composite = CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 	

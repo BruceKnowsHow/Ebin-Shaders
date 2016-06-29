@@ -131,7 +131,7 @@ void main() {
 	gl_FragData[1] = vec4(EncodeNormal(transpose(tbnMatrix)[2]), tangentNormal.y, 1.0);
 	gl_FragData[2] = vec4(encode.rg, 0.0, 1.0);
 	gl_FragData[3] = vec4(diffuse.rgb, diffuse.a);
-	gl_FragData[4] = vec4(1.0, 0.0, 0.0, diffuse.a);
+	gl_FragData[4] = vec4(1.0, (abs(mcID - 8.5) < 0.6), 0.0, diffuse.a);
 #endif
 	
 	exit();
