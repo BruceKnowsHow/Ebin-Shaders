@@ -8,7 +8,7 @@ It is, however, interdicted to (re-)distribute Ebin as it is provided or in any 
 
 You may freely publish Minecraft footage with Ebin installed given that you do not infringe applicable law. If you feature Ebin as the main content, you must provide reference to a description of Ebin as found in the official source on the github.
 
-Should you opt to release a subsequent series of videos that do not feature SEUS as their main content, e.g. 'Let's plays', it is sufficient to provide this reference once in the first installment featuring Ebin or its corresponding description.
+Should you opt to release a subsequent series of videos that do not feature Ebin as their main content, e.g. 'Let's plays', it is sufficient to provide this reference once in the first installment featuring Ebin or its corresponding description.
 
 This software is provided 'as is' and comes without warranty of any kind including, but not limited to, the implied warranty that it works the way intended or advertised. In no event is The Ebin Team liable to you for any damage that arises out of the use or malfunction of Ebin including, but not limited to, hardware failure, loss of income and negative impact on your Minecraft experience. The entire risk as to every aspect of Ebin is with you.
 
