@@ -1,3 +1,5 @@
+
+
 Ebin are the intellectual property of Bruce Z. and Joseph Conover (here and hereafter referred to as 'The Ebin Team') and the copyright belongs to them.
 
 You are granted the right to use and modify Ebin and its source for your own personal use.
@@ -10,7 +12,7 @@ Should you opt to release a subsequent series of videos that do not feature SEUS
 
 This software is provided 'as is' and comes without warranty of any kind including, but not limited to, the implied warranty that it works the way intended or advertised. In no event is The Ebin Team liable to you for any damage that arises out of the use or malfunction of Ebin including, but not limited to, hardware failure, loss of income and negative impact on your Minecraft experience. The entire risk as to every aspect of Ebin is with you.
 
-This agreement shall be generally referred to as the 'Ebin License'. Sonic Ether is free to change this license at any point in time without further notice. You can always find the latest version on http://www.sonicether.com.
+This agreement shall be generally referred to as the 'Ebin License'. The Ebin Team is free to change this license at any point in time without further notice. You can always find the latest version on https://github.com/BruceKnowsHow/Ebin-Shaders
 
 Legal domicile for any disputes arising from or in connection with Ebin or its use is Nevada, USA or California, USA. Each clause of this agreement is subject to applicable law and only to be applied to the extent is permitted by applicable law.
 
