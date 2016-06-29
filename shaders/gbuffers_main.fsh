@@ -1,4 +1,4 @@
-/* DRAWBUFFERS:256 */
+/* DRAWBUFFERS:0123456 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -62,6 +62,18 @@ vec4 GetNormal() {
 	return normal;
 }
 
+vec3 GetTangentNormal() {
+#ifdef NORMAL_MAPS
+	vec3 normal = texture2D(normals, texcoord).rgb;
+#else
+	vec3 normal = vec3(0.5, 0.5, 1.0);
+#endif
+	
+	normal.xyz = normalize(normal.xyz * 2.0 - 1.0);
+	
+	return normal;
+}
+
 void DoWaterFragment() {
 	gl_FragData[0] = vec4(EncodeNormal(transpose(tbnMatrix)[2]), 0.0, 1.0);
 	gl_FragData[1] = vec4(0.0);
@@ -93,28 +105,34 @@ vec2 GetSpecularity(in float height, in float skyLightmap) {
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
-#if defined gbuffers_water
-	if (abs(materialIDs - 4.0) < 0.5) { DoWaterFragment(); exit(); return; }
-	else discard;
-#endif
-	
 	vec4 diffuse = GetDiffuse();
 	
-#if !defined gbuffers_water
 	if (diffuse.a < 0.1000003) discard;
-#endif
 	
-	vec4 normal      = GetNormal();
+	
+	vec4 normal = GetNormal();
 	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	
 	
 	
+#if !defined gbuffers_water
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
 	
-	vec3 encode = vec3(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)), 0.0);
+	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)));
 	
-	gl_FragData[0] = vec4(1.0, 0.0, 0.0, diffuse.a);
-	gl_FragData[1] = vec4(diffuse.rgb, 0.0);
-	gl_FragData[2] = vec4(EncodeNormal(normal.xyz), encode.rg);
+	gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0);
+	gl_FragData[5] = vec4(diffuse.rgb, 0.0);
+	gl_FragData[6] = vec4(EncodeNormal(normal.xyz), encode.rg);
+#else
+	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, 0.0)));
+	
+	vec2 tangentNormal = EncodeNormal(GetTangentNormal());
+	
+	gl_FragData[0] = vec4(EncodeNormal(transpose(tbnMatrix)[0]), tangentNormal.x, 1.0);
+	gl_FragData[1] = vec4(EncodeNormal(transpose(tbnMatrix)[2]), tangentNormal.y, 1.0);
+	gl_FragData[2] = vec4(encode.rg, 0.0, 1.0);
+	gl_FragData[3] = vec4(diffuse.rgb, diffuse.a);
+	gl_FragData[4] = vec4(1.0, 0.0, 0.0, diffuse.a);
+#endif
 	
 	exit();
 }

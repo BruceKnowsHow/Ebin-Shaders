@@ -68,7 +68,9 @@ Mask CalculateMasks(in Mask mask) {
 
 Mask AddWaterMask(in Mask mask, in float depth0, in float depth1) {
 	mask.water = float(depth0 != depth1);
+	mask.bit[1] = mask.water;
 	mask.bit[2] = mask.water;
+	mask.transparent = mask.water;
 	
 	mask.materialIDs = EncodeMaterialIDs(mask.matIDs, mask.bit[0], mask.bit[1], mask.bit[2], mask.bit[3]);
 	

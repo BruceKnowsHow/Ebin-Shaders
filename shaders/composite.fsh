@@ -363,7 +363,7 @@ void main() {
 	float volFog = ComputeVolumetricFog(viewSpacePosition0);
 	
 	
-	if (mask.transparent + float(isEyeInWater != mask.water) > 0.5)
+	if (depth1 >= 1.0 || isEyeInWater != mask.water)
 		{ gl_FragData[0] = vec4(vec3(0.0), volFog); exit(); return; }
 	
 	
