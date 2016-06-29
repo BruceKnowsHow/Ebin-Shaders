@@ -1,4 +1,4 @@
-
+# License
 
 Ebin are the intellectual property of Bruce Z. and Joseph Conover (here and hereafter referred to as 'The Ebin Team') and the copyright belongs to them.
 
@@ -21,3 +21,5 @@ In case any part of this agreement should for any reason be considered invalid, 
 By installing, downloading, storing a copy of or using Ebin you agree to all of the terms and conditions. They can and will, if deemed neccessary by The Ebin Team, be enforced by going to law.
 
 For further questions concerning Ebin, its use or this license please contact The Ebin Team on GitHub.
+
+![slide](https://raw.githubusercontent.com/wiki/BruceKnowsHow/Ebin-Shaders/images/Fear.jpg)
