@@ -26,28 +26,24 @@ float EncodeMaterialIDs(in float materialIDs, in float bit0, in float bit1, in f
 	
 	materialIDs += 0.1;
 	materialIDs /= 255.0;
-	materialIDs  = 1.0 - materialIDs; // MaterialIDs are sent through the pipeline inverted so that when they're decoded, sky pixels (which are always written as 0.0 in certain situations) will be 1.0
 	
 	return materialIDs;
 }
 
 void DecodeMaterialIDs(inout float matID, out float[4] bit) {
-	matID  = 1.0 - matID;
 	matID *= 255.0;
 	
-	if (matID < 254.5) {
-		bit[0] = float(matID >= 128.0);
-		matID -= bit[0] * 128.0;
-		
-		bit[1] = float(matID >=  64.0);
-		matID -= bit[1] * 64.0;
-		
-		bit[2] = float(matID >=  32.0);
-		matID -= bit[2] * 32.0;
-		
-		bit[3] = float(matID >=  16.0);
-		matID -= bit[3] * 16.0;
-	}
+	bit[0] = float(matID >= 128.0);
+	matID -= bit[0] * 128.0;
+	
+	bit[1] = float(matID >=  64.0);
+	matID -= bit[1] * 64.0;
+	
+	bit[2] = float(matID >=  32.0);
+	matID -= bit[2] * 32.0;
+	
+	bit[3] = float(matID >=  16.0);
+	matID -= bit[3] * 16.0;
 }
 
 float GetMaterialMask(in float mask, in float materialID) {
@@ -59,21 +55,20 @@ Mask CalculateMasks(in Mask mask) {
 	
 	DecodeMaterialIDs(mask.matIDs, mask.bit);
 	
-	mask.grass  = GetMaterialMask(  2, mask.matIDs);
-	mask.leaves = GetMaterialMask(  3, mask.matIDs);
-	mask.water  = GetMaterialMask(  4, mask.matIDs);
-	mask.hand   = GetMaterialMask(  5, mask.matIDs);
+	mask.grass  = GetMaterialMask(2, mask.matIDs);
+	mask.leaves = GetMaterialMask(3, mask.matIDs);
+	mask.hand   = GetMaterialMask(5, mask.matIDs);
 	
 	mask.metallic    = mask.bit[0];
 	mask.transparent = mask.bit[1];
+	mask.water       = mask.bit[2];
 	
 	return mask;
 }
 
 Mask AddWaterMask(in Mask mask, in float depth0, in float depth1) {
-	mask.water = float(depth0 != depth1 && mask.transparent < 0.5);
-	
-	if (mask.water > 0.5) mask.matIDs = 4.0;
+	mask.water = float(depth0 != depth1);
+	mask.bit[2] = mask.water;
 	
 	mask.materialIDs = EncodeMaterialIDs(mask.matIDs, mask.bit[0], mask.bit[1], mask.bit[2], mask.bit[3]);
 	

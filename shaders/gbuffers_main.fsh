@@ -65,6 +65,7 @@ vec4 GetNormal() {
 void DoWaterFragment() {
 	gl_FragData[0] = vec4(EncodeNormal(transpose(tbnMatrix)[2]), 0.0, 1.0);
 	gl_FragData[1] = vec4(0.0);
+	gl_FragData[2] = vec4(0.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {

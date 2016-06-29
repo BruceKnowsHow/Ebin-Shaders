@@ -406,7 +406,7 @@ void main() {
 	if (mask.water < 0.5) color = color1; // Save the underwater color until after reflections are applied
 	
 	ComputeReflectedLight(color, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
-	
+	show(mask.water);
 	
 	CompositeWater(color, color1, depth1, mask.water);
 	

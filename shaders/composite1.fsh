@@ -137,7 +137,7 @@ void main() {
 	
 	vec3  diffuse =          GetDiffuse(texcoord);
 	vec3  normal  =           GetNormal(texcoord);
-	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
+	float depth1  = GetTransparentDepth(texcoord);
 	
 	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
