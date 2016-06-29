@@ -413,7 +413,7 @@ void main() {
 		tbnMatrix[2] = DecodeNormal(texture2D(colortex1, texcoord).xy);
 		tbnMatrix[1] = normalize(cross(tbnMatrix[2], tbnMatrix[0]));
 		
-		if (mask.water > 0.5) {
+		if (mask.water > 10.5) {
 			tangentNormal = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
 			smoothness = 0.85;
 		} else {
@@ -425,7 +425,7 @@ void main() {
 		normal = normalize(tangentNormal * transpose(tbnMatrix));
 		
 		color1 = GetRefractedColor(texcoord, viewSpacePosition0, viewSpacePosition1, normal, tangentNormal);
-		color0 = pow(texture2D(colortex3, texcoord).rgb, vec3(1.8));
+		color0 = pow(texture2D(colortex3, texcoord).rgb, vec3(2.2));
 		color0 *= CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition0);
 		
 	} else {
@@ -438,10 +438,10 @@ void main() {
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
 	
 	
+	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, texture2D(colortex4, texcoord).r);
+	
 	vec3 color = mix(color1, color0, texture2D(colortex4, texcoord).r);
 	
-	
-//	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, clamp01(mask.water + texture2D(colortex1, texcoord).r));
 	
 //	CompositeFog(color0, viewSpacePosition0, GetVolumetricFog(texcoord));
 	
