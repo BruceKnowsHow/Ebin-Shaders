@@ -371,7 +371,7 @@ void main() {
 	vec3 normal = GetNormal(texcoord);
 	
 	
-	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS, noise2D, mask);
+	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
 	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);

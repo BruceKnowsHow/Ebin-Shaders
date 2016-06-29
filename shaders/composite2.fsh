@@ -214,7 +214,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 		#endif
 	}
 	
-	color = mix(color, reflection, fresnel * smoothness);
+	color = mix(color, reflection, alpha);
 }
 
 #else
@@ -385,7 +385,7 @@ void main() {
 	
 	mask = CalculateMasks(mask);
 	
-	float depth1 = 1.0;
+	float depth1 = depth0;
 	vec4  viewSpacePosition1 = vec4(1.0);
 	
 	if (mask.transparent > 0.5) {
@@ -439,14 +439,13 @@ void main() {
 	
 	
 	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, texture2D(colortex4, texcoord).r);
-	
-	vec3 color = mix(color1, color0, texture2D(colortex4, texcoord).r);
-	
-	
-//	CompositeFog(color0, viewSpacePosition0, GetVolumetricFog(texcoord));
+	else if (mask.transparent > 0.5) color0 = mix(color1, color0, texture2D(colortex4, texcoord).r);
 	
 	
-	gl_FragData[0] = vec4(EncodeColor(color), 1.0);
+	CompositeFog(color0, viewSpacePosition0, GetVolumetricFog(texcoord));
+	
+	
+	gl_FragData[0] = vec4(EncodeColor(color0), 1.0);
 	
 	exit();
 }
