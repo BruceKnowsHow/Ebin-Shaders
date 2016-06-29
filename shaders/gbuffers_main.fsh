@@ -1,4 +1,4 @@
-/* DRAWBUFFERS:2013 */
+/* DRAWBUFFERS:201 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -65,8 +65,6 @@ vec4 GetNormal() {
 void DoWaterFragment() {
 	gl_FragData[0] = vec4(EncodeNormal(transpose(tbnMatrix)[2]), 0.0, 1.0);
 	gl_FragData[1] = vec4(0.0);
-	gl_FragData[2] = vec4(0.0);
-	gl_FragData[3] = vec4(0.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
@@ -96,7 +94,7 @@ void main() {
 	
 #if defined gbuffers_water
 	if (abs(materialIDs - 4.0) < 0.5) { DoWaterFragment(); exit(); return; }
-//	else discard;
+	else discard;
 #endif
 	
 	vec4 diffuse = GetDiffuse();
@@ -114,9 +112,8 @@ void main() {
 	vec3 encode = vec3(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)), 0.0);
 	
 	gl_FragData[0] = vec4(1.0, 0.0, 0.0, diffuse.a);
-	gl_FragData[1] = vec4(diffuse.rgb, diffuse.a);
-	gl_FragData[2] = vec4(EncodeNormal(normal.xyz), encode.r, 1.0);
-	gl_FragData[3] = vec4(encode.g, 0.0, 0.0, 1.0);
+	gl_FragData[1] = vec4(diffuse.rgb, 0.0);
+	gl_FragData[2] = vec4(EncodeNormal(normal.xyz), encode.rg);
 	
 	exit();
 }

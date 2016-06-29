@@ -4,13 +4,12 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:073 */
+/* DRAWBUFFERS:071 */
 
 const bool colortex7MipmapEnabled = true;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex3;
 uniform sampler2D colortex7;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
@@ -131,34 +130,34 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 
 
 void main() {
-	float depth = GetDepth(texcoord);
+	float depth0 = GetDepth(texcoord);
 	
-	if (depth >= 1.0) { discard; }
+	if (depth0 >= 1.0) { discard; }
 	
 	
 	vec3  diffuse =          GetDiffuse(texcoord);
 	vec3  normal  =           GetNormal(texcoord);
 	float depth1  = GetTransparentDepth(texcoord); // An appended 1 indicates that the variable is for a surface beneath first-layer transparency
 	
-	vec4 viewSpacePosition  = CalculateViewSpacePosition(texcoord, depth);
+	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
-	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
+	mask = AddWaterMask(CalculateMasks(mask), depth0, depth1);
 	
 	encode.g = Encode16(vec2(smoothness, mask.materialIDs));
 	
 	
-	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition);
+	vec4 dryViewSpacePosition = (mask.water > 0.5 ? viewSpacePosition1 : viewSpacePosition0);
 	
 	vec3 composite = CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 	
 	
 	vec3 GI; float volFog;
-	BilateralUpsample(normal, depth, GI, volFog);
+	BilateralUpsample(normal, depth1, GI, volFog);
 	
 	composite += GI * sunlightColor * 5.0;
 	
@@ -168,7 +167,7 @@ void main() {
 	
 	gl_FragData[0] = vec4(EncodeColor(composite), 1.0);
 	gl_FragData[1] = vec4(GI, volFog);
-	gl_FragData[2] = vec4(encode.g, 0.0, 0.0, 1.0);
+	gl_FragData[2] = vec4(EncodeNormal(normal), encode.rg);
 	
 	exit();
 }

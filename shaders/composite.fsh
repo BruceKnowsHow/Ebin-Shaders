@@ -16,7 +16,6 @@ const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
 uniform sampler2D colortex1;
-uniform sampler2D colortex3;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -338,9 +337,9 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 
 
 void main() {
-	float depth = GetDepth(texcoord);
+	float depth0 = GetDepth(texcoord);
 	
-	if (depth >= 1.0) { discard; }
+	if (depth0 >= 1.0) { discard; }
 	
 	
 	float depth1 = texture2DRaw(depthtex1, texcoord).x;
@@ -351,16 +350,17 @@ void main() {
 	vec2 noise2D = vec2(0.0);
 #endif
 	
-	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
+	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
+	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth0);
 	
 	
 	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
-	mask = AddWaterMask(CalculateMasks(mask), depth, depth1);
-	show(mask.transparent);
+	mask = AddWaterMask(CalculateMasks(mask), depth0, depth1);
 	
-	float volFog = ComputeVolumetricFog(viewSpacePosition);
+	
+	float volFog = ComputeVolumetricFog(viewSpacePosition0);
 	
 	
 	if (mask.transparent + float(isEyeInWater != mask.water) > 0.5)
@@ -370,7 +370,7 @@ void main() {
 	vec3 normal = GetNormal(texcoord);
 	
 	
-	vec3 GI = ComputeGlobalIllumination(viewSpacePosition, normal, skyLightmap, GI_RADIUS, noise2D, mask);
+	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS, noise2D, mask);
 	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);

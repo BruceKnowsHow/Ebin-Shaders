@@ -70,8 +70,8 @@ Mask CalculateMasks(in Mask mask) {
 	return mask;
 }
 
-Mask AddWaterMask(in Mask mask, in float depth, in float depth1) {
-	mask.water = float(depth != depth1 && mask.transparent < 0.5);
+Mask AddWaterMask(in Mask mask, in float depth0, in float depth1) {
+	mask.water = float(depth0 != depth1 && mask.transparent < 0.5);
 	
 	if (mask.water > 0.5) mask.matIDs = 4.0;
 	
