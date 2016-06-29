@@ -5,11 +5,11 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:1 */
+/* DRAWBUFFERS:6 */
 
-uniform sampler2D colortex0;
-uniform sampler2D colortex1;
 uniform sampler2D colortex2;
+uniform sampler2D colortex5;
+uniform sampler2D colortex6;
 uniform sampler2D colortex7;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
@@ -46,15 +46,15 @@ varying vec2 texcoord;
 #include "/lib/Misc/CalculateFogFactor.glsl"
 #include "/lib/Fragment/ReflectanceModel.fsh"
 
-const bool colortex2MipmapEnabled = true;
+const bool colortex5MipmapEnabled = true;
 
 
 vec3 GetColor(in vec2 coord) {
-	return DecodeColor(texture2D(colortex0, coord).rgb);
+	return DecodeColor(texture2D(colortex5, coord).rgb);
 }
 
 vec3 GetColorLod(in vec2 coord, in float lod) {
-	return DecodeColor(texture2DLod(colortex0, coord, lod).rgb);
+	return DecodeColor(texture2DLod(colortex5, coord, lod).rgb);
 }
 
 float GetDepth(in vec2 coord) {
@@ -89,7 +89,7 @@ vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex1, coord).xy);
+	return DecodeNormal(texture2D(colortex6, coord).xy);
 }
 
 #include "/lib/Misc/DecodeBuffer.fsh"
@@ -342,9 +342,9 @@ vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec4 viewSpa
 		mat3x2(coord.st, coord.st, coord.st) );
 	
 	
-	vec3 color = vec3(texture2D(colortex0, coords[0]).r,
-	                  texture2D(colortex0, coords[1]).g,
-	                  texture2D(colortex0, coords[2]).b);
+	vec3 color = vec3(texture2D(colortex5, coords[0]).r,
+	                  texture2D(colortex5, coords[1]).g,
+	                  texture2D(colortex5, coords[2]).b);
 	
 	return DecodeColor(color);
 }
@@ -359,7 +359,7 @@ void CompositeColor (inout vec3 color0, in vec3 color1, in float alpha) {
 	mix(color1, color0, alpha);
 }
 
-void GetSurfaceProperties(in Mask mask, out vec3 normal, out float depth1, out vec4 viewSpacePosition1, out vec3 color0, out vec3 color1) {
+void GetSurfaceProperties(in Mask mask, out vec3 normal, out vec3 color0, out vec3 color1) {
 	if (mask.transparent < 0.5) {
 		// Solid
 	} else if (mask.water < 0.5) {
@@ -390,12 +390,13 @@ void main() {
 	vec3  color0;
 	vec3  color1;
 	
-	GetSurfaceProperties(normal, depth1, viewSpacePosition0, color0, color1);
+	GetSurfaceProperties(normal, color0, color1);
 	*/
 	
-	vec3  normal             = GetNormal(texcoord);
-	float depth1             = GetTransparentDepth(texcoord);
-	vec4  viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
+	vec3 normal = GetNormal(texcoord);
+	
+	float depth1 = GetTransparentDepth(texcoord);
+	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
 	vec3 color = vec3(0.0); vec3 tangentNormal = vec3(0.0); mat3 tbnMatrix;

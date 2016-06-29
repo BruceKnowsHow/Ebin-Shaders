@@ -15,7 +15,7 @@ const bool shadowtex1Nearest   = true;
 const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
-uniform sampler2D colortex1;
+uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -62,7 +62,7 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2DRaw(colortex1, coord).xy);
+	return DecodeNormal(texture2DRaw(colortex6, coord).xy);
 }
 
 #include "/lib/Misc/DecodeBuffer.fsh"

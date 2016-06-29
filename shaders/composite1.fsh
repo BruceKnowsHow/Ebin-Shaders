@@ -4,12 +4,12 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:071 */
+/* DRAWBUFFERS:576 */
 
 const bool colortex7MipmapEnabled = true;
 
-uniform sampler2D colortex0;
-uniform sampler2D colortex1;
+uniform sampler2D colortex5;
+uniform sampler2D colortex6;
 uniform sampler2D colortex7;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
@@ -47,7 +47,7 @@ varying vec2 texcoord;
 
 
 vec3 GetDiffuse(in vec2 coord) {
-	return texture2D(colortex0, coord).rgb;
+	return texture2D(colortex5, coord).rgb;
 }
 
 float GetDepth(in vec2 coord) {
@@ -70,7 +70,7 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex1, coord).xy);
+	return DecodeNormal(texture2D(colortex6, coord).xy);
 }
 
 #include "/lib/Misc/DecodeBuffer.fsh"

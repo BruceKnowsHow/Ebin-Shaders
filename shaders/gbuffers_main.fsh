@@ -1,4 +1,4 @@
-/* DRAWBUFFERS:201 */
+/* DRAWBUFFERS:256 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
