@@ -122,7 +122,8 @@ void main() {
 	gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[3] = vec4(0.0);
 	gl_FragData[4] = vec4(0.0);
-	gl_FragData[5] = vec4(diffuse.rgb, 0.0);
+	//gl_FragData[5] = vec4(diffuse.rgb, 0.0); //Okay so Bruce, this is causing entities to go invis. They are still semitransparent. And whenever sky is behind them the become black.
+	gl_FragData[5] = vec4(diffuse.rgb, diffuse.a);
 	gl_FragData[6] = vec4(EncodeNormal(normal.xyz), encode.rg);
 #else
 	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, 0.0)));
