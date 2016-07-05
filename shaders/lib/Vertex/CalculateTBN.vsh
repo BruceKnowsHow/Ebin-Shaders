@@ -12,5 +12,5 @@ void CalculateTBN(in vec3 position, out mat3 tbnMatrix, out vec3 normal) {
 	
 	normal = cross(-tangent, binormal);
 	
-	tbnMatrix = transpose(mat3(tangent, binormal, normal));
+	tbnMatrix = mat3(tangent, binormal, normal);
 }
