@@ -215,7 +215,6 @@ void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer
 }
 
 
-
 void main() {
 	float depth0 = GetDepth(texcoord);
 	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);

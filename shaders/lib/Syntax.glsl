@@ -9,11 +9,6 @@
 
 //#define DEBUG
 
-#if (defined DEBUG && (defined composite0 || defined composite1))
-	#define discard exit(); return
-#endif
-
-
 #define cbool  const bool
 #define cuint  const uint
 #define cint   const int

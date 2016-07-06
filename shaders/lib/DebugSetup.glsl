@@ -41,3 +41,7 @@ void exit() {
 	
 	#include "/lib/Debug.glsl"
 }
+
+#if (defined DEBUG && (defined composite0 || defined composite1))
+	#define discard exit(); return
+#endif

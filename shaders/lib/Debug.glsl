@@ -11,7 +11,7 @@
 #ifdef DEBUG
 	#if ShaderStage == DEBUG_VIEW
 		#if ShaderStage == -1
-			gl_FragData[1] = vec4(Debug, 1.0);
+			gl_FragData[5] = vec4(Debug, 1.0);
 		#else
 			gl_FragData[0] = vec4(Debug, 1.0);
 		#endif
