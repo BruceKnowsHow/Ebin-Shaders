@@ -119,7 +119,7 @@ void main() {
 	
 	vec4 normal = GetNormal();
 	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	
-	
+	show(GetTangentNormal() * 2.0 - 1.0);
 	
 #if !defined gbuffers_water
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);

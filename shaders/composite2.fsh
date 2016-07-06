@@ -278,15 +278,15 @@ void main() {
 		smoothness = mix(smoothness, 0.85, mask.water);
 		
 		
-		color0 = pow(texture2D(colortex3, refractedCoord).rgb, vec3(1.0)) * 5.0;
+		alpha = texture2D(colortex4, texcoord).r;
+		
+		color0 = texture2D(colortex3, texcoord).rgb * 5.0 / alpha;
 		
 		color1 = DecodeColor(texture2D(colortex5, refractedCoord).rgb);
 		
 		
 		depth1             = GetTransparentDepth(texcoord);
 		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
-		
-		alpha = texture2D(colortex4, refractedCoord).r;
 	} else {
 		normal = GetNormal(texcoord);
 		color0 = DecodeColor(texture2D(colortex5, texcoord).rgb);
