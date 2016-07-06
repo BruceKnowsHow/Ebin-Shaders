@@ -8,6 +8,7 @@
 
 const bool colortex7MipmapEnabled = true;
 
+uniform sampler2D colortex1;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
