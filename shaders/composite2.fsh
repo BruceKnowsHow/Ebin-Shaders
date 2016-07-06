@@ -40,6 +40,9 @@ uniform float far;
 
 uniform int isEyeInWater;
 
+varying mat4 shadowView;
+#define shadowModelView shadowView
+
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
