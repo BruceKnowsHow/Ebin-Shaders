@@ -252,32 +252,28 @@ void main() {
 	float depth1 = depth0;
 	vec4  viewSpacePosition1 = viewSpacePosition0;
 	
-	if (mask.transparent > 0.5) {
-		depth1             = GetTransparentDepth(texcoord);
-		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
-	}
-	
-	
 	vec3 normal;
 	vec3 color0;
 	vec3 color1;
 	
 	if (mask.transparent > 0.5) {
+		depth1             = GetTransparentDepth(texcoord);
+		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
+		
 		DecodeTransparentBuffer(texcoord, torchLightmap, skyLightmap, smoothness);
+		smoothness = smoothness * (1.0 - mask.water) + mask.water * 0.85;
 		
 		mat3 tbnMatrix = DecodeTBN(texture2D(colortex0, texcoord).r);
 		
-		normal = (gbufferModelView * vec4(tbnMatrix[2], 0.0)).xyz;
-		
 		vec3 tangentNormal;
 		
-		if (mask.water > 0.5) {
-			tangentNormal = GetWaveNormals(viewSpacePosition0, normal);
-			smoothness = 0.85;
-		} else {
+		if (mask.water > 0.5)
+			tangentNormal.xy = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
+		else
 			tangentNormal.xy = Decode16(texture2D(colortex0, texcoord).g) * 2.0 - 1.0;
-			tangentNormal.z  = sqrt(1.0 - lengthSquared(tangentNormal.xy));
-		}
+		
+		tangentNormal.z = sqrt(1.0 - lengthSquared(tangentNormal.xy)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
+		
 		
 		normal = normalize((gbufferModelView * vec4(tangentNormal * transpose(tbnMatrix), 0.0)).xyz);
 		
