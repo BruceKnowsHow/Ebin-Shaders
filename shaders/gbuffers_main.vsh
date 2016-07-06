@@ -4,7 +4,6 @@ attribute vec4 at_tangent;
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
-uniform mat4 shadowModelView;
 
 uniform vec3 sunPosition;
 uniform vec3 upPosition;
@@ -35,6 +34,11 @@ varying float tbnIndex;
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
+
+#if defined gbuffers_water
+#include "/lib/Uniform/ShadowViewMatrix.vsh"
+#include "/lib/Uniform/GlobalCompositeVariables.glsl"
+#endif
 
 
 vec2 GetDefaultLightmap(in vec2 lightmapCoord) { // Gets the lightmap from the default lighting engine, ignoring any texture pack lightmap. First channel is torch lightmap, second channel is sky lightmap.
@@ -99,6 +103,11 @@ void main() {
 	
 	viewSpacePosition = gbufferModelView * position;
 	worldPosition     = position.xyz + cameraPosition;
+	
+	
+#if defined gbuffers_water
+	#include "/lib/Uniform/CompositeCalculations.vsh"
+#endif
 	
 	
 	exit();

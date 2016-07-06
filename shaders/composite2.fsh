@@ -278,8 +278,7 @@ void main() {
 		smoothness = mix(smoothness, 0.85, mask.water);
 		
 		
-		color0  = pow(texture2D(colortex3, refractedCoord).rgb, vec3(2.2));
-		color0 *= CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition0);
+		color0 = pow(texture2D(colortex3, refractedCoord).rgb, vec3(1.0)) * 5.0;
 		
 		color1 = DecodeColor(texture2D(colortex5, refractedCoord).rgb);
 		

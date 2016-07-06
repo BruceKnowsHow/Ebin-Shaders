@@ -5,4 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
+uniform mat4 shadowModelView;
+
+
 #include "gbuffers_main.vsh"

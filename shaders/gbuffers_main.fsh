@@ -4,11 +4,6 @@ uniform sampler2D texture;
 uniform sampler2D normals;
 uniform sampler2D specular;
 uniform sampler2D noisetex;
-uniform sampler2D shadowtex1;
-uniform sampler2DShadow shadow;
-
-uniform mat4 gbufferModelViewInverse;
-uniform mat4 shadowProjection;
 
 uniform float frameTimeCounter;
 uniform float far;
@@ -43,6 +38,11 @@ varying float tbnIndex;
 #include "/lib/DebugSetup.glsl"
 #include "/lib/Misc/CalculateFogFactor.glsl"
 #include "/lib/Fragment/Masks.fsh"
+
+#if defined gbuffers_water
+#include "/lib/Uniform/GlobalCompositeVariables.glsl"
+#include "/lib/Fragment/CalculateShadedFragment.fsh"
+#endif
 
 
 vec4 GetDiffuse() {
@@ -134,14 +134,21 @@ void main() {
 	gl_FragData[5] = vec4(diffuse.rgb, 1.0);
 	gl_FragData[6] = vec4(EncodeNormal(normal.xyz), encode.rg);
 #else
+	specularity.r = mix(specularity.r, 0.85, abs(mcID - 8.5) < 0.6);
+	
 	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, 0.0)));
 	
 	vec2 encodedNormal = EncodeNormalData(GetTangentNormal(), tbnIndex);
 	
+	Mask mask;
+	
+	vec3 composite  = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
+	     composite *= pow(diffuse.rgb, vec3(2.2));
+	
 	gl_FragData[0] = vec4(encodedNormal, 0.0, 1.0);
-	gl_FragData[1] = vec4(float(abs(mcID - 8.5) < 0.6), 0.0, 0.0, 1.0);
+	gl_FragData[1] = vec4(abs(mcID - 8.5) < 0.6, 0.0, 0.0, 1.0);
 	gl_FragData[2] = vec4(encode.rg, 0.0, 1.0);
-	gl_FragData[3] = vec4(diffuse.rgb, diffuse.a);
+	gl_FragData[3] = vec4(composite * 0.2, diffuse.a);
 	gl_FragData[4] = vec4(1.0, 0.0, 0.0, diffuse.a);
 	gl_FragData[5] = vec4(0.0);
 #endif
