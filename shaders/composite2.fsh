@@ -171,38 +171,26 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 
 #include "/lib/Fragment/ReflectionFunctions.fsh"
 
-vec3 GetRefractedColor(in vec2 coord, in vec4 viewSpacePosition, in vec4 viewSpacePosition1, in vec3 normal, in vec3 tangentNormal) {
+vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangentNormal) {
 	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
 	
 	float fov = atan(1.0 / gbufferProjection[1].y) * 2.0 / RAD;
 	
-	float VdotN        = dot(-normalize(viewSpacePosition.xyz), normalize(normal));
-	float surfaceDepth = sqrt(length(viewSpacePosition1.xyz - viewSpacePosition.xyz)) * VdotN;
-	
 	cfloat refractAmount = 0.5;
-	cfloat aberrationAmount = 1.0 + 0.2;
 	
-	vec2 refraction = tangentNormal.st / fov * 90.0 * refractAmount * min(surfaceDepth, 1.0);
+	vec2 refraction = tangentNormal.st / fov * 90.0 * refractAmount;
 	
-	mat3x2 coords = mat3x2(screenSpacePosition.st + refraction * aberrationAmount,
-	                       screenSpacePosition.st + refraction,
-	                       screenSpacePosition.st + refraction);
+	vec2 refractedCoord = screenSpacePosition.st + refraction;
 	
-	coords = coords / screenSpacePosition.w * 0.5 + 0.5;
+	refractedCoord = refractedCoord / screenSpacePosition.w * 0.5 + 0.5;
 	
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	vec2 minCoord  = pixelSize;
 	vec2 maxCoord  = 1.0 - pixelSize;
 	
-	coords[0] = clamp(coords[0], minCoord, maxCoord);
-	coords[1] = clamp(coords[1], minCoord, maxCoord);
-	coords[2] = clamp(coords[2], minCoord, maxCoord);
+	refractedCoord = clamp(refractedCoord, minCoord, maxCoord);
 	
-	vec3 color = vec3(texture2D(colortex5, coords[0]).r,
-	                  texture2D(colortex5, coords[1]).g,
-	                  texture2D(colortex5, coords[2]).b);
-	
-	return DecodeColor(color);
+	return refractedCoord;
 }
 
 void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer0g, out float buffer1r) {
@@ -224,22 +212,22 @@ mat3 DecodeTBN(in float tbnIndex) {
 	
 	if (tbnIndex == 0.0) {
 		tangent  = vec3( 0.0,  0.0,  1.0);
-		binormal = vec3( 0.0, -1.0,  0.0);
+		binormal = -tangent.yzy;
 	} else if (tbnIndex == 1.0) {
 		tangent  = vec3( 0.0,  0.0,  1.0);
-		binormal = vec3( 0.0,  1.0,  0.0);
+		binormal =  tangent.yzy;
 	} else if (tbnIndex == 2.0) {
 		tangent  = vec3( 1.0,  0.0,  0.0);
-		binormal = vec3( 0.0,  1.0,  0.0);
+		binormal =  tangent.yxy;
 	} else if (tbnIndex == 3.0) {
 		tangent  = vec3( 1.0,  0.0,  0.0);
-		binormal = vec3( 0.0, -1.0,  0.0);
+		binormal = -tangent.yxy;
 	} else if (tbnIndex == 4.0) {
 		tangent  = vec3(-1.0,  0.0,  0.0);
-		binormal = vec3( 0.0,  0.0, -1.0);
+		binormal =  tangent.yyx;
 	} else {
 		tangent  = vec3( 1.0,  0.0,  0.0);
-		binormal = vec3( 0.0,  0.0, -1.0);
+		binormal = -tangent.yyx;
 	}
 	
 	vec3 normal = cross(tangent, binormal);
@@ -270,9 +258,9 @@ void main() {
 	}
 	
 	
-	vec3 normal = vec3(0.0, 0.0, 1.0);
-	vec3 color0 = vec3(0.0);
-	vec3 color1 = vec3(0.0);
+	vec3 normal;
+	vec3 color0;
+	vec3 color1;
 	
 	if (mask.transparent > 0.5) {
 		DecodeTransparentBuffer(texcoord, torchLightmap, skyLightmap, smoothness);
@@ -293,8 +281,11 @@ void main() {
 		
 		normal = normalize((gbufferModelView * vec4(tangentNormal * transpose(tbnMatrix), 0.0)).xyz);
 		
-		color1 = GetRefractedColor(texcoord, viewSpacePosition0, viewSpacePosition1, normal, tangentNormal);
-		color0 = pow(texture2D(colortex3, texcoord).rgb, vec3(2.2));
+		vec2 refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
+		
+		color1 = DecodeColor(texture2D(colortex5, refractedCoord).rgb);
+		
+		color0  = pow(texture2D(colortex3, refractedCoord).rgb, vec3(2.2));
 		color0 *= CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition0);
 		
 	} else {
