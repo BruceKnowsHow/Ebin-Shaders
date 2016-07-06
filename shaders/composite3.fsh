@@ -7,9 +7,9 @@
 
 /* DRAWBUFFERS:5 */
 
-const bool colortex6MipmapEnabled = true;
+const bool colortex3MipmapEnabled = true;
 
-uniform sampler2D colortex6;
+uniform sampler2D colortex3;
 
 uniform float viewWidth;
 uniform float viewHeight;
@@ -52,7 +52,7 @@ vec3 ComputeBloomTile(cfloat scale, vec2 offset) { // Computes a single bloom ti
 			
 			vec2 offset = vec2(i, j) * pixelSize;
 			
-			bloom       += pow(texture2D(colortex6, coord + offset).rgb, vec3(2.2)) * weight;
+			bloom       += pow(texture2D(colortex3, coord + offset).rgb, vec3(2.2)) * weight;
 			totalWeight += weight;
 		}
 	}
@@ -71,7 +71,7 @@ vec3 ComputeBloom() {
 	     bloom += ComputeBloomTile(128, vec2(0.140625 + pixelSize.x * 4.0, 0.3125   + pixelSize.y * 4.0));
 	     bloom += ComputeBloomTile(256, vec2(0.125    + pixelSize.x * 2.0, 0.328125 + pixelSize.y * 6.0));
 	
-	return bloom;
+	return max(bloom, vec3(0.0));
 }
 
 

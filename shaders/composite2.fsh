@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:6 */
+/* DRAWBUFFERS:3 */
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
