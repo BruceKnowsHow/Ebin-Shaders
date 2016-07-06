@@ -8,7 +8,6 @@
 /* DRAWBUFFERS:6 */
 
 uniform sampler2D colortex0;
-uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
@@ -217,6 +216,44 @@ void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer
 	buffer1r = buffer1.r;
 }
 
+mat3 DecodeTBN(in float tbnIndex) {
+	tbnIndex *= 8.0;
+	
+	vec3 tangent;
+	vec3 binormal;
+	vec3 normal;
+	
+	switch(int(tbnIndex)) {
+		case 0: tangent  = vec3( 0.0,  0.0,  1.0);
+		        binormal = vec3( 0.0, -1.0,  0.0);
+		        break;
+		
+		case 1: tangent  = vec3( 0.0,  0.0,  1.0);
+		        binormal = vec3( 0.0,  1.0,  0.0);
+		        break;
+		
+		case 2: tangent  = vec3( 1.0,  0.0,  0.0);
+		        binormal = vec3( 0.0,  1.0,  0.0);
+		        break;
+		
+		case 3: tangent  = vec3( 1.0,  0.0,  0.0);
+		        binormal = vec3( 0.0, -1.0,  0.0);
+		        break;
+		
+		case 4: tangent  = vec3( 1.0,  0.0,  0.0);
+		        binormal = vec3( 0.0,  0.0, -1.0);
+		        break;
+		
+		default: tangent  = vec3( 1.0,  0.0,  0.0);
+		         binormal = vec3( 0.0,  0.0,  1.0);
+		         break;
+	}
+	
+	normal = cross(tangent, binormal);
+	
+	return mat3(tangent, binormal, normal);
+}
+
 
 void main() {
 	float depth0 = GetDepth(texcoord);
@@ -247,21 +284,21 @@ void main() {
 	if (mask.transparent > 0.5) {
 		DecodeTransparentBuffer(texcoord, torchLightmap, skyLightmap, smoothness);
 		
-		vec3 tangentNormal;
-		mat3 tbnMatrix;
+		mat3 tbnMatrix = DecodeTBN(texture2D(colortex0, texcoord).r);
 		
-		tbnMatrix[0] = decodeNormal(texture2D(colortex0, texcoord).xy);
-		tbnMatrix[2] = decodeNormal(texture2D(colortex1, texcoord).xy);
-		tbnMatrix[1] = normalize(cross(tbnMatrix[2], tbnMatrix[0]));
+		normal = (gbufferModelView * vec4(tbnMatrix[2], 0.0)).xyz;
+		
+		vec3 tangentNormal;
 		
 		if (mask.water > 0.5) {
-			tangentNormal = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
+			tangentNormal = GetWaveNormals(viewSpacePosition0, normal);
 			smoothness = 0.85;
 		} else {
-			tangentNormal = decodeNormal(vec2(texture2D(colortex0, texcoord).z, texture2D(colortex1, texcoord).z));
+			tangentNormal.xy = Decode16(texture2D(colortex0, texcoord).g) * 2.0 - 1.0;
+			tangentNormal.z  = sqrt(1.0 - lengthSquared(tangentNormal.xy));
 		}
 		
-		normal = normalize(tangentNormal * transpose(tbnMatrix));
+		normal = normalize((gbufferModelView * vec4(tangentNormal * transpose(tbnMatrix), 0.0)).xyz);
 		
 		color1 = GetRefractedColor(texcoord, viewSpacePosition0, viewSpacePosition1, normal, tangentNormal);
 		color0 = pow(texture2D(colortex3, texcoord).rgb, vec3(2.2));

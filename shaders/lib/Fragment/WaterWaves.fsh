@@ -81,7 +81,7 @@ vec3 GetWaveNormals(in vec4 viewSpacePosition, in vec3 baseNormal) {
 	      viewVectorCoeff  = clamp01(viewVectorCoeff * 4.0);
 	      viewVectorCoeff  = sqrt(viewVectorCoeff);
 	
-	normal.xy = diff * viewVectorCoeff;
+	normal.xy = diff ;// * viewVectorCoeff;
 	normal.z  = sqrt(1.0 - lengthSquared(normal.xy)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 	
 	return normalize(normal);

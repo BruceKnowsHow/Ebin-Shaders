@@ -30,6 +30,8 @@ varying vec4  materialIDs1;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
+varying float tbnIndex;
+
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
@@ -58,6 +60,22 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 #include "/lib/Vertex/CalculateTBN.vsh"
 
 
+float EncodePlanarTBN(in vec3 worldNormal) { // Encode the TBN matrix into a 3-bit float
+	// Only valid for axis-oriented TBN matrices
+	
+	float tbnIndex = 5.0; // Default is 5.0, which corresponds to an upward facing block, such as ocean
+	
+	cfloat sqrt2 = sqrt(2.0) * 0.5;
+	
+	if      (worldNormal.x >  sqrt2) tbnIndex = 0.0;
+	else if (worldNormal.x < -sqrt2) tbnIndex = 1.0;
+	else if (worldNormal.z >  sqrt2) tbnIndex = 2.0;
+	else if (worldNormal.z < -sqrt2) tbnIndex = 3.0;
+	else if (worldNormal.y < -sqrt2) tbnIndex = 4.0;
+	
+	return tbnIndex;
+}
+
 void main() {
 	color         = gl_Color.rgb;
 	texcoord      = gl_MultiTexCoord0.st;
@@ -68,6 +86,7 @@ void main() {
 	materialIDs  = GetMaterialIDs(int(mcID));
 	materialIDs1 = vec4(0.0, 0.0, 0.0, 0.0);
 	
+	tbnIndex = EncodePlanarTBN(gl_Normal);
 	
 	vec4 position = GetWorldSpacePosition();
 	

@@ -35,6 +35,8 @@ varying vec4  materialIDs1;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
+varying float tbnIndex;
+
 #include "/lib/Misc/MenuInitializer.glsl"
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
@@ -64,14 +66,10 @@ vec4 GetNormal() {
 
 vec3 GetTangentNormal() {
 #ifdef NORMAL_MAPS
-	vec3 normal = texture2D(normals, texcoord).rgb;
+	return texture2D(normals, texcoord).rgb;
 #else
-	vec3 normal = vec3(0.5, 0.5, 1.0);
+	return vec3(0.5, 0.5, 1.0);
 #endif
-	
-	normal.xyz = normalize(normal.xyz * 2.0 - 1.0);
-	
-	return normal;
 }
 
 void DoWaterFragment() {
@@ -101,6 +99,15 @@ vec2 GetSpecularity(in float height, in float skyLightmap) {
 #endif
 }
 
+vec2 EncodeNormalData(in vec3 normalTexture, in float tbnIndex) {
+	vec2 encode;
+	
+	encode.r = tbnIndex / 8.0;
+	encode.g = Encode16(normalTexture.xy);
+	
+	return encode;
+}
+
 
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
@@ -120,7 +127,6 @@ void main() {
 	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)));
 	
 	gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[2] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[4] = vec4(0.0, 0.0, 0.0, 1.0);
@@ -129,10 +135,9 @@ void main() {
 #else
 	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, 0.0)));
 	
-	vec2 tangentNormal = encodeNormal(GetTangentNormal());
+	vec2 encodedNormal = EncodeNormalData(GetTangentNormal(), tbnIndex);
 	
-	gl_FragData[0] = vec4(encodeNormal(tbnMatrix[0]), tangentNormal.x, 1.0);
-	gl_FragData[1] = vec4(encodeNormal(tbnMatrix[2]), tangentNormal.y, 1.0);
+	gl_FragData[0] = vec4(encodedNormal, 0.0, 1.0);
 	gl_FragData[2] = vec4(encode.rg, 0.0, 1.0);
 	gl_FragData[3] = vec4(diffuse.rgb, diffuse.a);
 	gl_FragData[4] = vec4(1.0, (abs(mcID - 8.5) < 0.6), 0.0, diffuse.a);
