@@ -251,39 +251,43 @@ void main() {
 	
 	float depth1 = depth0;
 	vec4  viewSpacePosition1 = viewSpacePosition0;
+	vec2  refractedCoord = texcoord;
+	float alpha = 0.0;
 	
 	vec3 normal;
 	vec3 color0;
 	vec3 color1;
 	
 	if (mask.transparent > 0.5) {
-		depth1             = GetTransparentDepth(texcoord);
-		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
-		
-		DecodeTransparentBuffer(texcoord, torchLightmap, skyLightmap, smoothness);
-		smoothness = smoothness * (1.0 - mask.water) + mask.water * 0.85;
-		
 		mat3 tbnMatrix = DecodeTBN(texture2D(colortex0, texcoord).r);
 		
 		vec3 tangentNormal;
 		
-		if (mask.water > 0.5)
-			tangentNormal.xy = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
-		else
-			tangentNormal.xy = Decode16(texture2D(colortex0, texcoord).g) * 2.0 - 1.0;
+		if (mask.water > 0.5) tangentNormal.xy = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
+		else                  tangentNormal.xy = Decode16(texture2D(colortex0, texcoord).g) * 2.0 - 1.0;
 		
 		tangentNormal.z = sqrt(1.0 - lengthSquared(tangentNormal.xy)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 		
-		
 		normal = normalize((gbufferModelView * vec4(tangentNormal * transpose(tbnMatrix), 0.0)).xyz);
 		
-		vec2 refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
 		
-		color1 = DecodeColor(texture2D(colortex5, refractedCoord).rgb);
+		refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
+		
+		
+		DecodeTransparentBuffer(texcoord, torchLightmap, skyLightmap, smoothness);
+		smoothness = mix(smoothness, 0.85, mask.water);
+		
 		
 		color0  = pow(texture2D(colortex3, refractedCoord).rgb, vec3(2.2));
 		color0 *= CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition0);
 		
+		color1 = DecodeColor(texture2D(colortex5, refractedCoord).rgb);
+		
+		
+		depth1             = GetTransparentDepth(texcoord);
+		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
+		
+		alpha = texture2D(colortex4, refractedCoord).r;
 	} else {
 		normal = GetNormal(texcoord);
 		color0 = DecodeColor(texture2D(colortex5, texcoord).rgb);
@@ -294,8 +298,8 @@ void main() {
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
 	
 	
-	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, texture2D(colortex4, texcoord).r);
-	else if (mask.transparent > 0.5) color0 = mix(color1, color0, texture2D(colortex4, texcoord).r);
+	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, alpha);
+	else if (mask.transparent > 0.5) color0 = mix(color1, color0, alpha);
 	
 	CompositeFog(color0, viewSpacePosition0, GetVolumetricFog(texcoord));
 	

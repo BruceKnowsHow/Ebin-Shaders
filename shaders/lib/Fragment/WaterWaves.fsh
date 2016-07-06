@@ -74,8 +74,6 @@ vec2 GetWaveNormals(in vec4 viewSpacePosition, in vec3 flatWorldNormal) {
 	
 	vec2 diff = GetWaveDifferentials(position + cameraPosition);
 	
-	vec2 tangentNormal;
-	
 	float viewVectorCoeff  = -dot(flatWorldNormal, normalize(position.xyz));
 	      viewVectorCoeff /= clamp(length(viewSpacePosition.xyz) * 0.05, 1.0, 10.0);
 	      viewVectorCoeff  = clamp01(viewVectorCoeff * 4.0);
