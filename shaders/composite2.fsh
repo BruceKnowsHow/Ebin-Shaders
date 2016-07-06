@@ -217,39 +217,32 @@ void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer
 }
 
 mat3 DecodeTBN(in float tbnIndex) {
-	tbnIndex *= 8.0;
+	tbnIndex = round(tbnIndex * 8.0);
 	
 	vec3 tangent;
 	vec3 binormal;
-	vec3 normal;
 	
-	switch(int(tbnIndex)) {
-		case 0: tangent  = vec3( 0.0,  0.0,  1.0);
-		        binormal = vec3( 0.0, -1.0,  0.0);
-		        break;
-		
-		case 1: tangent  = vec3( 0.0,  0.0,  1.0);
-		        binormal = vec3( 0.0,  1.0,  0.0);
-		        break;
-		
-		case 2: tangent  = vec3( 1.0,  0.0,  0.0);
-		        binormal = vec3( 0.0,  1.0,  0.0);
-		        break;
-		
-		case 3: tangent  = vec3( 1.0,  0.0,  0.0);
-		        binormal = vec3( 0.0, -1.0,  0.0);
-		        break;
-		
-		case 4: tangent  = vec3( 1.0,  0.0,  0.0);
-		        binormal = vec3( 0.0,  0.0, -1.0);
-		        break;
-		
-		default: tangent  = vec3( 1.0,  0.0,  0.0);
-		         binormal = vec3( 0.0,  0.0,  1.0);
-		         break;
+	if (tbnIndex == 0.0) {
+		tangent  = vec3( 0.0,  0.0,  1.0);
+		binormal = vec3( 0.0, -1.0,  0.0);
+	} else if (tbnIndex == 1.0) {
+		tangent  = vec3( 0.0,  0.0,  1.0);
+		binormal = vec3( 0.0,  1.0,  0.0);
+	} else if (tbnIndex == 2.0) {
+		tangent  = vec3( 1.0,  0.0,  0.0);
+		binormal = vec3( 0.0,  1.0,  0.0);
+	} else if (tbnIndex == 3.0) {
+		tangent  = vec3( 1.0,  0.0,  0.0);
+		binormal = vec3( 0.0, -1.0,  0.0);
+	} else if (tbnIndex == 4.0) {
+		tangent  = vec3(-1.0,  0.0,  0.0);
+		binormal = vec3( 0.0,  0.0, -1.0);
+	} else {
+		tangent  = vec3( 1.0,  0.0,  0.0);
+		binormal = vec3( 0.0,  0.0, -1.0);
 	}
 	
-	normal = cross(tangent, binormal);
+	vec3 normal = cross(tangent, binormal);
 	
 	return mat3(tangent, binormal, normal);
 }
@@ -316,7 +309,6 @@ void main() {
 	
 	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, texture2D(colortex4, texcoord).r);
 	else if (mask.transparent > 0.5) color0 = mix(color1, color0, texture2D(colortex4, texcoord).r);
-	
 	
 	CompositeFog(color0, viewSpacePosition0, GetVolumetricFog(texcoord));
 	
