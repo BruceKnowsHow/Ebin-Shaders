@@ -39,9 +39,6 @@ uniform float far;
 
 uniform int isEyeInWater;
 
-varying mat4 shadowView;
-#define shadowModelView shadowView
-
 varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
@@ -193,15 +190,12 @@ vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangent
 	return refractedCoord;
 }
 
-void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer0g, out float buffer1r) {
-	vec2 encode = texture2D(colortex2, coord).rg;
+void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer0g) {
+	float encode = texture2D(colortex2, coord).r;
 	
-	vec2 buffer0 = Decode16(encode.r);
+	vec2 buffer0 = Decode16(encode);
 	buffer0r = buffer0.r;
 	buffer0g = buffer0.g;
-	
-	vec2 buffer1 = Decode16(encode.g);
-	buffer1r = buffer1.r;
 }
 
 mat3 DecodeTBN(in float tbnIndex) {
@@ -274,7 +268,7 @@ void main() {
 		refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
 		
 		
-		DecodeTransparentBuffer(texcoord, torchLightmap, skyLightmap, smoothness);
+		DecodeTransparentBuffer(texcoord, skyLightmap, smoothness);
 		smoothness = mix(smoothness, 0.85, mask.water);
 		
 		

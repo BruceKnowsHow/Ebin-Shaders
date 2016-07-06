@@ -3,23 +3,14 @@
 uniform sampler2D texture;
 uniform sampler2D normals;
 uniform sampler2D specular;
-uniform sampler2D noisetex;
 
 uniform float frameTimeCounter;
 uniform float far;
 uniform float wetness;
 
-uniform float viewWidth;
-uniform float viewHeight;
-
-varying mat4 shadowView;
-#define shadowModelView shadowView
-
 varying vec3 color;
 varying vec2 texcoord;
-varying vec2 lightmapCoord;
 
-varying vec3 vertNormal;
 varying mat3 tbnMatrix;
 varying vec2 vertLightmap;
 
@@ -59,7 +50,7 @@ vec4 GetNormal() {
 	vec4 normal = vec4(0.5, 0.5, 1.0, 1.0);
 #endif
 	
-	normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * transpose(tbnMatrix));
+	normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * tbnMatrix);
 	
 	return normal;
 }
@@ -70,12 +61,6 @@ vec3 GetTangentNormal() {
 #else
 	return vec3(0.5, 0.5, 1.0);
 #endif
-}
-
-void DoWaterFragment() {
-	gl_FragData[0] = vec4(EncodeNormal(transpose(tbnMatrix)[2]), 0.0, 1.0);
-	gl_FragData[1] = vec4(0.0);
-	gl_FragData[2] = vec4(0.0);
 }
 
 vec2 GetSpecularity(in float height, in float skyLightmap) {
@@ -119,7 +104,7 @@ void main() {
 	
 	vec4 normal = GetNormal();
 	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	
-	show(GetTangentNormal() * 2.0 - 1.0);
+	
 	
 #if !defined gbuffers_water
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
@@ -136,7 +121,7 @@ void main() {
 #else
 	specularity.r = mix(specularity.r, 0.85, abs(mcID - 8.5) < 0.6);
 	
-	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, 0.0)));
+	float encode = Encode16(vec2(vertLightmap.g, specularity.r));
 	
 	vec2 encodedNormal = EncodeNormalData(GetTangentNormal(), tbnIndex);
 	
@@ -145,9 +130,8 @@ void main() {
 	vec3 composite  = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
 	     composite *= pow(diffuse.rgb, vec3(2.2));
 	
-	gl_FragData[0] = vec4(encodedNormal, 0.0, 1.0);
+	gl_FragData[0] = vec4(encodedNormal, encode, 1.0);
 	gl_FragData[1] = vec4(abs(mcID - 8.5) < 0.6, 0.0, 0.0, 1.0);
-	gl_FragData[2] = vec4(encode.rg, 0.0, 1.0);
 	gl_FragData[3] = vec4(composite * 0.2, diffuse.a);
 	gl_FragData[4] = vec4(1.0, 0.0, 0.0, diffuse.a);
 	gl_FragData[5] = vec4(0.0);

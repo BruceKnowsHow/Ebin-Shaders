@@ -190,9 +190,6 @@ screen.Misc=Misc
 option.REFLECTION_EDGE_FALLOFF=Reflection Edge Falloff
 option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "fade out" on the edges of the screen
 
-option.RECALCULATE_DISPLACED_NORMALS=Recalculate Displaced Normals
-option.RECALCULATE_DISPLACED_NORMALS.comment=Whether or not surface normals are recalculated on blocks that have a waving effect
-
 
 
 option.DEBUG=Debug Mode

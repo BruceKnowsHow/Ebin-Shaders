@@ -19,6 +19,8 @@ uniform vec3 previousCameraPosition;
 uniform float sunAngle;
 uniform float frameTimeCounter;
 
+varying mat4 shadowView;
+
 varying vec4 color;
 varying vec2 texcoord;
 varying vec2 lightmapCoord;
@@ -76,7 +78,7 @@ void main() {
 	
 	vec4 position = GetWorldSpacePositionShadow();
 	
-	position.xyz += CalculateVertexDisplacements(position.xyz);
+	position.xyz += CalculateVertexDisplacements(position.xyz, lightmapCoord.g);
 	
 	gl_Position = BiasShadowProjection(WorldSpaceToShadowProjection1(position));
 	

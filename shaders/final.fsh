@@ -47,9 +47,9 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 //	return Decode16(texture2D(colortex3, coord).r).g;
 //}
 
-void MotionBlur(inout vec3 color, in float depth, in Mask mask) {
+void MotionBlur(inout vec3 color, in float depth) {
 #ifdef MOTION_BLUR
-	if (mask.hand > 0.5) return;
+//	if (mask.hand > 0.5) return;
 	
 	vec4 position = vec4(vec3(texcoord, depth) * 2.0 - 1.0, 1.0); // Signed [-1.0 to 1.0] screen space position
 	
@@ -153,7 +153,7 @@ void main() {
 //	mask = CalculateMasks(mask);
 	
 	
-//	MotionBlur(color, depth, mask);
+	MotionBlur(color, depth);
 	
 	
 	vec3[8] bloom = GetBloom();

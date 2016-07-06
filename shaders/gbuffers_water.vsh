@@ -7,5 +7,9 @@
 
 uniform mat4 shadowModelView;
 
+uniform vec3 upPosition;
+
+uniform float sunAngle;
+
 
 #include "gbuffers_main.vsh"

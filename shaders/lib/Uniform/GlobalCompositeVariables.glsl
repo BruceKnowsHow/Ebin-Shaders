@@ -1,3 +1,8 @@
+varying mat4 shadowView;
+#if defined fsh
+	#define shadowModelView shadowView
+#endif
+
 varying vec3 lightVector;
 
 varying float timeDay;

@@ -5,20 +5,12 @@ uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
 
-uniform vec3 sunPosition;
-uniform vec3 upPosition;
-
 uniform vec3  cameraPosition;
 uniform float frameTimeCounter;
-uniform float sunAngle;
-
-uniform int isEyeInWater;
 
 varying vec3 color;
 varying vec2 texcoord;
-varying vec2 lightmapCoord;
 
-varying vec3 vertNormal;
 varying mat3 tbnMatrix;
 varying vec2 vertLightmap;
 
@@ -36,8 +28,8 @@ varying float tbnIndex;
 #include "/lib/DebugSetup.glsl"
 
 #if defined gbuffers_water
-#include "/lib/Uniform/ShadowViewMatrix.vsh"
 #include "/lib/Uniform/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/ShadowViewMatrix.vsh"
 #endif
 
 
@@ -53,7 +45,7 @@ vec4 GetWorldSpacePosition() {
 
 vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 #if !defined gbuffers_hand
-	return (isEyeInWater == 1 ? gbufferProjection : gl_ProjectionMatrix) * gbufferModelView * worldSpacePosition;
+	return gbufferProjection * gbufferModelView * worldSpacePosition;
 #else
 	return gl_ProjectionMatrix * gbufferModelView * worldSpacePosition;
 #endif
@@ -83,10 +75,9 @@ float EncodePlanarTBN(in vec3 worldNormal) { // Encode the TBN matrix into a 3-b
 void main() {
 	color         = gl_Color.rgb;
 	texcoord      = gl_MultiTexCoord0.st;
-	lightmapCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).st;
 	mcID          = mc_Entity.x;
 	
-	vertLightmap = GetDefaultLightmap(lightmapCoord);
+	vertLightmap = GetDefaultLightmap((gl_TextureMatrix[1] * gl_MultiTexCoord1).st);
 	materialIDs  = GetMaterialIDs(int(mcID));
 	materialIDs1 = vec4(0.0, 0.0, 0.0, 0.0);
 	
@@ -94,12 +85,12 @@ void main() {
 	
 	vec4 position = GetWorldSpacePosition();
 	
-	position.xyz += CalculateVertexDisplacements(position.xyz);
+	position.xyz += CalculateVertexDisplacements(position.xyz, vertLightmap.g);
 	
 	gl_Position   = WorldSpaceToProjectedSpace(position);
 	
 	
-	CalculateTBN(position.xyz, tbnMatrix, vertNormal);
+	CalculateTBN(position.xyz, tbnMatrix);
 	
 	viewSpacePosition = gbufferModelView * position;
 	worldPosition     = position.xyz + cameraPosition;

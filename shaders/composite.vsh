@@ -19,8 +19,8 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/Uniform/ShadowViewMatrix.vsh"
 #include "/lib/Uniform/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/ShadowViewMatrix.vsh"
 #include "/lib/DebugSetup.glsl"
 
 

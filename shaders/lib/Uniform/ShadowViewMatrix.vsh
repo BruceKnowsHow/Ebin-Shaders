@@ -1,5 +1,3 @@
-varying mat4 shadowView;
-
 float timeCycle;
 float timeAngle;
 float pathRotationAngle;

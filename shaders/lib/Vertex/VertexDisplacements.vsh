@@ -1,9 +1,9 @@
-vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition) {
+vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition, in float skyLightmap) {
 	worldSpacePosition += cameraPosition.xyz;
 	
 	vec3 wave = vec3(0.0);
 	
-	float skylightWeight = lightmapCoord.t;
+	float skylightWeight = skyLightmap;
 	float grassWeight    = float(fract(texcoord.t * 64.0) < 0.01);
 	
 	switch(int(mc_Entity.x)) {
