@@ -137,7 +137,6 @@ void main() {
 	gl_FragData[3] = vec4(diffuse.rgb, diffuse.a);
 	gl_FragData[4] = vec4(1.0, (abs(mcID - 8.5) < 0.6), 0.0, diffuse.a);
 	gl_FragData[5] = vec4(0.0);
-	gl_FragData[6] = vec4(0.0);
 #endif
 	
 	exit();
