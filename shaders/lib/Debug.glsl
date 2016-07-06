@@ -24,7 +24,7 @@
 			#if DEBUG_VIEW != 0
 				gl_FragData[0] = vec4(texture2D(colortex5, texcoord).rgb, 1.0);
 			#else
-				gl_FragData[0] = vec4(texture2D(colortex4, texcoord).rgb, 1.0);
+				gl_FragData[0] = vec4(texture2D(colortex7, texcoord).rgb, 1.0);
 			#endif
 			
 		#elif ShaderStage == 2
