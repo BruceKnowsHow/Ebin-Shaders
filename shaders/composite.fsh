@@ -120,9 +120,7 @@ float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 	cint sampleDirections = 8;
 	cfloat sampleStep = 0.005;
 	cint sampleStepCount = 4;
-	cfloat thresh = 0.1;
 	cfloat tanBias = 0.2;
-	cfloat scale = COMPOSITE0_SCALE;
 	
 	cfloat sampleDirInc = 2.0 * 3.141 / sampleDirections;
 	float ao;
