@@ -191,7 +191,7 @@ vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangent
 }
 
 void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer0g) {
-	float encode = texture2D(colortex2, coord).r;
+	float encode = texture2D(colortex0, coord).b;
 	
 	vec2 buffer0 = Decode16(encode);
 	buffer0r = buffer0.r;
@@ -274,7 +274,7 @@ void main() {
 		
 		alpha = texture2D(colortex4, texcoord).r;
 		
-		color0 = texture2D(colortex3, texcoord).rgb * 5.0 / alpha;
+		color0 = texture2D(colortex3, texcoord).rgb / alpha;
 		
 		color1 = DecodeColor(texture2D(colortex5, refractedCoord).rgb);
 		
@@ -292,7 +292,8 @@ void main() {
 	
 	
 	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, alpha);
-	else if (mask.transparent > 0.5) color0 = mix(color1, color0, alpha);
+	else color0 = mix(color1, color0, alpha);
+	
 	
 	CompositeFog(color0, viewSpacePosition0, GetVolumetricFog(texcoord));
 	

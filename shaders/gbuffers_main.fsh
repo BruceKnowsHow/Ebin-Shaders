@@ -132,7 +132,7 @@ void main() {
 	
 	gl_FragData[0] = vec4(encodedNormal, encode, 1.0);
 	gl_FragData[1] = vec4(abs(mcID - 8.5) < 0.6, 0.0, 0.0, 1.0);
-	gl_FragData[3] = vec4(composite * 0.2, diffuse.a);
+	gl_FragData[3] = vec4(composite, diffuse.a);
 	gl_FragData[4] = vec4(1.0, 0.0, 0.0, diffuse.a);
 	gl_FragData[5] = vec4(0.0);
 #endif
