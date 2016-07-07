@@ -5,9 +5,6 @@
 #include "/lib/Syntax.glsl"
 
 
-uniform vec3 sunPosition;
-uniform vec3 upPosition;
-
 uniform float viewWidth;
 uniform float viewHeight;
 
@@ -15,7 +12,6 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/Uniform/GlobalCompositeVariables.glsl"
 #include "/lib/DebugSetup.glsl"
 
 

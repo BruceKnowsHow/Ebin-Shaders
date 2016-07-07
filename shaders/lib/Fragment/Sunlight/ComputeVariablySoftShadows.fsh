@@ -60,3 +60,5 @@ float ComputeVariablySoftShadows(in vec4 viewSpacePosition, in float sunlightCoe
 	
 	return sunlightCoeff * sunlight / sampleCount;
 }
+
+#define ComputeShadows(x, y) ComputeVariablySoftShadows(x, y)

@@ -7,6 +7,8 @@
 
 /* DRAWBUFFERS:1 */
 
+const bool colortex3MipmapEnabled = true;
+
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
@@ -22,7 +24,6 @@ uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
-uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 
 uniform vec3 cameraPosition;
@@ -48,15 +49,13 @@ varying vec2 texcoord;
 #include "/lib/Misc/CalculateFogFactor.glsl"
 #include "/lib/Fragment/ReflectanceModel.fsh"
 
-const bool colortex3MipmapEnabled = true;
-
 
 vec3 GetColor(in vec2 coord) {
-	return DecodeColor(texture2D(colortex3, coord).rgb);
+	return texture2D(colortex3, coord).rgb;
 }
 
 vec3 GetColorLod(in vec2 coord, in float lod) {
-	return DecodeColor(texture2DLod(colortex3, coord, lod).rgb);
+	return texture2DLod(colortex3, coord, lod).rgb;
 }
 
 float GetDepth(in vec2 coord) {
@@ -67,21 +66,11 @@ float GetTransparentDepth(in vec2 coord) {
 	return texture2D(depthtex1, coord).x;
 }
 
-float ExpToLinearDepth(in float depth) {
-	return 2.0 * near * (far + near - depth * (far - near));
-}
-
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
 	
 	return position;
-}
-
-vec3 ViewSpaceToScreenSpace(vec3 viewSpacePosition) {
-	vec4 screenSpace = gbufferProjection * vec4(viewSpacePosition, 1.0);
-	
-	return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
 }
 
 vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
@@ -94,25 +83,21 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex4, coord).xy);
 }
 
-#include "/lib/Misc/DecodeBuffer.fsh"
-
-
 float GetVolumetricFog(in vec2 coord) {
 #ifdef VOLUMETRIC_FOG
 	return texture2D(colortex5, coord).a;
-#endif
-	
+#else
 	return 1.0;
+#endif
 }
 
-float noise(in vec2 coord) {
-    return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
-}
+#include "/lib/Misc/DecodeBuffer.fsh"
 
 
 #include "/lib/Fragment/WaterWaves.fsh"
 
-#include "/lib/Fragment/CalculateShadedFragment.fsh"
+#include "/lib/Misc/BiasFunctions.glsl"
+#include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
 
 #include "/lib/Fragment/Sky.fsh"
 
@@ -274,17 +259,15 @@ void main() {
 		alpha = texture2D(colortex2, refractedCoord).r;
 		
 		color0 = texture2D(colortex1, refractedCoord).rgb / alpha;
+		color1 = texture2D(colortex3, refractedCoord).rgb;
 		
 		if (any(isnan(color0))) color0 = color1;
-		
-		color1 = DecodeColor(texture2D(colortex3, refractedCoord).rgb);
-		
 		
 		depth1             = GetTransparentDepth(texcoord);
 		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	} else {
 		normal = GetNormal(texcoord);
-		color0 = DecodeColor(texture2D(colortex3, texcoord).rgb);
+		color0 = texture2D(colortex3, texcoord).rgb;
 		color1 = color0;
 	}
 	

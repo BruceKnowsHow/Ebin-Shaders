@@ -21,7 +21,6 @@ varying vec2 texcoord;
 #include "/lib/Utility.glsl"
 #include "/lib/Uniform/GlobalCompositeVariables.glsl"
 #include "/lib/Uniform/ShadowViewMatrix.vsh"
-#include "/lib/DebugSetup.glsl"
 
 
 void main() {
@@ -33,8 +32,6 @@ void main() {
 	
 	
 	#include "/lib/Uniform/CompositeCalculations.vsh"
-	
-	exit();
 #else
 	gl_Position = vec4(-1.0);
 #endif

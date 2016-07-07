@@ -20,16 +20,10 @@ struct Lightmap {    // Contains vector light levels with color
 
 #if SHADOW_TYPE == 3 && defined composite1
 	#include "/lib/Fragment/Sunlight/ComputeVariablySoftShadows.fsh"
-	#define ComputeShadows(x, y) ComputeVariablySoftShadows(x, y)
-	
 #elif SHADOW_TYPE == 2 && defined composite1
 	#include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
-	#define ComputeShadows(x, y) ComputeUniformlySoftShadows(x, y)
-	
 #else
 	#include "/lib/Fragment/Sunlight/ComputeHardShadows.fsh"
-	#define ComputeShadows(x, y) ComputeHardShadows(x, y)
-	
 #endif
 
 #if defined composite1

@@ -51,6 +51,10 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 }
 
 #else
+float noise(in vec2 coord) {
+    return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
 void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
 	if (mask.water < 0.5) smoothness = pow(smoothness, 4.8);
 	
