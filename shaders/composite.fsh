@@ -33,6 +33,8 @@ uniform mat4 shadowProjectionInverse;
 
 uniform vec3 cameraPosition;
 
+uniform float near;
+uniform float far;
 uniform float viewWidth;
 uniform float viewHeight;
 
@@ -51,6 +53,10 @@ varying vec2 texcoord;
 
 float GetDepth(in vec2 coord) {
 	return texture2DRaw(gdepthtex, coord).x;
+}
+
+float GetDepthLinear(in vec2 coord) {	
+	return (near * far) / (texture2DRaw(gdepthtex, coord).x * (near - far) + far);
 }
 
 vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
@@ -117,17 +123,23 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 // HBAO SIGGRAPH presentation http://developer.download.nvidia.com/presentations/2008/SIGGRAPH/HBAO_SIG08b.pdf
 float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 	cfloat sampleRadius = 0.5;
-	cint sampleDirections = 8;
-	cfloat sampleStep = 0.005;
-	cint sampleStepCount = 4;
+	cint sampleDirections = 4;
+	cfloat sampleStep = 0.004;
+	cint sampleStepCount = 8;
 	cfloat tanBias = 0.2;
 	
 	cfloat sampleDirInc = 2.0 * 3.141 / sampleDirections;
 	float ao;
 	
+	vec2 randomAngle = GetDitherred2DNoise(texcoord, 64.0).xy * 3.141 * 2.0;
+	
+	mat2 rotationMatrix = mat2(
+		cos(randomAngle.x), -sin(randomAngle.x),
+	  sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix
+	
 	for(uint i = 0; i < sampleDirections; i++) {
 		float sampleAngle = i * sampleDirInc;
-		vec2 sampleDir = vec2(cos(sampleAngle), sin(sampleAngle));
+		vec2 sampleDir = vec2(cos(sampleAngle), sin(sampleAngle)) * rotationMatrix;
 		
 		float tangentAngle = acos(dot(vec3(sampleDir, 0.0), normal)) - (0.5 * 3.141) + tanBias;
 		float horizonAngle = tangentAngle;
@@ -192,7 +204,8 @@ void main() {
 	
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
 	float AO = CalculateSSAO(viewSpacePosition0, normal);
-	GI += AO - 1.0;
+	GI += (AO - 1.0);
+	//GI *= AO;
 	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);
