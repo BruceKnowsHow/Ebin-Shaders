@@ -1,6 +1,6 @@
 #ifndef PBR
 void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
-	if (mask.water < 0.5) smoothness = pow(smoothness, 4.8) * 0.85;
+	if (mask.water < 0.5) smoothness = pow(smoothness, 2.0) * 0.85;
 	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
@@ -16,7 +16,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	vec3 alpha = fresnel * smoothness;
 	
-	if (length(alpha) < 0.01) return;
+	if (length(alpha) < 0.001) return;
 	
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
@@ -44,6 +44,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 			reflection       = mix(reflection, reflectedSky, pow(1.0 - edge, 10.0));
 		#endif
 	}
+	
+	reflection = max(reflection, 0.0);
 	
 	color = mix(color, reflection, alpha);
 }
@@ -110,6 +112,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	}
 	
 	reflection /= PBR_RAYS;
+	
+	reflection = max(reflection, 0.0);
 	
 	color = mix(color * (1.0 - mask.metallic), reflection, alpha);
 }

@@ -292,7 +292,7 @@ void main() {
 	
 	
 	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, alpha);
-	else color0 = mix(color1, color0, alpha);
+	else if (mask.transparent > 0.5) color0 = mix(color1, color0, alpha);
 	
 	
 	CompositeFog(color0, viewSpacePosition0, GetVolumetricFog(texcoord));
