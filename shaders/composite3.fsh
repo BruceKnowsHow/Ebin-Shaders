@@ -5,11 +5,11 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:5 */
+/* DRAWBUFFERS:3 */
 
-const bool colortex3MipmapEnabled = true;
+const bool colortex1MipmapEnabled = true;
 
-uniform sampler2D colortex3;
+uniform sampler2D colortex1;
 
 uniform float viewWidth;
 uniform float viewHeight;
@@ -52,7 +52,7 @@ vec3 ComputeBloomTile(cfloat scale, vec2 offset) { // Computes a single bloom ti
 			
 			vec2 offset = vec2(i, j) * pixelSize;
 			
-			bloom       += pow(texture2D(colortex3, coord + offset).rgb, vec3(2.2)) * weight;
+			bloom       += pow(texture2D(colortex1, coord + offset).rgb, vec3(2.2)) * weight;
 			totalWeight += weight;
 		}
 	}

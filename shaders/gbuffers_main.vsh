@@ -16,12 +16,12 @@ varying vec2 vertLightmap;
 
 varying float mcID;
 varying float materialIDs;
-varying vec4  materialIDs1;
 
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
 varying float tbnIndex;
+varying float waterMask;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
@@ -73,15 +73,13 @@ float EncodePlanarTBN(in vec3 worldNormal) { // Encode the TBN matrix into a 3-b
 }
 
 void main() {
-	color         = gl_Color.rgb;
-	texcoord      = gl_MultiTexCoord0.st;
-	mcID          = mc_Entity.x;
-	
+	color        = gl_Color.rgb;
+	texcoord     = gl_MultiTexCoord0.st;
+	mcID         = mc_Entity.x;
+	waterMask    = float(abs(mc_Entity.x - 8.5) < 0.6);
 	vertLightmap = GetDefaultLightmap((gl_TextureMatrix[1] * gl_MultiTexCoord1).st);
-	materialIDs  = GetMaterialIDs(int(mcID));
-	materialIDs1 = vec4(0.0, 0.0, 0.0, 0.0);
-	
-	tbnIndex = EncodePlanarTBN(gl_Normal);
+	materialIDs  = GetMaterialIDs(int(mc_Entity.x));
+	tbnIndex     = EncodePlanarTBN(gl_Normal);
 	
 	vec4 position = GetWorldSpacePosition();
 	

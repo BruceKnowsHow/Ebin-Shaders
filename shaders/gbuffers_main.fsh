@@ -16,12 +16,12 @@ varying vec2 vertLightmap;
 
 varying float mcID;
 varying float materialIDs;
-varying vec4  materialIDs1;
 
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
 varying float tbnIndex;
+varying float waterMask;
 
 #include "/lib/Misc/MenuInitializer.glsl"
 #include "/lib/Settings.glsl"
@@ -87,7 +87,7 @@ vec2 GetSpecularity(in float height, in float skyLightmap) {
 vec2 EncodeNormalData(in vec3 normalTexture, in float tbnIndex) {
 	vec2 encode;
 	
-	encode.r = tbnIndex / 8.0;
+	encode.r = (tbnIndex + 8.0 * waterMask) / 16.0;
 	encode.g = Encode16(normalTexture.xy);
 	
 	return encode;
@@ -107,7 +107,7 @@ void main() {
 	
 	
 #if !defined gbuffers_water
-	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, materialIDs1.g, materialIDs1.b, materialIDs1.a);
+	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, 0.0, 0.0, 0.0);
 	
 	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)));
 	
@@ -116,10 +116,10 @@ void main() {
 	gl_FragData[2] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[4] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[5] = vec4(diffuse.rgb, 1.0);
-	gl_FragData[6] = vec4(EncodeNormal(normal.xyz), encode.rg);
+	gl_FragData[3] = vec4(diffuse.rgb, 1.0);
+	gl_FragData[4] = vec4(EncodeNormal(normal.xyz), encode.rg);
 #else
-	specularity.r = mix(specularity.r, 0.85, abs(mcID - 8.5) < 0.6);
+	specularity.r = mix(specularity.r, 0.85, waterMask);
 	
 	float encode = Encode16(vec2(vertLightmap.g, specularity.r));
 	
@@ -131,10 +131,9 @@ void main() {
 	     composite *= pow(diffuse.rgb, vec3(2.2));
 	
 	gl_FragData[0] = vec4(encodedNormal, encode, 1.0);
-	gl_FragData[1] = vec4(abs(mcID - 8.5) < 0.6, 0.0, 0.0, 1.0);
-	gl_FragData[3] = vec4(composite, diffuse.a);
-	gl_FragData[4] = vec4(1.0, 0.0, 0.0, diffuse.a);
-	gl_FragData[5] = vec4(0.0);
+	gl_FragData[1] = vec4(composite, diffuse.a);
+	gl_FragData[2] = vec4(1.0, 0.0, 0.0, diffuse.a);
+	gl_FragData[3] = vec4(0.0);
 #endif
 	
 	exit();

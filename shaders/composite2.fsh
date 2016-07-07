@@ -5,15 +5,14 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:3 */
+/* DRAWBUFFERS:1 */
 
 uniform sampler2D colortex0;
+uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
-uniform sampler2D colortex6;
-uniform sampler2D colortex7;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -49,15 +48,15 @@ varying vec2 texcoord;
 #include "/lib/Misc/CalculateFogFactor.glsl"
 #include "/lib/Fragment/ReflectanceModel.fsh"
 
-const bool colortex5MipmapEnabled = true;
+const bool colortex3MipmapEnabled = true;
 
 
 vec3 GetColor(in vec2 coord) {
-	return DecodeColor(texture2D(colortex5, coord).rgb);
+	return DecodeColor(texture2D(colortex3, coord).rgb);
 }
 
 vec3 GetColorLod(in vec2 coord, in float lod) {
-	return DecodeColor(texture2DLod(colortex5, coord, lod).rgb);
+	return DecodeColor(texture2DLod(colortex3, coord, lod).rgb);
 }
 
 float GetDepth(in vec2 coord) {
@@ -92,7 +91,7 @@ vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2D(colortex6, coord).xy);
+	return DecodeNormal(texture2D(colortex4, coord).xy);
 }
 
 #include "/lib/Misc/DecodeBuffer.fsh"
@@ -100,7 +99,7 @@ vec3 GetNormal(in vec2 coord) {
 
 float GetVolumetricFog(in vec2 coord) {
 #ifdef VOLUMETRIC_FOG
-	return texture2D(colortex7, coord).a;
+	return texture2D(colortex5, coord).a;
 #endif
 	
 	return 1.0;
@@ -199,7 +198,7 @@ void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer
 }
 
 mat3 DecodeTBN(in float tbnIndex) {
-	tbnIndex = round(tbnIndex * 8.0);
+	tbnIndex = round(mod(tbnIndex * 16.0, 8.0));
 	
 	vec3 tangent;
 	vec3 binormal;
@@ -272,18 +271,20 @@ void main() {
 		smoothness = mix(smoothness, 0.85, mask.water);
 		
 		
-		alpha = texture2D(colortex4, texcoord).r;
+		alpha = texture2D(colortex2, refractedCoord).r;
 		
-		color0 = texture2D(colortex3, texcoord).rgb / alpha;
+		color0 = texture2D(colortex1, refractedCoord).rgb / alpha;
 		
-		color1 = DecodeColor(texture2D(colortex5, refractedCoord).rgb);
+		if (any(isnan(color0))) color0 = color1;
+		
+		color1 = DecodeColor(texture2D(colortex3, refractedCoord).rgb);
 		
 		
 		depth1             = GetTransparentDepth(texcoord);
 		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	} else {
 		normal = GetNormal(texcoord);
-		color0 = DecodeColor(texture2D(colortex5, texcoord).rgb);
+		color0 = DecodeColor(texture2D(colortex3, texcoord).rgb);
 		color1 = color0;
 	}
 	

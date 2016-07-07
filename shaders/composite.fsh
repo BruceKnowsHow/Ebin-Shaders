@@ -15,9 +15,8 @@ const bool shadowtex1Nearest   = true;
 const bool shadowcolor0Nearest = false;
 const bool shadowcolor1Nearest = false;
 
-uniform sampler2D colortex1;
+uniform sampler2D colortex0;
 uniform sampler2D colortex4;
-uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -67,7 +66,7 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 }
 
 vec3 GetNormal(in vec2 coord) {
-	return DecodeNormal(texture2DRaw(colortex6, coord).xy);
+	return DecodeNormal(texture2DRaw(colortex4, coord).xy);
 }
 
 #include "/lib/Misc/DecodeBuffer.fsh"
@@ -203,9 +202,9 @@ void main() {
 	
 	
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
-	float AO = CalculateSSAO(viewSpacePosition0, normal);
-	GI += (AO - 1.0);
-	//GI *= AO;
+	// float AO = CalculateSSAO(viewSpacePosition0, normal);
+	// GI += (AO - 1.0);
+	// GI *= AO;
 	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);
