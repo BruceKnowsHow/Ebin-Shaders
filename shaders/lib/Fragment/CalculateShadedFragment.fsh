@@ -57,7 +57,7 @@ vec3 CalculateShadedFragment(in Mask mask, in float AO, in float torchLightmap, 
 	
 	lightmap.sunlight = shading.sunlight * sunlightColor * pow(AO, 0.7);
 	
-	lightmap.skylight = shading.skylight * pow(skylightColor, vec3(0.7));
+	lightmap.skylight = shading.skylight * pow(skylightColor, vec3(0.7)) * AO;
 	
 	lightmap.ambient = shading.ambient * vec3(AO);
 	

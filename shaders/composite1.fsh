@@ -84,10 +84,6 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 	volFog = 0.0;
 	AO = 0.0;
 	
-	#ifndef AO_ENABLED
-	 AO = 1.0;
-	#endif
-	
 #if (defined GI_ENABLED || defined VOLUMETRIC_FOG || defined AO_ENABLED)
 	depth = ExpToLinearDepth(depth);
 	
@@ -149,6 +145,10 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 	GI /= totalWeights;
 	volFog /= totalFogWeight;
 	AO /= totalAOWeight;
+#endif
+	
+#ifndef AO_ENABLED
+	AO = 1.0;
 #endif
 }
 
