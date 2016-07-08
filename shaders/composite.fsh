@@ -69,8 +69,6 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2DRaw(colortex4, coord).xy);
 }
 
-#include "/lib/Misc/DecodeBuffer.fsh"
-
 
 vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
 	coord *= vec2(viewWidth, viewHeight);
@@ -137,10 +135,18 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth0);
 	
 	
-	vec2 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	vec2  buffer0     = Decode16(texture2D(colortex4, texcoord).b);
+	float smoothness  = buffer0.r;
+	float skyLightmap = buffer0.g;
 	
-	mask = AddWaterMask(CalculateMasks(mask), depth0, depth1);
+	Mask mask = CalculateMasks(Decode16(texture2D(colortex4, texcoord).a).g);
+	
+	if (depth0 != depth1) {
+		mask.transparent = 1.0;
+		mask.water   = float(texture2D(colortex0, texcoord).r >= 0.5);
+	}
+	
+	vec3 normal = DecodeNormal(texture2D(colortex4, texcoord).xy);
 	
 	
 	float volFog = ComputeVolumetricFog(viewSpacePosition0);
@@ -148,9 +154,6 @@ void main() {
 	
 	if (depth1 >= 1.0 || isEyeInWater != mask.water)
 		{ gl_FragData[0] = vec4(vec3(0.0), volFog); exit(); return; }
-	
-	
-	vec3 normal = GetNormal(texcoord);
 	
 	
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);

@@ -74,8 +74,6 @@ vec3 GetNormal(in vec2 coord) {
 	return DecodeNormal(texture2D(colortex4, coord).xy);
 }
 
-#include "/lib/Misc/DecodeBuffer.fsh"
-
 
 #include "/lib/Fragment/CalculateShadedFragment.fsh"
 
@@ -153,49 +151,57 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 }
 
 
-struct Fragment {
-	vec4 viewSpacePosition;
-	vec3 normal;
-	vec3 depth;
-	vec3 diffuse;
-};
-
-
 void main() {
 	float depth0 = GetDepth(texcoord);
 	
 	if (depth0 >= 1.0) { discard; }
 	
 	
-	vec3  diffuse =          GetDiffuse(texcoord);
-	float depth1  = GetTransparentDepth(texcoord);
+	float depth1 = GetTransparentDepth(texcoord);
 	
-//	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
-	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
+	vec4 encode1 = texture2D(colortex4, texcoord);
 	
+	vec3 normal = DecodeNormal(encode1.xy);
 	
-	vec4 encode; vec3 normal; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, encode, normal, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	vec2  buffer0     = Decode16(encode1.b);
+	float smoothness  = buffer0.r;
+	float skyLightmap = buffer0.g;
 	
-	mask = AddWaterMask(CalculateMasks(mask), depth0, depth1);
+	vec2  buffer1       = Decode16(encode1.a);
+	float torchLightmap = buffer1.r;
+	Mask  mask          = CalculateMasks(buffer1.g);
+	
+	if (depth0 != depth1) {
+		vec3 encode0 = texture2D(colortex0, texcoord).rgb;
+		
+		mask.transparent = 1.0;
+		mask.water   = float(encode0.r >= 0.5);
+		mask.matIDs  = 1.0;
+		mask.bit[0] *= 1.0 - mask.transparent;
+		mask.bit[1]  = mask.transparent;
+		mask.bit[2]  = mask.water;
+		mask.materialIDs = EncodeMaterialIDs(mask.matIDs, mask.bit[0], mask.bit[1], mask.bit[2], mask.bit[3]);
+		
+		encode0.r = mod(encode0.r, 0.5);
+		
+		encode1 = vec4(encode0.rgb, Encode16(vec2(0.0, mask.materialIDs)));
+	}
 	
 	
 	vec3 GI; float volFog; float AO;
 	BilateralUpsample(normal, depth1, GI, volFog, AO);
 	
-	vec3 composite = CalculateShadedFragment(mask, AO, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition1);
 	
-	composite += GI * sunlightColor * 5.0;
+	vec3 diffuse = GetDiffuse(texcoord);
+	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	
-	composite *= pow(diffuse, vec3(2.2));
-	
-	
-	encode.a = Encode16(vec2(smoothness, mask.materialIDs));
+	vec3 composite  = CalculateShadedFragment(mask, AO, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition1);
+	     composite += GI * sunlightColor * 5.0;
+	     composite *= pow(diffuse, vec3(2.2));
 	
 	
 	gl_FragData[0] = vec4(composite, 1.0);
-	gl_FragData[1] = vec4(encode);
+	gl_FragData[1] = vec4(encode1);
 	gl_FragData[2] = vec4(volFog, 0.0, 0.0, 1.0);
 	
 	exit();
