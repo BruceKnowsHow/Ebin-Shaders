@@ -1,9 +1,11 @@
 float AlchemyAO(in vec4 viewSpacePosition, in vec3 normal) {
-  cfloat range = 2.0;
-  cfloat falloffCap = 0.08 * range;
-  cint numSamples = 20;
+  cfloat sampleRadius = 0.5;
+  cfloat shadowScalar = 0.2;
+  cfloat depthThreshold = 0.0025;
+  cfloat shadowContrast = 0.5;
+  cint numSamples = 6;
   
-  float sampleArea = range / viewSpacePosition.z;
+  float sampleArea = sampleRadius / viewSpacePosition.z;
   float sampleStep = sampleArea / numSamples;
   
   float angle = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 64.0).x * 2.0 * 3.14159;
@@ -20,14 +22,14 @@ float AlchemyAO(in vec4 viewSpacePosition, in vec3 normal) {
     
     vec3 offsetPosition = CalculateViewSpacePosition(offsetCoord, GetDepth(offsetCoord)).xyz;
     vec3 differential = offsetPosition - viewSpacePosition.xyz;
-    float diffLength =  lengthSquared(differential);
+    float diffLength = lengthSquared(differential);
     
-    AO += (max(0.0, dot(normal, differential) + 0.0025 * viewSpacePosition.z) * step(sqrt(diffLength), range) * EdgeError) / (diffLength + 0.0001);
+    AO += (max(0.0, dot(normal, differential) + depthThreshold * viewSpacePosition.z) * step(sqrt(diffLength), sampleRadius) * EdgeError) / max(pow2(shadowScalar), (diffLength + 0.0001));
     angle += angleStep;
   }
   
-  AO *= (2.0 * falloffCap) / numSamples;
-  AO = max(0.0, 1.0 - AO);
+  AO *= (2.0 * shadowScalar) / numSamples;
+  AO = max(0.0, 1.0 - pow(AO, shadowContrast));
   
   return AO;
 }
