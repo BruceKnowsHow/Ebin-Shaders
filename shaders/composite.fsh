@@ -137,7 +137,7 @@ void main() {
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth0);
 	
 	
-	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	vec2 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth0, depth1);
@@ -156,6 +156,7 @@ void main() {
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
 	float AO = CalculateSSAO(viewSpacePosition0, normal);
 	GI *= AO;
+	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), AO);
 	gl_FragData[1] = vec4(volFog, 0.0, 0.0, 1.0);

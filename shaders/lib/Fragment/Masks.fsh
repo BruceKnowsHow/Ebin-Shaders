@@ -68,9 +68,10 @@ Mask CalculateMasks(in Mask mask) {
 
 #if defined composite0 || defined composite1
 Mask AddWaterMask(in Mask mask, in float depth0, in float depth1) {
-	mask.transparent = float(depth0 != depth1);
-	mask.water = mask.transparent * float(texture2D(colortex0, texcoord).r >= 0.5);
-	
+	if (depth0 != depth1) {
+		mask.transparent = 1.0;
+		mask.water = float(texture2D(colortex0, texcoord).r >= 0.5);
+	}
 	
 	#if defined composite1
 		mask.matIDs = 1.0;

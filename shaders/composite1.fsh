@@ -10,7 +10,7 @@ const bool colortex5MipmapEnabled = true;
 const bool colortex6MipmapEnabled = true;
 
 uniform sampler2D colortex0;
-uniform sampler2D colortex2;
+uniform sampler2D colortex1;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
@@ -153,6 +153,14 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 }
 
 
+struct Fragment {
+	vec4 viewSpacePosition;
+	vec3 normal;
+	vec3 depth;
+	vec3 diffuse;
+};
+
+
 void main() {
 	float depth0 = GetDepth(texcoord);
 	
@@ -160,28 +168,22 @@ void main() {
 	
 	
 	vec3  diffuse =          GetDiffuse(texcoord);
-	vec3  normal  =           GetNormal(texcoord);
 	float depth1  = GetTransparentDepth(texcoord);
 	
-	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
+//	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
-	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	vec4 encode; vec3 normal; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	DecodeBuffer(texcoord, encode, normal, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = AddWaterMask(CalculateMasks(mask), depth0, depth1);
-	
-	encode.g = Encode16(vec2(smoothness, mask.materialIDs));
-	
-	
-	vec4 dryViewSpacePosition = (mask.transparent > 0.5 ? viewSpacePosition1 : viewSpacePosition0);
 	
 	
 	vec3 GI; float volFog; float AO;
 	BilateralUpsample(normal, depth1, GI, volFog, AO);
 	
-	vec3 composite = CalculateShadedFragment(mask, AO, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
+	vec3 composite = CalculateShadedFragment(mask, AO, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition1);
 	
 	composite += GI * sunlightColor * 5.0;
 	
@@ -189,8 +191,11 @@ void main() {
 	composite *= pow(diffuse, vec3(2.2));
 	
 	
+	encode.a = Encode16(vec2(smoothness, mask.materialIDs));
+	
+	
 	gl_FragData[0] = vec4(composite, 1.0);
-	gl_FragData[1] = vec4(EncodeNormal(normal), encode.rg);
+	gl_FragData[1] = vec4(encode);
 	gl_FragData[2] = vec4(volFog, 0.0, 0.0, 1.0);
 	
 	exit();

@@ -96,9 +96,6 @@ float GetVolumetricFog(in vec2 coord) {
 
 #include "/lib/Fragment/WaterWaves.fsh"
 
-#include "/lib/Misc/BiasFunctions.glsl"
-#include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
-
 #include "/lib/Fragment/Sky.fsh"
 
 bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, cfloat rayGrowth, cint maxSteps, cint maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
@@ -150,6 +147,9 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 	return false;
 }
 
+#include "/lib/Misc/BiasFunctions.glsl"
+#include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
+
 #include "/lib/Fragment/ReflectionFunctions.fsh"
 
 vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangentNormal) {
@@ -172,14 +172,6 @@ vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangent
 	refractedCoord = clamp(refractedCoord, minCoord, maxCoord);
 	
 	return refractedCoord;
-}
-
-void DecodeTransparentBuffer(in vec2 coord, out float buffer0r, out float buffer0g) {
-	float encode = texture2D(colortex0, coord).b;
-	
-	vec2 buffer0 = Decode16(encode);
-	buffer0r = buffer0.r;
-	buffer0g = buffer0.g;
 }
 
 mat3 DecodeTBN(in float tbnIndex) {
@@ -222,7 +214,7 @@ void main() {
 	if (depth0 >= 1.0) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition0, true)), 1.0); exit(); return; }
 	
 	
-	vec3 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
+	vec2 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
 	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
 	
 	mask = CalculateMasks(mask);
@@ -253,7 +245,6 @@ void main() {
 		
 		
 		DecodeTransparentBuffer(texcoord, skyLightmap, smoothness);
-		smoothness = mix(smoothness, 0.85, mask.water);
 		
 		
 		alpha = texture2D(colortex2, refractedCoord).r;
@@ -261,13 +252,13 @@ void main() {
 		color0 = texture2D(colortex1, refractedCoord).rgb / alpha;
 		color1 = texture2D(colortex3, refractedCoord).rgb;
 		
-		if (any(isnan(color0))) color0 = color1;
+		if (any(isnan(color0))) color0 = vec3(0.0);
 		
 		depth1             = GetTransparentDepth(texcoord);
 		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	} else {
 		normal = GetNormal(texcoord);
-		color0 = texture2D(colortex3, texcoord).rgb;
+		color0 = texture2D(colortex3, refractedCoord).rgb;
 		color1 = color0;
 	}
 	
