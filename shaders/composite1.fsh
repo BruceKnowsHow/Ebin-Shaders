@@ -4,17 +4,17 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:354 */
+/* DRAWBUFFERS:346 */
 
+const bool colortex5MipmapEnabled = true;
 const bool colortex6MipmapEnabled = true;
-const bool colortex7MipmapEnabled = true;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D colortex5;
 uniform sampler2D colortex6;
-uniform sampler2D colortex7;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -109,7 +109,7 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 			      weight  = pow(weight, 32);
 			      weight  = max(1.0e-6, weight);
 			
-			GI += pow(texture2DLod(colortex7, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).rgb, vec3(2.2)) * weight;
+			GI += pow(texture2DLod(colortex5, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).rgb, vec3(2.2)) * weight;
 			
 			totalWeights += weight;
 		#endif
@@ -125,7 +125,7 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 				HBAOOffset *= 2.0;
 			#endif
 			
-			AO += texture2DLod(colortex6, texcoord * COMPOSITE0_SCALE + HBAOOffset, 0).r * AOWeight;
+			AO += texture2DLod(colortex5, texcoord * COMPOSITE0_SCALE + HBAOOffset, 0).a * AOWeight;
 			
 			totalAOWeight += AOWeight;
 		#endif
@@ -135,7 +135,7 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 			      FogWeight = pow(FogWeight, 32);
 			      FogWeight = max(0.1e-8, FogWeight);
 			
-			volFog += texture2DLod(colortex7, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).a * FogWeight;
+			volFog += texture2DLod(colortex6, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).r * FogWeight;
 			
 			totalFogWeight += FogWeight;
 		#endif
@@ -190,8 +190,8 @@ void main() {
 	
 	
 	gl_FragData[0] = vec4(composite, 1.0);
-	gl_FragData[1] = vec4(GI, volFog);
-	gl_FragData[2] = vec4(EncodeNormal(normal), encode.rg);
+	gl_FragData[1] = vec4(EncodeNormal(normal), encode.rg);
+	gl_FragData[2] = vec4(volFog, 0.0, 0.0, 1.0);
 	
 	exit();
 }

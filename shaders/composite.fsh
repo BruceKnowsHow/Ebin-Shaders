@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:67 */
+/* DRAWBUFFERS:56 */
 
 const bool shadowtex1Mipmap    = true;
 const bool shadowcolor0Mipmap  = true;
@@ -157,8 +157,8 @@ void main() {
 	float AO = CalculateSSAO(viewSpacePosition0, normal);
 	GI *= AO;
 	
-	gl_FragData[0] = vec4(AO, 0.0, 0.0, 1.0);
-	gl_FragData[1] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);
+	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), AO);
+	gl_FragData[1] = vec4(volFog, 0.0, 0.0, 1.0);
 	
 	exit();
 }

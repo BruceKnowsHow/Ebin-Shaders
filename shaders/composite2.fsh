@@ -14,7 +14,7 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
-uniform sampler2D colortex5;
+uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -85,7 +85,7 @@ vec3 GetNormal(in vec2 coord) {
 
 float GetVolumetricFog(in vec2 coord) {
 #ifdef VOLUMETRIC_FOG
-	return texture2D(colortex5, coord).a;
+	return texture2D(colortex6, coord).r;
 #else
 	return 1.0;
 #endif
