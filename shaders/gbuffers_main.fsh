@@ -127,7 +127,7 @@ void main() {
 	
 	Mask mask;
 	
-	vec3 composite  = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
+	vec3 composite  = CalculateShadedFragment(mask, 1.0, vertLightmap.r, vertLightmap.g, normal.xyz, specularity.r, viewSpacePosition);
 	     composite *= pow(diffuse.rgb, vec3(2.2));
 	
 	gl_FragData[0] = vec4(encodedNormal, encode, 1.0);

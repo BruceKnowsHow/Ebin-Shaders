@@ -6,12 +6,14 @@
 
 /* DRAWBUFFERS:354 */
 
+const bool colortex6MipmapEnabled = true;
 const bool colortex7MipmapEnabled = true;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D colortex6;
 uniform sampler2D colortex7;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
@@ -77,15 +79,21 @@ vec3 GetNormal(in vec2 coord) {
 
 #include "/lib/Fragment/CalculateShadedFragment.fsh"
 
-void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float volFog) {
+void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float volFog, out float AO) {
 	GI = vec3(0.0);
 	volFog = 0.0;
+	AO = 0.0;
 	
-#if (defined GI_ENABLED || defined VOLUMETRIC_FOG)
+	#ifndef AO_ENABLED
+	 AO = 1.0;
+	#endif
+	
+#if (defined GI_ENABLED || defined VOLUMETRIC_FOG || defined AO_ENABLED)
 	depth = ExpToLinearDepth(depth);
 	
 	float totalWeights   = 0.0;
 	float totalFogWeight = 0.0;
+	float totalAOWeight = 0.0;
 	
 	cfloat kernal = 2.0;
 	cfloat range = kernal - kernal * 0.5 - 0.5;
@@ -109,6 +117,22 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 			
 			totalWeights += weight;
 		#endif
+		
+		#ifdef AO_ENABLED
+			float AOWeight = 1.0 - abs(depth - sampleDepth) * 10.0;
+			      AOWeight = pow(AOWeight, 32);
+			      AOWeight = max(0.1e-8, AOWeight);
+						
+			vec2 HBAOOffset = offset;
+			
+			#ifdef HBAO
+				HBAOOffset *= 2.0;
+			#endif
+			
+			AO += texture2DLod(colortex6, texcoord * COMPOSITE0_SCALE + HBAOOffset, 0).r * AOWeight;
+			
+			totalAOWeight += AOWeight;
+		#endif
 			
 		#ifdef VOLUMETRIC_FOG
 			float FogWeight = 1.0 - abs(depth - sampleDepth) * 10.0;
@@ -124,6 +148,7 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 	
 	GI /= totalWeights;
 	volFog /= totalFogWeight;
+	AO /= totalAOWeight;
 #endif
 }
 
@@ -152,11 +177,11 @@ void main() {
 	
 	vec4 dryViewSpacePosition = (mask.transparent > 0.5 ? viewSpacePosition1 : viewSpacePosition0);
 	
-	vec3 composite = CalculateShadedFragment(mask, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 	
+	vec3 GI; float volFog; float AO;
+	BilateralUpsample(normal, depth1, GI, volFog, AO);
 	
-	vec3 GI; float volFog;
-	BilateralUpsample(normal, depth1, GI, volFog);
+	vec3 composite = CalculateShadedFragment(mask, AO, torchLightmap, skyLightmap, normal, smoothness, dryViewSpacePosition);
 	
 	composite += GI * sunlightColor * 5.0;
 	

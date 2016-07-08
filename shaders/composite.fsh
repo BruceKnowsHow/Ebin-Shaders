@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:7 */
+/* DRAWBUFFERS:67 */
 
 const bool shadowtex1Mipmap    = true;
 const bool shadowcolor0Mipmap  = true;
@@ -117,55 +117,7 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 #endif
 }
 
-
-// HBAO paper http://rdimitrov.twistedsanity.net/HBAO_SIGGRAPH08.pdf
-// HBAO SIGGRAPH presentation http://developer.download.nvidia.com/presentations/2008/SIGGRAPH/HBAO_SIG08b.pdf
-float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
-	cfloat sampleRadius = 0.5;
-	cint sampleDirections = 4;
-	cfloat sampleStep = 0.004;
-	cint sampleStepCount = 8;
-	cfloat tanBias = 0.2;
-	
-	cfloat sampleDirInc = 2.0 * 3.141 / sampleDirections;
-	float ao;
-	
-	vec2 randomAngle = GetDitherred2DNoise(texcoord, 64.0).xy * 3.141 * 2.0;
-	
-	mat2 rotationMatrix = mat2(
-		cos(randomAngle.x), -sin(randomAngle.x),
-	  sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix
-	
-	for(uint i = 0; i < sampleDirections; i++) {
-		float sampleAngle = i * sampleDirInc;
-		vec2 sampleDir = vec2(cos(sampleAngle), sin(sampleAngle)) * rotationMatrix;
-		
-		float tangentAngle = acos(dot(vec3(sampleDir, 0.0), normal)) - (0.5 * 3.141) + tanBias;
-		float horizonAngle = tangentAngle;
-		vec3 prevDiff;
-		
-		for(uint j = 0; j < sampleStepCount; j++) {
-			vec2 sampleOffset = float(j + 1) * sampleStep * sampleDir;
-			vec2 offsetCoord = texcoord + sampleOffset;
-			
-			float offsetDepth = GetDepth(offsetCoord);
-			vec3 offsetViewSpace = CalculateViewSpacePosition(offsetCoord, offsetDepth).xyz;
-			
-			vec3 differential = offsetViewSpace - viewSpacePosition.xyz;
-			if(length(differential) < sampleRadius) {
-				prevDiff = differential;
-				float elevationAngle = atan(differential.z / length(differential.xy));
-				horizonAngle = max(horizonAngle, elevationAngle);
-			}
-		}
-		float attenuation = 1.0 / (1.0 + length(prevDiff));
-		float occlusion = clamp01(attenuation * (sin(horizonAngle) - sin(tangentAngle)));
-		ao += 1.0 - occlusion;
-	}
-	ao /= sampleDirections;
-	
-	return ao;
-}
+#include "lib/Fragment/AO.fsh"
 
 void main() {
 	float depth0 = GetDepth(texcoord);
@@ -202,12 +154,11 @@ void main() {
 	
 	
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
-	// float AO = CalculateSSAO(viewSpacePosition0, normal);
-	// GI += (AO - 1.0);
-	// GI *= AO;
+	float AO = CalculateSSAO(viewSpacePosition0, normal);
+	GI *= AO;
 	
-	
-	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);
+	gl_FragData[0] = vec4(AO, 0.0, 0.0, 1.0);
+	gl_FragData[1] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), volFog);
 	
 	exit();
 }

@@ -155,6 +155,11 @@ option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "b
 
 option.GI_BRIGHTNESS=GI Brightness
 
+option.AO_ENABLED=Ambient Occlusion
+option.AO_ENABLED.comment=Ambient Occlusion/Ambient Obscurance darkens corners semi naturally to give the effect of depth and changes in geometry.
+
+option.HBAO=HBAO
+option.HBAO.comment=HBAO also knows as Horizon Based Ambient Occlusion is a different option to AO. it is not higher quality however it has less bugs.
 
 
 option.PBR=Physically Based Rendering

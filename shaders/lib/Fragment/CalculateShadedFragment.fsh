@@ -31,7 +31,7 @@ struct Lightmap {    // Contains vector light levels with color
 #endif
 
 
-vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
+vec3 CalculateShadedFragment(in Mask mask, in float AO, in float torchLightmap, in float skyLightmap, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
 	Shading shading;
 	
 	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
@@ -55,11 +55,11 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	
 	Lightmap lightmap;
 	
-	lightmap.sunlight = shading.sunlight * sunlightColor;
+	lightmap.sunlight = shading.sunlight * sunlightColor * pow(AO, 0.5);
 	
 	lightmap.skylight = shading.skylight * pow(skylightColor, vec3(0.7));
 	
-	lightmap.ambient = shading.ambient * vec3(1.0);
+	lightmap.ambient = shading.ambient * vec3(AO);
 	
 	lightmap.torchlight = shading.torchlight * vec3(0.7, 0.3, 0.1);
 	
