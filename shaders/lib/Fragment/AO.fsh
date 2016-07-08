@@ -1,6 +1,6 @@
 float AlchemyAO(in vec4 viewSpacePosition, in vec3 normal) {
   cfloat sampleRadius = 0.5;
-  cfloat shadowScalar = 0.2;
+  cfloat shadowScalar = 0.1;
   cfloat depthThreshold = 0.0025;
   cfloat shadowContrast = 0.5;
   cint numSamples = 6;
