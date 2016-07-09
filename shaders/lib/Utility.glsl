@@ -18,6 +18,8 @@ cvec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 
 #include "/lib/Utility/rotation.glsl"
 
+#include "/lib/Utility/blending.glsl"
+
 
 vec3 SetSaturationLevel(in vec3 color, in float level) {
 	float luminance = max(0.1175, dot(color, lumaCoeff));

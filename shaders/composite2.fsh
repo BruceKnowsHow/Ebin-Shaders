@@ -147,9 +147,9 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 #include "/lib/Misc/BiasFunctions.glsl"
 #include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
 
-/*
+
 #include "/lib/Fragment/ReflectionFunctions.fsh"
-*/
+
 
 vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangentNormal) {
 	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
@@ -264,7 +264,7 @@ void main() {
 	if (mask.transparent < 0.5) color0 = color1;
 	
 	
-//	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
+	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
 	
 	
 	if (depth1 >= 1.0) color0 = mix(sky.rgb, color0, alpha);
