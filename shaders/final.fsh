@@ -43,10 +43,6 @@ vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
 	return position;
 }
 
-//float GetMaterialIDs(in vec2 coord) {
-//	return Decode16(texture2D(colortex1, coord).r).g;
-//}
-
 void MotionBlur(inout vec3 color, in float depth) {
 #ifdef MOTION_BLUR
 //	if (mask.hand > 0.5) return;
@@ -145,12 +141,6 @@ void main() {
 	vec3  color = GetColor(texcoord);
 	
 	vec4 viewSpacePosition = CalculateViewSpacePosition(texcoord, depth);
-	
-	
-//	Mask mask;
-//	mask.materialIDs = GetMaterialIDs(texcoord);
-	
-//	mask = CalculateMasks(mask);
 	
 	
 	MotionBlur(color, depth);

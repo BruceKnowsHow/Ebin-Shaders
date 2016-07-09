@@ -163,13 +163,14 @@ void main() {
 	
 	vec3 normal = DecodeNormal(encode1.xy);
 	
-	vec2  buffer0     = Decode16(encode1.b);
-	float smoothness  = buffer0.r;
-	float skyLightmap = buffer0.g;
+	float smoothness;
+	float skyLightmap;
+	Decode16(encode1.b, smoothness, skyLightmap);
 	
-	vec2  buffer1       = Decode16(encode1.a);
-	float torchLightmap = buffer1.r;
-	Mask  mask          = CalculateMasks(buffer1.g);
+	float torchLightmap;
+	Mask  mask;
+	Decode16(encode1.a, torchLightmap, mask.materialIDs);
+	mask = CalculateMasks(mask.materialIDs);
 	
 	if (depth0 != depth1) {
 		vec3 encode0 = texture2D(colortex0, texcoord).rgb;
@@ -192,6 +193,10 @@ void main() {
 	BilateralUpsample(normal, depth1, GI, volFog, AO);
 	
 	
+	gl_FragData[1] = vec4(encode1);
+	gl_FragData[2] = vec4(volFog, 0.0, 0.0, 1.0);
+	
+	
 	vec3 diffuse = GetDiffuse(texcoord);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
@@ -201,8 +206,6 @@ void main() {
 	
 	
 	gl_FragData[0] = vec4(composite, 1.0);
-	gl_FragData[1] = vec4(encode1);
-	gl_FragData[2] = vec4(volFog, 0.0, 0.0, 1.0);
 	
 	exit();
 }

@@ -4,6 +4,7 @@ struct Mask {
 	
 	float[4] bit;
 	
+	float sky;
 	float grass;
 	float leaves;
 	float water;
@@ -59,6 +60,10 @@ Mask CalculateMasks(in float materialIDs) {
 	
 	DecodeMaterialIDs(mask.matIDs, mask.bit);
 	
+#if defined composite2
+	mask.sky    = float(mask.materialIDs <= 0.0);
+#endif
+	
 	mask.grass  = GetMaterialMask(2, mask.matIDs);
 	mask.leaves = GetMaterialMask(3, mask.matIDs);
 	mask.hand   = GetMaterialMask(5, mask.matIDs);
@@ -82,27 +87,6 @@ Mask CalculateMasks(in Mask mask) {
 	mask.metallic    = mask.bit[0];
 	mask.transparent = mask.bit[1];
 	mask.water       = mask.bit[2];
-	
-	return mask;
-}
-#endif
-
-#if defined composite0 || defined composite1
-Mask AddWaterMask(in Mask mask, in float depth0, in float depth1) {
-	if (depth0 != depth1) {
-		mask.transparent = 1.0;
-		mask.water = float(texture2D(colortex0, texcoord).r >= 0.5);
-	}
-	
-	#if defined composite1
-		mask.matIDs = 1.0;
-		
-		mask.bit[0] *= 1.0 - mask.transparent;
-		mask.bit[1]  = mask.transparent;
-		mask.bit[2]  = mask.water;
-		
-		mask.materialIDs = EncodeMaterialIDs(mask.matIDs, mask.bit[0], mask.bit[1], mask.bit[2], mask.bit[3]);
-	#endif
 	
 	return mask;
 }

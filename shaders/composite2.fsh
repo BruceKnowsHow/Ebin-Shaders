@@ -147,7 +147,9 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 #include "/lib/Misc/BiasFunctions.glsl"
 #include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
 
+/*
 #include "/lib/Fragment/ReflectionFunctions.fsh"
+*/
 
 vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangentNormal) {
 	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
@@ -207,15 +209,16 @@ void main() {
 	float depth0 = GetDepth(texcoord);
 	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
 	
+	vec4 sky = CalculateSky(viewSpacePosition0, 1.0, true);
 	
-	if (depth0 >= 1.0) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition0, true)), 1.0); exit(); return; }
+	if (depth0 >= 1.0) { gl_FragData[0] = vec4(EncodeColor(sky.rgb), 1.0); exit(); return; }
 	
 	
 	vec4 encode = texture2D(colortex4, texcoord);
 	
-	vec2  buffer0     = Decode16(encode.b);
-	float smoothness  = buffer0.r;
-	float skyLightmap = buffer0.g;
+	float smoothness;
+	float skyLightmap;
+	Decode16(encode.b, smoothness, skyLightmap);
 	
 	Mask mask = CalculateMasks(Decode16(encode.a).g);
 	
@@ -260,14 +263,11 @@ void main() {
 	if (mask.transparent < 0.5) color0 = color1;
 	
 	
-	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
+//	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
 	
 	
-	if (depth1 >= 1.0) color0 = mix(CalculateSky(viewSpacePosition0, true), color0, alpha);
+	if (depth1 >= 1.0) color0 = mix(sky.rgb, color0, alpha);
 	else if (mask.transparent > 0.5) color0 = mix(color1, color0, alpha);
-	
-	
-	CompositeFog(color0, viewSpacePosition0, GetVolumetricFog(texcoord));
 	
 	
 	gl_FragData[0] = vec4(EncodeColor(color0), 1.0);
