@@ -38,36 +38,33 @@ float AlchemyAO(in vec4 viewSpacePosition, in vec3 normal) {
 // HBAO SIGGRAPH presentation http://developer.download.nvidia.com/presentations/2008/SIGGRAPH/HBAO_SIG08b.pdf
 float CalculateHBAO(in vec4 viewSpacePosition, in vec3 normal) {
 	cfloat sampleRadius = 0.5;
-	cint sampleDirections = 4;
-	cfloat sampleStep = 0.004;
-	cint sampleStepCount = 8;
+	cint sampleDirections = 6;
+	cfloat sampleStep = 0.016;
+	cint sampleStepCount = 2;
 	cfloat tanBias = 0.2;
 	
-	cfloat sampleDirInc = 2.0 * 3.141 / sampleDirections;
 	float ao;
 	
-	vec2 randomAngle = GetDitherred2DNoise(texcoord, 64.0).xy * 3.141 * 2.0;
-	
-	mat2 rotationMatrix = mat2(
-		cos(randomAngle.x), -sin(randomAngle.x),
-	  sin(randomAngle.y),  cos(randomAngle.y)); //Random Rotation Matrix
+  vec2 noise = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 64.0).xy;
+	float angle = noise.x * 2.0 * 3.14159;
+  cfloat sampleDirInc = 2.0 * 3.14159 / sampleDirections;
 	
 	for(uint i = 0; i < sampleDirections; i++) {
-		float sampleAngle = i * sampleDirInc;
-		vec2 sampleDir = vec2(cos(sampleAngle), sin(sampleAngle)) * rotationMatrix;
+		vec2 sampleDir = vec2(cos(angle), sin(angle));
+    angle += sampleDirInc;
 		
-		float tangentAngle = acos(dot(vec3(sampleDir, 0.0), normal)) - (0.5 * 3.141) + tanBias;
+		float tangentAngle = acos(dot(vec3(sampleDir, 0.0), normal)) - (0.5 * 3.14159) + tanBias;
 		float horizonAngle = tangentAngle;
 		vec3 prevDiff;
 		
 		for(uint j = 0; j < sampleStepCount; j++) {
-			vec2 sampleOffset = float(j + 1) * sampleStep * sampleDir;
+			vec2 sampleOffset = float(j + noise.y) * sampleStep * sampleDir;
 			vec2 offsetCoord = texcoord + sampleOffset;
 			
 			float offsetDepth = GetDepth(offsetCoord);
 			vec3 offsetViewSpace = CalculateViewSpacePosition(offsetCoord, offsetDepth).xyz;
-			
 			vec3 differential = offsetViewSpace - viewSpacePosition.xyz;
+      
 			if(length(differential) < sampleRadius) {
 				prevDiff = differential;
 				float elevationAngle = atan(differential.z / length(differential.xy));
@@ -76,9 +73,10 @@ float CalculateHBAO(in vec4 viewSpacePosition, in vec3 normal) {
 		}
 		float attenuation = 1.0 / (1.0 + length(prevDiff));
 		float occlusion = clamp01(attenuation * (sin(horizonAngle) - sin(tangentAngle)));
-		ao += 1.0 - occlusion;
+		ao += occlusion;
 	}
-	ao /= sampleDirections;
+	ao *= 3.0 / (sampleDirections * sampleStepCount);
+  ao = clamp01(1.0 - pow(ao, 0.5));
 	
 	return ao;
 }
