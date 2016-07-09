@@ -81,3 +81,11 @@ vec2 GetWaveNormals(in vec4 viewSpacePosition, in vec3 flatWorldNormal) {
 	
 	return diff * viewVectorCoeff;
 }
+
+vec2 GetWaveNormals(in vec4 viewSpacePosition) {
+	vec3 position = (gbufferModelViewInverse * vec4(viewSpacePosition.xyz, 0.0)).xyz;
+	
+	vec2 diff = GetWaveDifferentials(position + cameraPosition);
+	
+	return diff;
+}

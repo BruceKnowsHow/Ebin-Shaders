@@ -206,37 +206,24 @@ mat3 DecodeTBN(in float tbnIndex) {
 
 
 void main() {
+	Mask mask = CalculateMasks(Decode16(texture2D(colortex4, texcoord).a).g);
+	
 	float depth0 = GetDepth(texcoord);
-	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
-	
-	vec4 sky = CalculateSky(viewSpacePosition0, 1.0, true);
-	
-	if (depth0 >= 1.0) { gl_FragData[0] = vec4(EncodeColor(sky.rgb), 1.0); exit(); return; }
-	
-	
-	vec4 encode = texture2D(colortex4, texcoord);
-	
-	float smoothness;
-	float skyLightmap;
-	Decode16(encode.b, smoothness, skyLightmap);
-	
-	Mask mask = CalculateMasks(Decode16(encode.a).g);
+	vec4  viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
 	
 	float depth1 = depth0;
 	vec4  viewSpacePosition1 = viewSpacePosition0;
 	vec2  refractedCoord = texcoord;
-	float alpha = 0.0;
 	vec3  normal;
-	vec3  color0;
-	vec3  color1;
+	vec2  encodedNormal = texture2D(colortex4, texcoord).xy;
 	
 	if (mask.transparent > 0.5) {
-		mat3 tbnMatrix = DecodeTBN(encode.r);
+		mat3 tbnMatrix = DecodeTBN(encodedNormal.x);
 		
 		vec3 tangentNormal;
 		
 		if (mask.water > 0.5) tangentNormal.xy = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
-		else                  tangentNormal.xy = Decode16(encode.g) * 2.0 - 1.0;
+		else                  tangentNormal.xy = Decode16(encodedNormal.y) * 2.0 - 1.0;
 		
 		tangentNormal.z = sqrt(1.0 - lengthSquared(tangentNormal.xy)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 		
@@ -245,20 +232,34 @@ void main() {
 		
 		refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
 		
-		
-		alpha = texture2D(colortex2, texcoord).r;
+		depth1 = GetTransparentDepth(refractedCoord);
+		viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
+	}
+	
+	vec4 sky = CalculateSky(viewSpacePosition1, 1.0, true);
+	
+	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(sky.rgb), 1.0); exit(); return; }
+	
+	
+	float smoothness;
+	float skyLightmap;
+	Decode16(texture2D(colortex4, texcoord).b, smoothness, skyLightmap);
+	
+	float alpha = 0.0;
+	vec3  color0;
+	vec3  color1;
+	
+	if (mask.transparent > 0.5) {
+		alpha = texture2D(colortex2, refractedCoord).r;
 		
 		color0 = texture2D(colortex1, refractedCoord).rgb / alpha;
 		
 		if (any(isnan(color0))) color0 = vec3(0.0);
-		
-		depth1             = GetTransparentDepth(texcoord);
-		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	} else {
-		normal = DecodeNormal(encode.xy);
+		normal = DecodeNormal(encodedNormal.xy);
 	}
 	
-	color1 = texture2D(colortex3, texcoord).rgb;
+	color1 = texture2D(colortex3, refractedCoord).rgb;
 	
 	if (mask.transparent < 0.5) color0 = color1;
 	
