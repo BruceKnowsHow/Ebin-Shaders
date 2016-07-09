@@ -61,7 +61,7 @@ vec3 CalculateShadedFragment(in Mask mask, in float AO, in float torchLightmap, 
 	
 	lightmap.ambient = shading.ambient * vec3(AO);
 	
-	lightmap.torchlight = shading.torchlight * vec3(0.7, 0.3, 0.1) * pow(AO, 0.5);
+	lightmap.torchlight = shading.torchlight * vec3(0.7, 0.3, 0.1) * pow(AO, 0.7);
 	
 	
 	return vec3(
