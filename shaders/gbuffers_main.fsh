@@ -109,7 +109,7 @@ void main() {
 #if !defined gbuffers_water
 	float encodedMaterialIDs = EncodeMaterialIDs(materialIDs, specularity.g, 0.0, 0.0, 0.0);
 	
-	vec2 encode = vec2(Encode16(vec2(vertLightmap.st)), Encode16(vec2(specularity.r, encodedMaterialIDs)));
+	vec2 encode = vec2(Encode16(vec2(specularity.r, vertLightmap.g)), Encode16(vec2(vertLightmap.r, encodedMaterialIDs)));
 	
 	gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
@@ -119,7 +119,7 @@ void main() {
 #else
 	specularity.r = mix(specularity.r, 0.85, waterMask);
 	
-	float encode = Encode16(vec2(vertLightmap.g, specularity.r));
+	float encode = Encode16(vec2(specularity.r, vertLightmap.g));
 	
 	vec2 encodedNormal = EncodeNormalData(GetTangentNormal(), tbnIndex);
 	

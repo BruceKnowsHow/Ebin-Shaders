@@ -50,6 +50,26 @@ float GetMaterialMask(in float mask, in float materialID) {
 	return float(abs(materialID - mask) < 0.5);
 }
 
+#if defined composite0 || defined composite1 || defined composite2
+Mask CalculateMasks(in float materialIDs) {
+	Mask mask;
+	
+	mask.materialIDs = materialIDs;
+	mask.matIDs      = materialIDs;
+	
+	DecodeMaterialIDs(mask.matIDs, mask.bit);
+	
+	mask.grass  = GetMaterialMask(2, mask.matIDs);
+	mask.leaves = GetMaterialMask(3, mask.matIDs);
+	mask.hand   = GetMaterialMask(5, mask.matIDs);
+	
+	mask.metallic    = mask.bit[0];
+	mask.transparent = mask.bit[1];
+	mask.water       = mask.bit[2];
+	
+	return mask;
+}
+#else
 Mask CalculateMasks(in Mask mask) {
 	mask.matIDs = mask.materialIDs;
 	
@@ -65,6 +85,7 @@ Mask CalculateMasks(in Mask mask) {
 	
 	return mask;
 }
+#endif
 
 #if defined composite0 || defined composite1
 Mask AddWaterMask(in Mask mask, in float depth0, in float depth1) {

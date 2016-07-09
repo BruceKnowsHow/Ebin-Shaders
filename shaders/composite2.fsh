@@ -9,7 +9,6 @@
 
 const bool colortex3MipmapEnabled = true;
 
-uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
@@ -90,8 +89,6 @@ float GetVolumetricFog(in vec2 coord) {
 	return 1.0;
 #endif
 }
-
-#include "/lib/Misc/DecodeBuffer.fsh"
 
 
 #include "/lib/Fragment/WaterWaves.fsh"
@@ -175,7 +172,7 @@ vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangent
 }
 
 mat3 DecodeTBN(in float tbnIndex) {
-	tbnIndex = round(mod(tbnIndex * 16.0, 8.0));
+	tbnIndex = round(tbnIndex * 16.0);
 	
 	vec3 tangent;
 	vec3 binormal;
@@ -214,27 +211,29 @@ void main() {
 	if (depth0 >= 1.0) { gl_FragData[0] = vec4(EncodeColor(CalculateSky(viewSpacePosition0, true)), 1.0); exit(); return; }
 	
 	
-	vec2 encode; float torchLightmap, skyLightmap, smoothness; Mask mask;
-	DecodeBuffer(texcoord, encode, torchLightmap, skyLightmap, smoothness, mask.materialIDs);
+	vec4 encode = texture2D(colortex4, texcoord);
 	
-	mask = CalculateMasks(mask);
+	vec2  buffer0     = Decode16(encode.b);
+	float smoothness  = buffer0.r;
+	float skyLightmap = buffer0.g;
+	
+	Mask mask = CalculateMasks(Decode16(encode.a).g);
 	
 	float depth1 = depth0;
 	vec4  viewSpacePosition1 = viewSpacePosition0;
 	vec2  refractedCoord = texcoord;
 	float alpha = 0.0;
-	
-	vec3 normal;
-	vec3 color0;
-	vec3 color1;
+	vec3  normal;
+	vec3  color0;
+	vec3  color1;
 	
 	if (mask.transparent > 0.5) {
-		mat3 tbnMatrix = DecodeTBN(texture2D(colortex0, texcoord).r);
+		mat3 tbnMatrix = DecodeTBN(encode.r);
 		
 		vec3 tangentNormal;
 		
 		if (mask.water > 0.5) tangentNormal.xy = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
-		else                  tangentNormal.xy = Decode16(texture2D(colortex0, texcoord).g) * 2.0 - 1.0;
+		else                  tangentNormal.xy = Decode16(encode.g) * 2.0 - 1.0;
 		
 		tangentNormal.z = sqrt(1.0 - lengthSquared(tangentNormal.xy)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 		
@@ -242,9 +241,6 @@ void main() {
 		
 		
 		refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
-		
-		
-		DecodeTransparentBuffer(texcoord, skyLightmap, smoothness);
 		
 		
 		alpha = texture2D(colortex2, refractedCoord).r;
@@ -257,7 +253,7 @@ void main() {
 		depth1             = GetTransparentDepth(texcoord);
 		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	} else {
-		normal = GetNormal(texcoord);
+		normal = DecodeNormal(encode.xy);
 		color0 = texture2D(colortex3, refractedCoord).rgb;
 		color1 = color0;
 	}
