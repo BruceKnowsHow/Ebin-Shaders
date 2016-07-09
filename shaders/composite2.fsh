@@ -243,10 +243,9 @@ void main() {
 		refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
 		
 		
-		alpha = texture2D(colortex2, refractedCoord).r;
+		alpha = texture2D(colortex2, texcoord).r;
 		
 		color0 = texture2D(colortex1, refractedCoord).rgb / alpha;
-		color1 = texture2D(colortex3, refractedCoord).rgb;
 		
 		if (any(isnan(color0))) color0 = vec3(0.0);
 		
@@ -254,9 +253,11 @@ void main() {
 		viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	} else {
 		normal = DecodeNormal(encode.xy);
-		color0 = texture2D(colortex3, refractedCoord).rgb;
-		color1 = color0;
 	}
+	
+	color1 = texture2D(colortex3, texcoord).rgb;
+	
+	if (mask.transparent < 0.5) color0 = color1;
 	
 	
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);

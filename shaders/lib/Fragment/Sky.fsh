@@ -56,44 +56,26 @@ vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
 }
 
 void CompositeFog(inout vec3 color, in vec4 viewSpacePosition, in float fogVolume) {
-#ifndef FOG_ENABLED
-	color += CalculateAtmosphereScattering(viewSpacePosition);
-#else
-	
-	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
-	color += atmosphere * SKY_BRIGHTNESS;
-	
-	
 	vec4 skyComposite;
-	float fogFactor = CalculateFogFactor(viewSpacePosition, FOG_POWER);
-	skyComposite.a  = GetSkyAlpha(fogVolume, fogFactor);
+	
+	skyComposite.a  = CalculateFogFactor(viewSpacePosition, FOG_POWER);
+	
 	if (skyComposite.a < 0.0001) return;
 	
 	
-	if (isEyeInWater == 1) {
-		color = mix(color, vec3(0.0, 0.01, 0.1) * skylightColor, skyComposite.a); return; }
-	
-	
-	vec3 gradient = CalculateSkyGradient(viewSpacePosition, fogFactor);
-	vec3 sunspot  = CalculateSunspot(viewSpacePosition) * pow(fogFactor, 25);
+	vec3 gradient = CalculateSkyGradient(viewSpacePosition, skyComposite.a);
+	vec3 sunspot  = CalculateSunspot(viewSpacePosition) * pow(skyComposite.a, 25);
 	
 	skyComposite.rgb = (gradient + sunspot) * SKY_BRIGHTNESS;
 	
 	color = mix(color, skyComposite.rgb, skyComposite.a);
-	#endif
 }
 
 #include "/lib/Fragment/Clouds.fsh"
 
 vec3 CalculateSky(in vec4 viewSpacePosition, cbool sunSpot) {
-	if (isEyeInWater == 1) return vec3(0.0, 0.01, 0.1) * skylightColor; // waterVolumeColor from composite1
+	vec3 gradient = CalculateSkyGradient(viewSpacePosition, 1.0);
+	vec3 sunspot  = sunSpot ? CalculateSunspot(viewSpacePosition) : vec3(0.0);
 	
-	viewSpacePosition.xyz = normalize(viewSpacePosition.xyz);
-	
-	vec3 gradient   = CalculateSkyGradient(viewSpacePosition, 1.0);
-	vec3 sunspot    = (sunSpot ? CalculateSunspot(viewSpacePosition) : vec3(0.0));
-	vec3 atmosphere = CalculateAtmosphereScattering(viewSpacePosition);
-	vec3 clouds     = CompositeClouds(viewSpacePosition);
-	
-	return (gradient + sunspot + atmosphere + clouds) * SKY_BRIGHTNESS;
+	return (gradient + sunspot) * SKY_BRIGHTNESS;
 }

@@ -108,10 +108,7 @@ const int noiseTextureResolution = 64;
 #endif
 
 #ifdef FOG_ENABLED
-	#define VOLUMETRIC_FOG
-	#define Volumetric_Fog true
-#else
-	#define Volumetric_Fog false
+/*	#define VOLUMETRIC_FOG */
 #endif
 
 #ifdef DEFAULT_TEXTURE_PACK
