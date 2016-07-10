@@ -35,6 +35,8 @@ uniform float far;
 uniform float viewWidth;
 uniform float viewHeight;
 
+uniform ivec2 eyeBrightnessSmooth;
+
 uniform int isEyeInWater;
 
 varying vec2 texcoord;
@@ -140,7 +142,7 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 		}
 	}
 	
-	GI /= totalWeights;
+	GI *= 5.0 / totalWeights;
 	volFog /= totalFogWeight;
 	AO /= totalAOWeight;
 #endif
@@ -200,8 +202,7 @@ void main() {
 	vec3 diffuse = GetDiffuse(texcoord);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
-	vec3 composite  = CalculateShadedFragment(mask, AO, torchLightmap, skyLightmap, normal, smoothness, viewSpacePosition1);
-	     composite += GI * sunlightColor * 5.0;
+	vec3 composite  = CalculateShadedFragment(mask, torchLightmap, skyLightmap, GI, AO, normal, smoothness, viewSpacePosition1);
 	     composite *= pow(diffuse, vec3(2.2));
 	
 	

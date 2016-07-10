@@ -83,6 +83,8 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 
 #include "/lib/Fragment/GlobalIllumination.fsh"
 
+#include "lib/Fragment/AO.fsh"
+
 float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 #ifdef VOLUMETRIC_FOG
 	float fog    = 0.0;
@@ -114,8 +116,6 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 	return 1.0;
 #endif
 }
-
-#include "lib/Fragment/AO.fsh"
 
 void main() {
 	float depth0 = GetDepth(texcoord);
@@ -156,9 +156,9 @@ void main() {
 		{ gl_FragData[0] = vec4(vec3(0.0), volFog); exit(); return; }
 	
 	
-	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
+	vec3  GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
+	
 	float AO = CalculateSSAO(viewSpacePosition0, normal);
-	GI *= AO;
 	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), AO);

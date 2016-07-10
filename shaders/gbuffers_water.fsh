@@ -10,5 +10,7 @@ uniform sampler2DShadow shadow;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 
+uniform ivec2 eyeBrightnessSmooth;
+
 
 #include "gbuffers_main.fsh"

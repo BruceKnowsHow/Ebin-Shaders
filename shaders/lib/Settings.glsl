@@ -17,6 +17,8 @@ const int colortex4Format = RGBA16;
 
 const int colortex5Format = RGBA8;
 const int colortex6Format = R8;
+
+const float eyeBrightnessHalflife = 1.5;
 */
 
 const int noiseTextureResolution = 64;

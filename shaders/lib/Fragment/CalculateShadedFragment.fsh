@@ -12,6 +12,7 @@ struct Lightmap {    // Contains vector light levels with color
 	vec3 skylight;
 	vec3 ambient;
 	vec3 torchlight;
+	vec3 GI;
 };
 
 
@@ -30,8 +31,7 @@ struct Lightmap {    // Contains vector light levels with color
 // Underwater light caustics
 #endif
 
-
-vec3 CalculateShadedFragment(in Mask mask, in float AO, in float torchLightmap, in float skyLightmap, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
+vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 GI, in float AO, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
 	Shading shading;
 	
 	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
@@ -50,14 +50,23 @@ vec3 CalculateShadedFragment(in Mask mask, in float AO, in float torchLightmap, 
 	
 	shading.skylight = pow(skyLightmap, 4.0);
 	
-	shading.ambient = 1.0;
+#ifndef GI_ENABLED
+	shading.skylight /= 0.7;
+#endif
+	
+	
+	shading.ambient = 1.0 + (1.0 - eyeBrightnessSmooth.g / 240.0) * 1.3;
 	
 	
 	Lightmap lightmap;
 	
 	lightmap.sunlight = shading.sunlight * sunlightColor * pow(AO, 0.7);
 	
-	lightmap.skylight = shading.skylight * pow(skylightColor, vec3(0.7)) * AO;
+	lightmap.skylight = shading.skylight * pow(skylightColor, vec3(0.25)) * AO;
+	
+	
+	
+	lightmap.GI = GI * sunlightColor * AO;
 	
 	lightmap.ambient = shading.ambient * vec3(AO);
 	
@@ -65,9 +74,10 @@ vec3 CalculateShadedFragment(in Mask mask, in float AO, in float torchLightmap, 
 	
 	
 	return vec3(
-	    lightmap.sunlight   * 6.0   * SUN_LIGHT_LEVEL
-	+   lightmap.skylight   * 0.5   * SKY_LIGHT_LEVEL
-	+   lightmap.ambient    * 0.015 * AMBIENT_LIGHT_LEVEL
-	+   lightmap.torchlight * 3.0   * TORCH_LIGHT_LEVEL
+	    lightmap.sunlight   * 6.0    * SUN_LIGHT_LEVEL
+	+   lightmap.skylight   * 0.7    * SKY_LIGHT_LEVEL
+	+   lightmap.GI         * 1.0
+	+   lightmap.ambient    * 0.0175 * AMBIENT_LIGHT_LEVEL
+	+   lightmap.torchlight * 3.0    * TORCH_LIGHT_LEVEL
 	    );
 }
