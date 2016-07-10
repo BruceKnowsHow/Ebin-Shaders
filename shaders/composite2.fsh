@@ -211,11 +211,12 @@ void main() {
 	
 	Mask mask = CalculateMasks(Decode16(texture2D(colortex4, texcoord).a).g);
 	
-	float depth1 = depth0;
+	vec2  refractedCoord     = texcoord;
+	float depth1             = depth0;
 	vec4  viewSpacePosition1 = viewSpacePosition0;
-	vec2  refractedCoord = texcoord;
-	vec3  normal;
-	vec2  encodedNormal;
+	vec2  encodedNormal      = vec2(0.0);
+	vec3  normal             = vec3(0.0);
+	float alpha              = 0.0;
 	
 	if (depth0 < 1.0) {
 		encodedNormal = texture2D(colortex4, texcoord).xy;
@@ -237,10 +238,12 @@ void main() {
 			
 			depth1 = GetTransparentDepth(refractedCoord);
 			viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
+			
+			alpha = texture2D(colortex2, refractedCoord).r;
 		}
 	}
 	
-	vec4 sky = CalculateSky(viewSpacePosition1, float(depth0 >= 1.0), true);
+	vec3 sky = CalculateSky(viewSpacePosition1, 1.0 - alpha, false);
 	
 	if (depth0 >= 1.0) { gl_FragData[0] = vec4(EncodeColor(sky.rgb), 1.0); exit(); return; }
 	
@@ -249,13 +252,10 @@ void main() {
 	float skyLightmap;
 	Decode16(texture2D(colortex4, texcoord).b, smoothness, skyLightmap);
 	
-	float alpha = 0.0;
-	vec3  color0;
-	vec3  color1;
+	vec3 color0 = vec3(0.0);
+	vec3 color1 = vec3(0.0);
 	
 	if (mask.transparent > 0.5) {
-		alpha = texture2D(colortex2, refractedCoord).r;
-		
 		color0 = texture2D(colortex1, refractedCoord).rgb / alpha;
 		
 		if (any(isnan(color0))) color0 = vec3(0.0);
@@ -274,7 +274,7 @@ void main() {
 	if (depth1 >= 1.0) color0 = mix(sky.rgb, color0, alpha);
 	
 	color0 = mix(color0, sky.rgb, CalculateFogFactor(viewSpacePosition0, FOG_POWER));
-	color1 = mix(color1, sky.rgb, sky.a);
+	color1 = mix(color1, sky.rgb, CalculateFogFactor(viewSpacePosition1, FOG_POWER));
 	
 	if (depth1 < 1.0 && mask.transparent > 0.5) color0 = mix(color1, color0, alpha);
 	

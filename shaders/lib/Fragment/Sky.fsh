@@ -55,20 +55,16 @@ vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
 	return pow(skylightColor, vec3(2.5)) * factor;
 }
 
-vec4 CalculateSky(in vec4 viewSpacePosition, in float skyMask, cbool doSunspot) {
-	vec4 sky;
-	
-	sky.a = CalculateFogFactor(viewSpacePosition, FOG_POWER);
-	
-//	if (sky.a < 0.001) return vec4(0.0);
-	
-	
-	vec3 gradient = CalculateSkyGradient(viewSpacePosition, sky.a);
-	vec3 sunspot  = doSunspot ? CalculateSunspot(viewSpacePosition) * pow(sky.a, 25) : vec3(0.0);
-	
-	sky.rgb = (gradient + sunspot) * SKY_BRIGHTNESS;
-	
-	return sky;
-}
-
 #include "/lib/Fragment/Clouds.fsh"
+
+vec3 CalculateSky(in vec4 viewSpacePosition, in float alpha, cbool reflection) {
+	float visibility = CalculateFogFactor(viewSpacePosition, FOG_POWER);
+	
+	if (visibility < 0.001 && !reflection) return vec3(0.0);
+	
+	
+	vec3 gradient = CalculateSkyGradient(viewSpacePosition, visibility);
+	vec3 sunspot  = reflection ? vec3(0.0) : CalculateSunspot(viewSpacePosition) * pow(visibility, 25) * alpha;
+	
+	return (gradient + sunspot) * SKY_BRIGHTNESS;
+}
