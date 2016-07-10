@@ -58,9 +58,9 @@ vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
 vec4 CalculateSky(in vec4 viewSpacePosition, in float skyMask, cbool doSunspot) {
 	vec4 sky;
 	
-	sky.a = skyMask > 0.5 ? skyMask : CalculateFogFactor(viewSpacePosition, FOG_POWER);
+	sky.a = CalculateFogFactor(viewSpacePosition, FOG_POWER);
 	
-//	if (sky.a < 0.005) return vec4(0.0);
+//	if (sky.a < 0.001) return vec4(0.0);
 	
 	
 	vec3 gradient = CalculateSkyGradient(viewSpacePosition, sky.a);

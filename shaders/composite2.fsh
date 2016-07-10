@@ -179,19 +179,19 @@ mat3 DecodeTBN(in float tbnIndex) {
 	vec3 tangent;
 	vec3 binormal;
 	
-	if (tbnIndex == 0.0) {
+	if (tbnIndex == 1.0) {
 		tangent  = vec3( 0.0,  0.0,  1.0);
 		binormal = -tangent.yzy;
-	} else if (tbnIndex == 1.0) {
+	} else if (tbnIndex == 2.0) {
 		tangent  = vec3( 0.0,  0.0,  1.0);
 		binormal =  tangent.yzy;
-	} else if (tbnIndex == 2.0) {
-		tangent  = vec3( 1.0,  0.0,  0.0);
-		binormal =  tangent.yxy;
 	} else if (tbnIndex == 3.0) {
 		tangent  = vec3( 1.0,  0.0,  0.0);
-		binormal = -tangent.yxy;
+		binormal =  tangent.yxy;
 	} else if (tbnIndex == 4.0) {
+		tangent  = vec3( 1.0,  0.0,  0.0);
+		binormal = -tangent.yxy;
+	} else if (tbnIndex == 5.0) {
 		tangent  = vec3(-1.0,  0.0,  0.0);
 		binormal =  tangent.yyx;
 	} else {
@@ -206,39 +206,43 @@ mat3 DecodeTBN(in float tbnIndex) {
 
 
 void main() {
-	Mask mask = CalculateMasks(Decode16(texture2D(colortex4, texcoord).a).g);
-	
 	float depth0 = GetDepth(texcoord);
 	vec4  viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
+	
+	Mask mask = CalculateMasks(Decode16(texture2D(colortex4, texcoord).a).g);
 	
 	float depth1 = depth0;
 	vec4  viewSpacePosition1 = viewSpacePosition0;
 	vec2  refractedCoord = texcoord;
 	vec3  normal;
-	vec2  encodedNormal = texture2D(colortex4, texcoord).xy;
+	vec2  encodedNormal;
 	
-	if (mask.transparent > 0.5) {
-		mat3 tbnMatrix = DecodeTBN(encodedNormal.x);
+	if (depth0 < 1.0) {
+		encodedNormal = texture2D(colortex4, texcoord).xy;
 		
-		vec3 tangentNormal;
-		
-		if (mask.water > 0.5) tangentNormal.xy = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
-		else                  tangentNormal.xy = Decode16(encodedNormal.y) * 2.0 - 1.0;
-		
-		tangentNormal.z = sqrt(1.0 - lengthSquared(tangentNormal.xy)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
-		
-		normal = normalize((gbufferModelView * vec4(tangentNormal * transpose(tbnMatrix), 0.0)).xyz);
-		
-		
-		refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
-		
-		depth1 = GetTransparentDepth(refractedCoord);
-		viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
+		if (mask.transparent > 0.5) {
+			mat3 tbnMatrix = DecodeTBN(encodedNormal.x);
+			
+			vec3 tangentNormal;
+			
+			if (mask.water > 0.5) tangentNormal.xy = GetWaveNormals(viewSpacePosition0, tbnMatrix[2]);
+			else                  tangentNormal.xy = Decode16(encodedNormal.y) * 2.0 - 1.0;
+			
+			tangentNormal.z = sqrt(1.0 - lengthSquared(tangentNormal.xy)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
+			
+			normal = normalize((gbufferModelView * vec4(tangentNormal * transpose(tbnMatrix), 0.0)).xyz);
+			
+			
+			refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
+			
+			depth1 = GetTransparentDepth(refractedCoord);
+			viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
+		}
 	}
 	
-	vec4 sky = CalculateSky(viewSpacePosition1, 1.0, true);
+	vec4 sky = CalculateSky(viewSpacePosition1, float(depth0 >= 1.0), true);
 	
-	if (mask.sky > 0.5) { gl_FragData[0] = vec4(EncodeColor(sky.rgb), 1.0); exit(); return; }
+	if (depth0 >= 1.0) { gl_FragData[0] = vec4(EncodeColor(sky.rgb), 1.0); exit(); return; }
 	
 	
 	float smoothness;
@@ -261,14 +265,18 @@ void main() {
 	
 	color1 = texture2D(colortex3, refractedCoord).rgb;
 	
-	if (mask.transparent < 0.5) color0 = color1;
+	color0 = mix(color1, color0, mask.transparent);
 	
 	
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
 	
 	
 	if (depth1 >= 1.0) color0 = mix(sky.rgb, color0, alpha);
-	else if (mask.transparent > 0.5) color0 = mix(color1, color0, alpha);
+	
+	color0 = mix(color0, sky.rgb, CalculateFogFactor(viewSpacePosition0, FOG_POWER));
+	color1 = mix(color1, sky.rgb, sky.a);
+	
+	if (depth1 < 1.0 && mask.transparent > 0.5) color0 = mix(color1, color0, alpha);
 	
 	
 	gl_FragData[0] = vec4(EncodeColor(color0), 1.0);

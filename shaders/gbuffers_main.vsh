@@ -59,15 +59,15 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 float EncodePlanarTBN(in vec3 worldNormal) { // Encode the TBN matrix into a 3-bit float
 	// Only valid for axis-oriented TBN matrices
 	
-	float tbnIndex = 5.0; // Default is 5.0, which corresponds to an upward facing block, such as ocean
+	float tbnIndex = 6.0; // Default is 5.0, which corresponds to an upward facing block, such as ocean
 	
 	cfloat sqrt2 = sqrt(2.0) * 0.5;
 	
-	if      (worldNormal.x >  sqrt2) tbnIndex = 0.0;
-	else if (worldNormal.x < -sqrt2) tbnIndex = 1.0;
-	else if (worldNormal.z >  sqrt2) tbnIndex = 2.0;
-	else if (worldNormal.z < -sqrt2) tbnIndex = 3.0;
-	else if (worldNormal.y < -sqrt2) tbnIndex = 4.0;
+	if      (worldNormal.x >  sqrt2) tbnIndex = 1.0;
+	else if (worldNormal.x < -sqrt2) tbnIndex = 2.0;
+	else if (worldNormal.z >  sqrt2) tbnIndex = 3.0;
+	else if (worldNormal.z < -sqrt2) tbnIndex = 4.0;
+	else if (worldNormal.y < -sqrt2) tbnIndex = 5.0;
 	
 	return tbnIndex;
 }
