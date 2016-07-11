@@ -83,7 +83,7 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 
 #include "/lib/Fragment/GlobalIllumination.fsh"
 
-#include "lib/Fragment/AO.fsh"
+#include "lib/Fragment/Ambient_Occlusion.fsh"
 
 float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 #ifdef VOLUMETRIC_FOG
