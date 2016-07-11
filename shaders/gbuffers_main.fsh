@@ -23,16 +23,16 @@ varying vec3 worldPosition;
 varying float tbnIndex;
 varying float waterMask;
 
-#include "/lib/Misc/MenuInitializer.glsl"
+#include "/lib/Misc/Menu_Initializer.glsl"
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
-#include "/lib/Misc/CalculateFogFactor.glsl"
+#include "/lib/Misc/Calculate_Fogfactor.glsl"
 #include "/lib/Fragment/Masks.fsh"
 
 #if defined gbuffers_water
-#include "/lib/Uniform/GlobalCompositeVariables.glsl"
-#include "/lib/Fragment/CalculateShadedFragment.fsh"
+#include "/lib/Uniform/Global_Composite_Variables.glsl"
+#include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 #endif
 
 

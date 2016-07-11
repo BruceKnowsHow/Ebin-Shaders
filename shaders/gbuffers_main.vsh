@@ -28,7 +28,7 @@ varying float waterMask;
 #include "/lib/DebugSetup.glsl"
 
 #if defined gbuffers_water
-#include "/lib/Uniform/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/Global_Composite_Variables.glsl"
 #include "/lib/Uniform/ShadowViewMatrix.vsh"
 #endif
 
@@ -52,7 +52,7 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 }
 
 #include "/lib/Vertex/Waving.vsh"
-#include "/lib/Vertex/VertexDisplacements.vsh"
+#include "/lib/Vertex/Vertex_Displacements.vsh"
 #include "/lib/Vertex/CalculateTBN.vsh"
 
 
@@ -95,7 +95,7 @@ void main() {
 	
 	
 #if defined gbuffers_water
-	#include "/lib/Uniform/CompositeCalculations.vsh"
+	#include "/lib/Uniform/Composite_Calculations.vsh"
 #endif
 	
 	

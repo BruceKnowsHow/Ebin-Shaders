@@ -44,9 +44,9 @@ varying vec2 texcoord;
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
-#include "/lib/Uniform/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/Global_Composite_Variables.glsl"
 #include "/lib/Fragment/Masks.fsh"
-#include "/lib/Misc/CalculateFogFactor.glsl"
+#include "/lib/Misc/Calculate_Fogfactor.glsl"
 
 
 vec3 GetDiffuse(in vec2 coord) {
@@ -77,7 +77,7 @@ vec3 GetNormal(in vec2 coord) {
 }
 
 
-#include "/lib/Fragment/CalculateShadedFragment.fsh"
+#include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 
 void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float volFog, out float AO) {
 	GI = vec3(0.0);

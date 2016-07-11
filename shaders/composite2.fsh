@@ -43,10 +43,10 @@ varying vec2 texcoord;
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
-#include "/lib/Uniform/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/Global_Composite_Variables.glsl"
 #include "/lib/Fragment/Masks.fsh"
-#include "/lib/Misc/CalculateFogFactor.glsl"
-#include "/lib/Fragment/ReflectanceModel.fsh"
+#include "/lib/Misc/Calculate_Fogfactor.glsl"
+#include "/lib/Fragment/Reflectance_Models.fsh"
 
 
 vec3 GetColor(in vec2 coord) {
@@ -91,7 +91,7 @@ float GetVolumetricFog(in vec2 coord) {
 }
 
 
-#include "/lib/Fragment/WaterWaves.fsh"
+#include "/lib/Fragment/Water_Waves.fsh"
 
 #include "/lib/Fragment/Sky.fsh"
 
@@ -144,11 +144,11 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 	return false;
 }
 
-#include "/lib/Misc/BiasFunctions.glsl"
+#include "/lib/Misc/Bias_Functions.glsl"
 #include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
 
 
-#include "/lib/Fragment/ReflectionFunctions.fsh"
+#include "/lib/Fragment/Reflection_Functions.fsh"
 
 
 vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangentNormal) {

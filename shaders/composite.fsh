@@ -44,7 +44,7 @@ varying vec2 texcoord;
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/DebugSetup.glsl"
-#include "/lib/Uniform/GlobalCompositeVariables.glsl"
+#include "/lib/Uniform/Global_Composite_Variables.glsl"
 #include "/lib/Fragment/Masks.fsh"
 
 
@@ -77,11 +77,11 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 	return texture2D(noisetex, coord).xy;
 }
 
-#include "/lib/Misc/BiasFunctions.glsl"
+#include "/lib/Misc/Bias_Functions.glsl"
 #include "/lib/Fragment/Sunlight/GetSunlightShading.fsh"
 #include "/lib/Fragment/Sunlight/ComputeHardShadows.fsh"
 
-#include "/lib/Fragment/GlobalIllumination.fsh"
+#include "/lib/Fragment/Global_Illumination.fsh"
 
 #include "lib/Fragment/Ambient_Occlusion.fsh"
 

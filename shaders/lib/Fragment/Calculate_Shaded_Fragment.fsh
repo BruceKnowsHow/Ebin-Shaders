@@ -16,7 +16,7 @@ struct Lightmap {    // Contains vector light levels with color
 };
 
 
-#include "/lib/Misc/BiasFunctions.glsl"
+#include "/lib/Misc/Bias_Functions.glsl"
 #include "/lib/Fragment/Sunlight/GetSunlightShading.fsh"
 
 #if SHADOW_TYPE == 3 && defined composite1
