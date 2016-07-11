@@ -1,7 +1,5 @@
 #ifndef AO_ENABLED
-
-#define CalculateSSAO(a, b) 1.0
-
+	#define CalculateSSAO(a, b) 1.0
 #elif AO_MODE == 1 // AlchemyAO
 float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 	cfloat sampleRadius   = 0.5;

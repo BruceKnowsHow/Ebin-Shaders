@@ -85,8 +85,10 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 
 #include "lib/Fragment/Ambient_Occlusion.fsh"
 
+#ifndef VOLUMETRIC_FOG
+	#define ComputeVolumetricFog(a) 1.0
+#else
 float ComputeVolumetricFog(in vec4 viewSpacePosition) {
-#ifdef VOLUMETRIC_FOG
 	float fog    = 0.0;
 	float weight = 0.0;
 	
@@ -112,10 +114,8 @@ float ComputeVolumetricFog(in vec4 viewSpacePosition) {
 	fog  = pow(fog, VOLUMETRIC_FOG_POWER);
 	
 	return fog;
-#else
-	return 1.0;
-#endif
 }
+#endif
 
 void main() {
 	float depth0 = GetDepth(texcoord);

@@ -1,3 +1,4 @@
+#define ComputeShadows(x, y) ComputeUniformlySoftShadows(x, y)
 float ComputeUniformlySoftShadows(in vec4 viewSpacePosition, in float sunlightCoeff) { // Soft shadows
 	if (sunlightCoeff <= 0.01) return 0.0;
 	
@@ -23,5 +24,3 @@ float ComputeUniformlySoftShadows(in vec4 viewSpacePosition, in float sunlightCo
 	
 	return sunlightCoeff * pow2(sunlight);
 }
-
-#define ComputeShadows(x, y) ComputeUniformlySoftShadows(x, y)

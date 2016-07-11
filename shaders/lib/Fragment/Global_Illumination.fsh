@@ -1,9 +1,7 @@
-#if GI_MODE == 1
+#ifndef GI_ENABLED
+	#define ComputeGlobalIllumination(a, b, c, d, e, f) vec3(0.0)
+#elif GI_MODE == 1
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLightmap, const in float radius, in vec2 noise, in Mask mask) {
-	#ifndef GI_ENABLED
-		return vec3(0.0);
-	#endif
-	
 	float lightMult = skyLightmap;
 	
 	#ifdef GI_BOOST
@@ -75,10 +73,6 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 
 #elif GI_MODE == 2
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLightmap, const in float radius, in vec2 noise, in Mask mask) {
-	#ifndef GI_ENABLED
-		return vec3(0.0);
-	#endif
-	
 	float lightMult = skyLightmap;
 	
 	#ifdef GI_BOOST
@@ -157,10 +151,6 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 
 #else
 vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLightmap, const in float radius, in vec2 noise, in Mask mask) {
-	#ifndef GI_ENABLED
-		return vec3(0.0);
-	#endif
-	
 	float lightMult = skyLightmap;
 	
 	#ifdef GI_BOOST

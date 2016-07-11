@@ -74,7 +74,7 @@ const int noiseTextureResolution = 64;
 #define ATMOSPHERIC_SCATTERING_AMOUNT 1.00 // [0.00 0.25 0.50 0.75 1.00 2.00 4.00]
 
 #ifdef FOG_ENABLED
-/*	#define VOLUMETRIC_FOG */
+	#define VOLUMETRIC_FOG
 #endif
 
 #define GI_ENABLED

@@ -1,3 +1,4 @@
+#define ComputeShadows(x, y) ComputeHardShadows(x, y)
 float ComputeHardShadows(in vec4 viewSpacePosition, in float sunlightCoeff) {
 	if (sunlightCoeff <= 0.01) return 0.0;
 	
@@ -7,5 +8,3 @@ float ComputeHardShadows(in vec4 viewSpacePosition, in float sunlightCoeff) {
 	
 	return sunlightCoeff * pow2(shadow2D(shadow, shadowPosition.xyz).x);
 }
-
-#define ComputeShadows(x, y) ComputeHardShadows(x, y)

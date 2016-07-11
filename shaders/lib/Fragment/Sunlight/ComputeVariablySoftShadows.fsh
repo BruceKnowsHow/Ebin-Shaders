@@ -5,6 +5,7 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 	return texture2D(noisetex, coord).xy;
 }
 
+#define ComputeShadows(x, y) ComputeVariablySoftShadows(x, y)
 float ComputeVariablySoftShadows(in vec4 viewSpacePosition, in float sunlightCoeff) { // Variable softness shadows (PCSS)
 	if (sunlightCoeff <= 0.01) return 0.0;
 	
@@ -60,5 +61,3 @@ float ComputeVariablySoftShadows(in vec4 viewSpacePosition, in float sunlightCoe
 	
 	return sunlightCoeff * sunlight / sampleCount;
 }
-
-#define ComputeShadows(x, y) ComputeVariablySoftShadows(x, y)
