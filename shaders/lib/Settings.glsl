@@ -31,6 +31,10 @@ const int noiseTextureResolution = 64;
 
 
 // GUI Settings
+//#define low_profile
+#define standard_profile
+
+
 //#define DEFAULT_TEXTURE_PACK
 
 
@@ -73,11 +77,14 @@ const int noiseTextureResolution = 64;
 #define VOLUMETRIC_FOG_POWER 2.0           // [1.0 2.0 3.0 4.0]
 #define ATMOSPHERIC_SCATTERING_AMOUNT 1.00 // [0.00 0.25 0.50 0.75 1.00 2.00 4.00]
 
-#ifdef FOG_ENABLED
+#if defined FOG_ENABLED && !defined low_profile
 	#define VOLUMETRIC_FOG
 #endif
 
-#define GI_ENABLED
+#if !defined low_profile
+	#define GI_ENABLED
+#endif
+
 //#define PLAYER_GI_BOUNCE
 #define GI_MODE         1    // [1 2 3]
 #define GI_RADIUS       16   // [4 8 16 24 32]
@@ -86,7 +93,10 @@ const int noiseTextureResolution = 64;
 #define GI_TRANSLUCENCE 0.2  // [0.0 0.2 0.4 0.6 0.8 1.0]
 #define GI_BRIGHTNESS   1.00 // [0.25 0.50 0.75 1.00 2.00 4.00]
 
-#define AO_ENABLED
+#if !defined low_profile
+	#define AO_ENABLED
+#endif
+
 #define AO_MODE 1 // [1 2]
 
 #define REFLECTION_EDGE_FALLOFF
