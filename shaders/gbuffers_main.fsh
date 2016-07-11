@@ -112,9 +112,7 @@ void main() {
 	vec2 encode = vec2(Encode16(vec2(specularity.r, vertLightmap.g)), Encode16(vec2(vertLightmap.r, encodedMaterialIDs)));
 	
 	gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[2] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[3] = vec4(diffuse.rgb, 1.0);
+	gl_FragData[1] = vec4(diffuse.rgb, 1.0);
 	gl_FragData[4] = vec4(EncodeNormal(normal.xyz), encode.rg);
 #else
 	specularity.r = mix(specularity.r, 0.85, waterMask);
@@ -129,9 +127,9 @@ void main() {
 	     composite *= pow(diffuse.rgb, vec3(2.2));
 	
 	gl_FragData[0] = vec4(encodedNormal, encode, 1.0);
-	gl_FragData[1] = vec4(composite, diffuse.a);
+	gl_FragData[1] = vec4(0.0);
 	gl_FragData[2] = vec4(1.0, 0.0, 0.0, diffuse.a);
-	gl_FragData[3] = vec4(0.0);
+	gl_FragData[3] = vec4(composite, diffuse.a);
 #endif
 	
 	exit();

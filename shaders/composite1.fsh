@@ -4,14 +4,13 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:346 */
+/* DRAWBUFFERS:146 */
 
 const bool colortex5MipmapEnabled = true;
 const bool colortex6MipmapEnabled = true;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
@@ -50,7 +49,7 @@ varying vec2 texcoord;
 
 
 vec3 GetDiffuse(in vec2 coord) {
-	return texture2D(colortex3, coord).rgb;
+	return texture2D(colortex1, coord).rgb;
 }
 
 float GetDepth(in vec2 coord) {

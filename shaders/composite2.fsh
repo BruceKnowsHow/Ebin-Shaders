@@ -5,9 +5,9 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:1 */
+/* DRAWBUFFERS:3 */
 
-const bool colortex3MipmapEnabled = true;
+const bool colortex1MipmapEnabled = true;
 
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
@@ -50,11 +50,11 @@ varying vec2 texcoord;
 
 
 vec3 GetColor(in vec2 coord) {
-	return texture2D(colortex3, coord).rgb;
+	return texture2D(colortex1, coord).rgb;
 }
 
 vec3 GetColorLod(in vec2 coord, in float lod) {
-	return texture2DLod(colortex3, coord, lod).rgb;
+	return texture2DLod(colortex1, coord, lod).rgb;
 }
 
 float GetDepth(in vec2 coord) {
@@ -256,14 +256,14 @@ void main() {
 	vec3 color1 = vec3(0.0);
 	
 	if (mask.transparent > 0.5) {
-		color0 = texture2D(colortex1, refractedCoord).rgb / alpha;
+		color0 = texture2D(colortex3, refractedCoord).rgb / alpha;
 		
 		if (any(isnan(color0))) color0 = vec3(0.0);
 	} else {
 		normal = DecodeNormal(encodedNormal.xy);
 	}
 	
-	color1 = texture2D(colortex3, refractedCoord).rgb;
+	color1 = texture2D(colortex1, refractedCoord).rgb;
 	
 	color0 = mix(color1, color0, mask.transparent);
 	
