@@ -25,7 +25,7 @@ varying float waterMask;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/DebugSetup.glsl"
+#include "/lib/Debug.glsl"
 
 #if defined gbuffers_water
 #include "/lib/Uniform/Global_Composite_Variables.glsl"

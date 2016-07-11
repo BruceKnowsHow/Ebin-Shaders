@@ -18,7 +18,7 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/DebugSetup.glsl"
+#include "/lib/Debug.glsl"
 
 
 vec3 ComputeBloomTile(cfloat scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size

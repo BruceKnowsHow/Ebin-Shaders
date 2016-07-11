@@ -43,7 +43,7 @@ varying vec2 texcoord;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/DebugSetup.glsl"
+#include "/lib/Debug.glsl"
 #include "/lib/Uniform/Global_Composite_Variables.glsl"
 #include "/lib/Fragment/Masks.fsh"
 #include "/lib/Misc/Calculate_Fogfactor.glsl"

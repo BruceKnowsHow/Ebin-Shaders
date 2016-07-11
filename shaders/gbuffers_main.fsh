@@ -26,7 +26,7 @@ varying float waterMask;
 #include "/lib/Misc/Menu_Initializer.glsl"
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
-#include "/lib/DebugSetup.glsl"
+#include "/lib/Debug.glsl"
 #include "/lib/Misc/Calculate_Fogfactor.glsl"
 #include "/lib/Fragment/Masks.fsh"
 
