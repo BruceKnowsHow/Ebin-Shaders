@@ -105,7 +105,7 @@ option.PLAYER_SHADOW=Player Shadow
 option.PLAYER_SHADOW.comment=Whether or not the player casts a shadow
 
 
-screen.Composite0=GI & Volumetric Fog
+screen.Composite0=GI, AO & Volumetric Fog
 
 option.COMPOSITE0_SCALE=Resolution Coefficient
 option.COMPOSITE0_SCALE.comment=The resolution coefficient at which global illumination and volumetric fog are computed.
@@ -156,10 +156,10 @@ option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "b
 option.GI_BRIGHTNESS=GI Brightness
 
 option.AO_ENABLED=Ambient Occlusion
-option.AO_ENABLED.comment=Ambient Occlusion/Ambient Obscurance darkens corners semi naturally to give the effect of depth and changes in geometry.
+option.AO_ENABLED.comment=Ambient Occlusion darkens corners semi naturally to give the effect of depth and changes in geometry.
 
-option.HBAO=HBAO
-option.HBAO.comment=HBAO also knows as Horizon Based Ambient Occlusion is a different option to AO. it is not higher quality however it has less bugs.
+option.AO_MODE=Ambient Occlusion Mode
+option.AO_MODE.comment=1: AlchemyAO. 2: HBAO
 
 
 option.PBR=Physically Based Rendering

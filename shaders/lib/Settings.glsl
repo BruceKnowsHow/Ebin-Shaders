@@ -8,15 +8,20 @@ const float wetnessHalflife          = 200.0;
 const float drynessHalflife          = 40.0;
 
 /*
+
+** ᴛʀᴀɴsᴘᴀʀᴇɴᴛ ɢʙᴜғғᴇʀs **
 const int colortex0Format = RGB16;
 const int colortex1Format = R11F_G11F_B10F;
 const int colortex2Format = R8;
 
+** ғʟᴀᴛ ɢʙᴜғғᴇʀs **
 const int colortex3Format = R11F_G11F_B10F;
 const int colortex4Format = RGBA16;
 
+** ᴄᴏᴍᴘᴏsɪᴛᴇ0 ʙᴜғғᴇʀs **
 const int colortex5Format = RGBA8;
 const int colortex6Format = R8;
+
 
 const float eyeBrightnessHalflife = 1.5;
 */
@@ -68,6 +73,10 @@ const int noiseTextureResolution = 64;
 #define VOLUMETRIC_FOG_POWER 2.0           // [1.0 2.0 3.0 4.0]
 #define ATMOSPHERIC_SCATTERING_AMOUNT 1.00 // [0.00 0.25 0.50 0.75 1.00 2.00 4.00]
 
+#ifdef FOG_ENABLED
+/*	#define VOLUMETRIC_FOG */
+#endif
+
 #define GI_ENABLED
 //#define PLAYER_GI_BOUNCE
 #define GI_MODE         1    // [1 2 3]
@@ -78,11 +87,7 @@ const int noiseTextureResolution = 64;
 #define GI_BRIGHTNESS   1.00 // [0.25 0.50 0.75 1.00 2.00 4.00]
 
 #define AO_ENABLED
-//#define HBAO
-
-#ifdef HBAO
-	#define AO_ENABLED
-#endif
+#define AO_MODE 1 // [1 2]
 
 #define REFLECTION_EDGE_FALLOFF
 
@@ -101,17 +106,6 @@ const int noiseTextureResolution = 64;
 
 #define DEBUG_VIEW 1 // [-1 0 1 2 3 7]
 
-
-// Option unwravelling
-#ifdef GI_BOOST
-	#define GI_Boost true
-#else
-	#define GI_Boost false
-#endif
-
-#ifdef FOG_ENABLED
-/*	#define VOLUMETRIC_FOG */
-#endif
 
 #ifdef DEFAULT_TEXTURE_PACK
 	#define TEXTURE_PACK_RESOLUTION 16

@@ -24,7 +24,7 @@ varying vec2 texcoord;
 
 
 void main() {
-#if (defined GI_ENABLED) || (defined VOLUMETRIC_FOG)
+#if (defined GI_ENABLED) || (defined AO_ENABLED) || (defined VOLUMETRIC_FOG)
 	texcoord    = gl_MultiTexCoord0.st;
 	gl_Position = ftransform();
 	
