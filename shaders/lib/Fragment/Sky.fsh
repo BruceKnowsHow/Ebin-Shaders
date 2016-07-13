@@ -38,7 +38,7 @@ vec3 CalculateSkyGradient(in vec4 viewSpacePosition, in float fogFactor) {
 	return color * 0.9;
 }
 
-#define iSteps 2
+#define iSteps 8
 #define jSteps 2
 
 float rsi(vec3 r0, vec3 rd, float sr) {
@@ -124,6 +124,8 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
 		// Calculate attenuation.
 		vec3 attn = exp(-(kMie * (iOdMie + jOdMie) + kRlh * (iOdRlh + jOdRlh)));
 		
+		show(attn);
+		
 		// Accumulate scattering.
 		totalRlh += odStepRlh * attn;
 		totalMie += odStepMie * attn;
@@ -136,25 +138,175 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
 	
 	vec3 color = iSun * (pRlh * kRlh * totalRlh + pMie * kMie * totalMie);
 	
-	if (any(isnan(color))) color = vec3(0.0);
+//	if (any(isnan(color))) color = vec3(0.0);
 	
 	return color;
 }
 
+// math const
+const float DEG_TO_RAD = PI / 180.0;
+const float MAX = 100000.0;
+
+// scatter const
+const float K_R = 0.166;
+const float K_M = 0.005;
+const float E = 50.0; 						// light intensity
+const vec3  C_R = vec3( 2.0, 7.5, 20.0 ) * 0.1; 	// 1 / wavelength ^ 4
+const float G_M = 0.95;					// Mie g
+
+const float R = 6471e3;
+const float R_INNER = 6371e3;
+const float SCALE_H = 4.0 / ( R - R_INNER );
+const float SCALE_L = 1.0 / ( R - R_INNER );
+
+const int NUM_OUT_SCATTER = 10;
+const float FNUM_OUT_SCATTER = 10.0;
+
+const int NUM_IN_SCATTER = 10;
+const float FNUM_IN_SCATTER = 10.0;
+
+// angle : pitch, yaw
+mat3 rot3xy( vec2 angle ) {
+	vec2 c = cos( angle );
+	vec2 s = sin( angle );
+	
+	return mat3(
+		c.y      ,  0.0, -s.y,
+		s.y * s.x,  c.x,  c.y * s.x,
+		s.y * c.x, -s.x,  c.y * c.x
+	);
+}
+
+// ray direction
+vec3 ray_dir( float fov, vec2 size, vec2 pos ) {
+	vec2 xy = pos - size * 0.5;
+
+	float cot_half_fov = tan( ( 90.0 - fov * 0.5 ) * DEG_TO_RAD );	
+	float z = size.y * 0.5 * cot_half_fov;
+	
+	return normalize( vec3( xy, -z ) );
+}
+
+// ray intersects sphere
+// e = -b +/- sqrt( b^2 - c )
+vec2 ray_vs_sphere( vec3 p, vec3 dir, float r ) {
+	float b = dot( p, dir );
+	float c = dot( p, p ) - r * r;
+	
+	float d = b * b - c;
+	if ( d < 0.0 ) {
+		return vec2( MAX, -MAX );
+	}
+	d = sqrt( d );
+	
+	return vec2( -b - d, -b + d );
+}
+
+// Mie
+// g : ( -0.75, -0.999 )
+//      3 * ( 1 - g^2 )               1 + c^2
+// F = ----------------- * -------------------------------
+//      2 * ( 2 + g^2 )     ( 1 + g^2 - 2 * g * c )^(3/2)
+float phase_mie( float g, float c, float cc ) {
+	float gg = g * g;
+	
+	float a = ( 1.0 - gg ) * ( 1.0 + cc );
+
+	float b = 1.0 + gg - 2.0 * g * c;
+	b *= sqrt( b );
+	b *= 2.0 + gg;	
+	
+	return 1.5 * a / b;
+}
+
+// Reyleigh
+// g : 0
+// F = 3/4 * ( 1 + c^2 )
+float phase_reyleigh( float cc ) {
+	return 0.75 * ( 1.0 + cc );
+}
+
+float density( vec3 p ){
+	return exp( -( length( p ) - R_INNER ) * SCALE_H );
+}
+
+float optic( vec3 p, vec3 q ) {
+	vec3 step = ( q - p ) / FNUM_OUT_SCATTER;
+	vec3 v = p + step * 0.5;
+	
+	float sum = 0.0;
+	for ( int i = 0; i < NUM_OUT_SCATTER; i++ ) {
+		sum += density( v );
+		v += step;
+	}
+	sum *= length( step ) * SCALE_L;
+	
+	return sum;
+}
+
+vec3 in_scatter( vec3 o, vec3 dir, vec2 e, vec3 l ) {
+	float len = ( e.y - e.x ) / FNUM_IN_SCATTER;
+	vec3 step = dir * len;
+	vec3 p = o + dir * e.x;
+	vec3 v = p + dir * ( len * 0.5 );
+
+	vec3 sum = vec3( 0.0 );
+	for ( int i = 0; i < NUM_IN_SCATTER; i++ ) {
+		vec2 f = ray_vs_sphere( v, l, R );
+		vec3 u = v + l * f.y;
+		
+		float n = ( optic( p, v ) + optic( v, u ) ) * ( PI * 4.0 );
+		
+		sum += density( v ) * exp( -n * ( K_R * C_R + K_M ) );
+
+		v += step;
+	}
+	sum *= len * SCALE_L;
+	
+	float c  = dot( dir, -l );
+	float cc = c * c;
+	
+	return sum * ( K_R * C_R * phase_reyleigh( cc ) + K_M * phase_mie( G_M, c, cc ) ) * E;
+}
+
 vec3 CalculateAtmosphericSky(in vec4 viewSpacePosition, in float fogFactor) {
+	vec3 worldSpacePosition = (gbufferModelViewInverse * viewSpacePosition).xyz;
+	vec3 worldLightVector   = (gbufferModelViewInverse * vec4(lightVector, 0.0)).xyz;
+	vec3 r0                 = vec3(0.0, 6372e3 + (cameraPosition.y - 62.0), 0.0);
+	
+	
+	// default ray dir
+	vec3 dir = normalize(-worldSpacePosition);
+	
+	// default ray origin
+	vec3 eye = r0;
+
+	// sun light dir
+	vec3 l = normalize(worldLightVector);
+			  
+	vec2 e = ray_vs_sphere( eye, dir, R );
+	
+	vec2 f = ray_vs_sphere( eye, dir, R_INNER );
+	e.y = min( e.y, f.x );
+
+	vec3 I = in_scatter( eye, dir, e, l );
+	
+	return I;
+	
+	/*
 	return atmosphere(
-		normalize((gbufferModelViewInverse * viewSpacePosition).xyz),           // normalized ray direction
-		vec3(0,6372e3,0),               // ray origin
-		(gbufferModelViewInverse * vec4(lightVector, 0.0)).xyz,                        // position of the sun
-		22.0,                           // intensity of the sun
+		normalize(worldSpacePosition),  // normalized ray direction
+		r0,               // ray origin
+		worldLightVector,               // position of the sun
+		40.0,                           // intensity of the sun
 		6371e3,                         // radius of the planet in meters
 		6471e3,                         // radius of the atmosphere in meters
-		vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
+		vec3(2.5e-6, 10.0e-6, 22.4e-6), // Rayleigh scattering coefficient
 		21e-6,                          // Mie scattering coefficient
 		8e3,                            // Rayleigh scale height
 		1.2e3,                          // Mie scale height
-		0.758                           // Mie preferred scattering direction
-	);
+		0.9                             // Mie preferred scattering direction
+	); */
 }
 
 vec3 CalculateSunspot(in vec4 viewSpacePosition) {

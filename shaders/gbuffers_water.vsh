@@ -8,6 +8,7 @@
 uniform mat4 shadowModelView;
 
 uniform vec3 upPosition;
+uniform vec3 previousCameraPosition;
 
 uniform float sunAngle;
 
