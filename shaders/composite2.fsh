@@ -266,7 +266,7 @@ void main() {
 	color1 = texture2D(colortex1, refractedCoord).rgb;
 	
 	color0 = mix(color1, color0, mask.transparent);
-	
+//	show(color0);
 	
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
 	
