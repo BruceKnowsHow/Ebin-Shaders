@@ -59,7 +59,7 @@ void exit() {
 				#endif
 				
 			#elif ShaderStage == 2
-				gl_FragData[0] = vec4(texture2D(colortex3, texcoord).rgb, 1.0);
+				gl_FragData[0] = vec4(texture2D(colortex1, texcoord).rgb, 1.0);
 				
 			#elif ShaderStage == 3
 				discard;
