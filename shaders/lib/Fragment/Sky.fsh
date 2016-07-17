@@ -59,22 +59,25 @@ float AtmosphereLength(in vec3 worldVector, in vec3 worldDirection) {
 	// Below is a heavily simplified quadratic solution to a ray-sphere intersection
 	
 	// Start with a ray-sphere intersection test for the planet
-	float b = dot(worldVector, worldDirection);
+	float b = 2.0 * dot(worldVector, worldDirection);
 	float c = dot(worldVector, worldVector) - planetSquared;
 	
-	float delta = b * b - c;
+	float delta = b * b - 4.0 * c;
 	
 	if  (delta < 0.0) { // Planet not visible to pixel
 		// Perform the intersection test again, this time with the atmoSphere
 		
-		c += planetSquared - atmosphereSquared;
+		c = dot(worldVector, worldVector) - atmosphereSquared;
 		
-		delta = 4.0 * sqrt(b * b - c);
+		delta = b * b - 4.0 * c;
+		
+		if (delta < 0.0) return 0.0;
+		
+		return (-b + sqrt(delta)) * 0.5 * 0.0005;
 	}
 	
-	else delta = 4.0 * sqrt(delta); // If the planet is visible, finish finding the distance to its surface
-	
-	return delta / 10000.0;
+	else return (-b - sqrt(delta)) * 0.5 * 0.0005; // If the planet is visible, finish finding the distance to its surface
+	// b will always be negative, so the closer point (lesser distance) will be the one subtracted by sqrt(delta)
 }
 
 #define iSteps 1
@@ -179,9 +182,9 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, vec3 kRlh, float shRlh) 
 vec3 CalculateAtmosphericSky(in vec4 viewSpacePosition, in float fogFactor) {
 	vec3 worldSpacePosition = (gbufferModelViewInverse * viewSpacePosition).xyz;
 	vec3 worldLightVector   = (gbufferModelViewInverse * vec4(lightVector, 0.0)).xyz;
-	vec3 r0                 = vec3(0.0, planetRadius + 0, 0.0);
+	vec3 r0                 = vec3(0.0, planetRadius + (cameraPosition.y - 120.0), 0.0);
 	
-	show(AtmosphereLength(r0, normalize(worldSpacePosition)));
+//	show(AtmosphereLength(r0, normalize(worldSpacePosition)));
 	
 	/*
 	return atmosphere(
@@ -222,7 +225,7 @@ vec3 CalculateSky(in vec4 viewSpacePosition, in float alpha, cbool reflection) {
 //	if (visibility < 0.001 && !reflection) return vec3(0.0);
 	
 	
-	vec3 gradient = CalculateAtmosphericSky(viewSpacePosition, visibility);
+	vec3 gradient = CalculateSkyGradient(viewSpacePosition, visibility);
 	vec3 sunspot  = reflection ? vec3(0.0) : CalculateSunspot(viewSpacePosition) * pow(visibility, 25) * alpha;
 	
 	return (gradient + sunspot) * SKY_BRIGHTNESS;
