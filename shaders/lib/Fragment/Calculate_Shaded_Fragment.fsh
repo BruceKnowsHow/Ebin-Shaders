@@ -35,6 +35,7 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	Shading shading;
 	
 	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
+	if(mask.transparent > 0.5) shading.normal = max0(dot(normal, lightVector));
 	
 	shading.sunlight  = shading.normal;
 	shading.sunlight *= pow2(skyLightmap);
