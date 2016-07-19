@@ -17,14 +17,29 @@ float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection) {
 	
 	if (insideAtmosphere) {
 		// Start with a ray-sphere intersection test for the planet
-		float b = -dot(worldPosition, worldDirection);
-		float c = worldPositionSquared - planetSquared;
+		float b  = -dot(worldPosition, worldDirection);
+		float bb = b * b;
+		float c  = worldPositionSquared - planetSquared;
 		
-		if  (b < c) // If the earth is not visible to the ray
+		if (bb < c && b > 0.0) // If the earth is not visible to the ray, check against the atmosphere instead
 			c = worldPositionSquared - atmosphereSquared;
 		
-		else return b * 0.5 + sqrt(b * b - c); // find the distance to the sphere's near surface
+		return b * 0.5 + sqrt(bb - c); // find the distance to the sphere's near surface
 	} else {
-		return 0.0;
+		float b  = -dot(worldPosition, worldDirection);
+		float bb = b * b;
+		float c1 = worldPositionSquared - planetSquared;
+		float c2 = worldPositionSquared - atmosphereSquared;
+		
+		if  (bb < c1 && b > 0.0) {
+			float delta = bb - c2;
+			
+			return 2.0 * sqrt(max(delta, 0.0)); // Find the length of the ray passing through the atmosphere, not occluded by the planet
+		}
+		
+		float distEarth      = b * 0.5 + sqrt(bb - c1);
+		float distAtmosphere = b * 0.5 + sqrt(bb - c2);
+		
+		return distEarth - distAtmosphere; // find the distance to the sphere's near surface
 	}
 }
