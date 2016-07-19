@@ -11,16 +11,16 @@ float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection) {
 	// worldPosition should probably be: vec3(0.0, planetRadius + cameraPosition.y, 0.0)
 	// worldDirection is just the normalized worldSpacePosition
 	
-	float worldPositionSquared = dot(worldPosition, worldPosition);
+	bool insideAtmosphere = true; // worldPosition.y < atmosphereRadius
 	
-	bool insideAtmosphere = true; // worldPosition.y < atmosphereRadius, uniform condition
+	float worldPositionSquared = dot(worldPosition, worldPosition);
 	
 	float b  = -dot(worldPosition, worldDirection);
 	float bb = b * b;
-	float c1 = worldPositionSquared - planetSquared;
+	float c1 = worldPositionSquared -     planetSquared;
 	float c2 = worldPositionSquared - atmosphereSquared;
 	
-	if (insideAtmosphere) {
+	if (insideAtmosphere) { // Uniform condition
 		if (bb < c1 && b > 0.0) // If the earth is not visible to the ray, check against the atmosphere instead
 			c1 = c2;
 		
