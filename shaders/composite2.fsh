@@ -268,7 +268,7 @@ void main() {
 	color0 = mix(color1, color0, mask.transparent);
 	
 	
-//	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
+	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
 	
 	
 	if (depth1 >= 1.0) color0 = mix(sky.rgb, color0, alpha);

@@ -150,15 +150,14 @@ void main() {
 	
 	
 	float volFog = ComputeVolumetricFog(viewSpacePosition0);
+	float AO = CalculateSSAO(viewSpacePosition0, normal);
 	
 	
 	if (depth1 >= 1.0 || isEyeInWater != mask.water)
-		{ gl_FragData[0] = vec4(vec3(0.0), volFog); exit(); return; }
+		{ gl_FragData[0] = vec4(vec3(0.0), AO); exit(); return; }
 	
 	
 	vec3  GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
-	
-	float AO = CalculateSSAO(viewSpacePosition0, normal);
 	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), AO);
