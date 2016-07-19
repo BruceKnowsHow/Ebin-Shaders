@@ -50,34 +50,7 @@ const float atmosphereSquared = atmosphereRadius * atmosphereRadius;
 
 
 float AtmosphereLength(in vec3 worldVector, in vec3 worldDirection) {
-	// Returns the length of air visible to the pixel inside the atmosphere
-	// Considers the planet's center as the coordinate origin, as per convention
-	
-	// worldVector should probably be: vec3(0.0, planetRadius + cameraPosition.y, 0.0)
-	// worldDirection is just the normalized worldSpacePosition
-	
-	// Below is a heavily simplified quadratic solution to a ray-sphere intersection
-	
-	// Start with a ray-sphere intersection test for the planet
-	float b = 2.0 * dot(worldVector, worldDirection);
-	float c = dot(worldVector, worldVector) - planetSquared;
-	
-	float delta = b * b - 4.0 * c;
-	
-	if  (delta < 0.0) { // Planet not visible to pixel
-		// Perform the intersection test again, this time with the atmoSphere
-		
-		c = dot(worldVector, worldVector) - atmosphereSquared;
-		
-		delta = b * b - 4.0 * c;
-		
-		if (delta < 0.0) return 0.0;
-		
-		return (-b + sqrt(delta)) * 0.5 * 0.0005;
-	}
-	
-	else return (-b - sqrt(delta)) * 0.5 * 0.0005; // If the planet is visible, finish finding the distance to its surface
-	// b will always be negative, so the closer point (lesser distance) will be the one subtracted by sqrt(delta)
+	return 0.0;
 }
 
 #define iSteps 1
