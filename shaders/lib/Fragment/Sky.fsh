@@ -38,6 +38,21 @@ vec3 CalculateSkyGradient(in vec4 viewSpacePosition, in float fogFactor) {
 	return color * 0.9;
 }
 
+
+const vec3  rayleighScattering = vec3(5.5e-6, 13.0e-6, 22.4e-6);
+const float rayleighHeight     = 8.0e3;
+
+const float     planetRadius = 6371.0;
+const float atmosphereRadius = 6471.0;
+
+const float     planetSquared =     planetRadius * planetRadius;
+const float atmosphereSquared = atmosphereRadius * atmosphereRadius;
+
+
+float AtmosphereLength(in vec3 worldVector, in vec3 worldDirection) {
+	return 0.0;
+}
+
 #define iSteps 1
 #define jSteps 1
 
@@ -86,7 +101,7 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, vec3 kRlh, float shRlh) 
 		
 		// Calculate the height of the sample.
 		float iHeight = length(iPos) - R_INNER;
-		show(iStepSize * 0.001);
+		
 		// Calculate the optical depth of the Rayleigh and Mie scattering for this step.
 		float odStepRlh = exp(-iHeight / shRlh) * iStepSize;
 		
@@ -140,8 +155,11 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, vec3 kRlh, float shRlh) 
 vec3 CalculateAtmosphericSky(in vec4 viewSpacePosition, in float fogFactor) {
 	vec3 worldSpacePosition = (gbufferModelViewInverse * viewSpacePosition).xyz;
 	vec3 worldLightVector   = (gbufferModelViewInverse * vec4(lightVector, 0.0)).xyz;
-	vec3 r0                 = vec3(0.0, R_INNER + 1, 0.0);
+	vec3 r0                 = vec3(0.0, planetRadius + (cameraPosition.y - 120.0), 0.0);
 	
+//	show(AtmosphereLength(r0, normalize(worldSpacePosition)));
+	
+	/*
 	return atmosphere(
 		worldSpacePosition,             // normalized ray direction
 		r0,                             // ray origin
@@ -149,7 +167,9 @@ vec3 CalculateAtmosphericSky(in vec4 viewSpacePosition, in float fogFactor) {
 		100.0,                           // intensity of the sun
 		vec3(2.5e-2, 10.0e-2, 22.4e-2), // Rayleigh scattering coefficient
 		1.0                           // Rayleigh scale height
-	);
+	); */
+	
+	return vec3(0.0);
 }
 
 
