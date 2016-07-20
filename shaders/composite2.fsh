@@ -4,8 +4,6 @@
 #define ShaderStage 2
 #include "/lib/Syntax.glsl"
 
-#define PBR
-
 
 /* DRAWBUFFERS:3 */
 
