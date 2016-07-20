@@ -5,8 +5,8 @@ float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 	cfloat sampleRadius   = 0.5;
 	cfloat shadowScalar   = 0.1;
 	cfloat depthThreshold = 0.0025;
-	cfloat shadowContrast = 0.5;
-	cint   numSamples     = 6;
+	cfloat shadowContrast = 0.4;
+	cint   numSamples     = 8;
 	
 	float sampleArea = sampleRadius / viewSpacePosition.z;
 	float sampleStep = sampleArea   / numSamples;
@@ -34,6 +34,7 @@ float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
   
 	AO *= (2.0 * shadowScalar) / numSamples;
 	AO  = max(0.0, 1.0 - pow(AO, shadowContrast));
+	show(AO);
 	
 	return AO;
 }
