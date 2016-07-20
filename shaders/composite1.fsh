@@ -118,15 +118,9 @@ void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float vo
 			float AOWeight = 1.0 - abs(depth - sampleDepth);
 						AOWeight *= dot(normal, sampleNormal);
 			      AOWeight = pow(AOWeight, 32);
-			      AOWeight = max(0.1e-8, AOWeight);
-						
-			vec2 HBAOOffset = offset;
+			      AOWeight = max(1.0e-6, AOWeight);
 			
-			#ifdef HBAO
-				HBAOOffset *= 2.0;
-			#endif
-			
-			AO += texture2DLod(colortex5, texcoord * COMPOSITE0_SCALE + HBAOOffset, 1).a * AOWeight;
+			AO += texture2DLod(colortex5, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).a * AOWeight;
 			
 			totalAOWeight += AOWeight;
 		#endif
@@ -194,8 +188,6 @@ void main() {
 	
 	vec3 GI; float volFog; float AO;
 	BilateralUpsample(normal, depth1, GI, volFog, AO);
-	
-	show(AO);
 	
 	
 	gl_FragData[1] = vec4(encode1);
