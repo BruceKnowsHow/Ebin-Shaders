@@ -6,7 +6,7 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 	return shading;
 }
 
-#ifdef PBR
+#if defined PBR && ShaderStage > -1
 float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in Mask mask) {
 	vec3 eyeDir = normalize(viewSpacePosition.xyz);
 	

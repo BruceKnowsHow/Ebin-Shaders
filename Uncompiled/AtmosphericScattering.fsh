@@ -36,15 +36,14 @@ float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection, const bool
 vec3 ComputeAtmosphericSky(vec3 worldPosition, vec3 playerSpacePosition, vec3 pSun, float iSun, float rPlanet, float rAtmos, vec3 kRlh, float kMie, float shRlh, float shMie, float g) {
 	vec3 worldDirection = normalize(playerSpacePosition);
 	
-	// Calculate the step size of the primary ray.
+	// Calculate the step size of the primary ray
     float iStepSize = AtmosphereLength(worldPosition, worldDirection, false) / float(iSteps);
 	
     float iCount = 0.0; // Initialize the primary ray counter
 	
-    // Initialize accumulators for Rayleigh and Mie scattering.
-    mat2x3 accumulator = mat2x3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    mat2x3 accumulator = mat2x3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // Initialize accumulator for Rayleigh and Mie scattering
 	
-    // Initialize optical depth accumulators for the primary ray.
+    // Initialize optical depth accumulators for the primary ray
 	vec4 opticalDepth = vec4(0.0); // .rg = rayleigh & mie depth for the "i" iterator, .ba represent the same for the "j" iterator
 	
 	vec2 invScatterHeight = -1.0 / vec2(shRlh, shMie);
@@ -83,11 +82,11 @@ vec3 ComputeAtmosphericSky(vec3 worldPosition, vec3 playerSpacePosition, vec3 pS
     }
 	
 	// Calculate the Rayleigh and Mie phases.
-    float mu = dot(r, pSun);
+    float mu = dot(worldDirection, pSun);
     float mumu = mu * mu;
     float gg = g * g;
     float pRlh = 3.0 / (16.0 * PI) * (1.0 + mumu);
-    float pMie = 3.0 / (8.0 * PI) * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+    float pMie = 3.0 / ( 8.0 * PI) * (1.0 + mumu) * (1.0 - gg) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
 	
     // Calculate and return the final color.
     return iSun * (pRlh * kRlh * accumulator[0] + pMie * kMie * accumulator[1]);
