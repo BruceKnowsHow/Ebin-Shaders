@@ -62,7 +62,7 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 		float Bp = Cosri < 0.0 ? 1.4 * NoV * NoL * Cosri : Cosri;
 		float Lr = (21.0 / 20.0) * (1.0 - F0) * (Fr * Lm + Vd + Bp);
 		
-		float shading = 2.0 / PI * Lr;
+		float shading = 2.5 / PI * Lr;
 		      shading *= max0(NoL);
 		      shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
 		      shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
