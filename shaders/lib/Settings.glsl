@@ -48,7 +48,7 @@ const int noiseTextureResolution = 64;
 
 
 #define BLOOM_ENABLED
-#define BLOOM_AMOUNT        0.12 // [0.05 0.12 0.25 0.50 1.00]
+#define BLOOM_AMOUNT        0.05 // [0.05 0.12 0.25 0.50 1.00]
 #define BLOOM_CURVE         1.50 // [1.00 1.25 1.50 1.75 2.00]
 
 //#define MOTION_BLUR
