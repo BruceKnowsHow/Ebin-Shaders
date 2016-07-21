@@ -7,8 +7,8 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 }
 
 float GetSubSurfaceDiffuse(in vec4 viewSpacePosition, in vec3 normal) { //This is a crude
-	cfloat wrap = 0.2;
-	cfloat scatterWidth = 0.3;
+	cfloat wrap = 0.6;
+	cfloat scatterWidth = 0.4;
 	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
@@ -19,7 +19,7 @@ float GetSubSurfaceDiffuse(in vec4 viewSpacePosition, in vec3 normal) { //This i
 	
 	float diffuse = max0(NdotLWrap);
 	float scatter = smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
-	
+
 	return diffuse + scatter;
 }
 

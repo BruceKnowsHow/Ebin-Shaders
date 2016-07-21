@@ -36,9 +36,11 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	
 	shading.normal = GetDiffuseShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
 	
+	vec3 SubSurfaceColor = vec3(1.0);
 	if(mask.leaves > 0.5 || mask.grass > 0.5) {
-			shading.normal += GetSubSurfaceDiffuse(ViewSpacePosition, normal);
-			shading.normal /= 2.0;
+		float SubSurfaceDiffusion = GetSubSurfaceDiffuse(ViewSpacePosition, normal);
+		SubSurfaceColor += SubSurfaceDiffusion * vec3(0.0, 0.2, 0.0);
+		shading.normal += SubSurfaceDiffusion;
 	}
 	
 	#ifdef PBR
@@ -69,7 +71,7 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	
 	Lightmap lightmap;
 	
-	lightmap.sunlight = shading.sunlight * sunlightColor * pow(AO, 0.7);
+	lightmap.sunlight = shading.sunlight * sunlightColor * SubSurfaceColor * pow(AO, 0.7);
 	
 	lightmap.skylight = shading.skylight * pow(skylightColor, vec3(0.5)) * AO;
 	
