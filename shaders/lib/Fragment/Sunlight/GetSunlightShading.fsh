@@ -2,12 +2,12 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 	float shading = max0(dot(normal, lightVector));
 	      shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
 	      shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
-	
+				
 	return shading;
 }
 
 #if defined PBR && ShaderStage > -1
-	#if defined PBR_Diffuse == 1
+	#if PBR_Diffuse == 1
 		#define GetDiffuseShading(a, b, c, d) GetLambertianShading(b, d)
 	#elif PBR_Diffuse == 2
 	float GetDiffuseShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in Mask mask) { //Oren Nayar from Gotanda 2012
@@ -32,7 +32,7 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 		      shading *= max0(NoL);
 		      shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
 		      shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
-		
+					
 		return shading;
 	}
 	#else
