@@ -200,7 +200,6 @@ void main() {
 	vec3 composite  = CalculateShadedFragment(mask, torchLightmap, skyLightmap, GI, AO, normal, smoothness, viewSpacePosition1);
 	     composite *= pow(diffuse * 1.2, vec3(2.8));
 	
-	
 	gl_FragData[0] = vec4(composite, 1.0);
 	
 	exit();

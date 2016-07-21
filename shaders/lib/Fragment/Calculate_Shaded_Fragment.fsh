@@ -36,6 +36,11 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 	
 	shading.normal = GetDiffuseShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
 	
+	if(mask.leaves > 0.5 || mask.grass > 0.5) {
+			shading.normal += GetSubSurfaceDiffuse(ViewSpacePosition, normal);
+			shading.normal /= 2.0;
+	}
+	
 	#ifdef PBR
 		if(mask.transparent > 0.5) shading.normal = max0(dot(normal, lightVector)); //LEAVE THIS LINE ALONE IT FIXED PBR
 	#endif

@@ -6,6 +6,23 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 	return shading;
 }
 
+float GetSubSurfaceDiffuse(in vec4 viewSpacePosition, in vec3 normal) { //This is a crude
+	cfloat wrap = 0.2;
+	cfloat scatterWidth = 0.3;
+	
+	vec3 viewVector = -normalize(viewSpacePosition.xyz);
+	vec3 halfVector = normalize(lightVector - viewVector);
+	
+	float NdotH = dot(normal, halfVector);
+	float NdotL = dot(normal, lightVector);
+	float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
+	
+	float diffuse = max0(NdotLWrap);
+	float scatter = smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
+	
+	return diffuse + scatter;
+}
+
 #if defined PBR && ShaderStage > -1
 	#if PBR_Diffuse == 1
 		#define GetDiffuseShading(a, b, c, d) GetLambertianShading(b, d)
