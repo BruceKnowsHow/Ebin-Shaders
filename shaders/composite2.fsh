@@ -204,15 +204,26 @@ mat3 DecodeTBN(in float tbnIndex) {
 	return mat3(tangent, binormal, normal);
 }
 
-void waterFog(inout vec3 color0, in vec4 viewSpacePosition0, in vec4 viewSpacePosition1, in float skyLightmap) {
-	float waterDepth = distance(viewSpacePosition1.xyz, viewSpacePosition0.xyz); //How far is the .
+vec3 waterFog(in vec3 color1, in vec3 normal, in vec4 viewSpacePosition0, in vec4 viewSpacePosition1, in float skyLightmap) {
+	cfloat wrap = 0.2;
+	cfloat scatterWidth = 0.5;
+	
+	float NdotL = dot(normal, lightVector);
+	float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
+	float scatter = smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
+	
+	float waterDepth = distance(viewSpacePosition1.xyz, viewSpacePosition0.xyz); //How far is the water.
 	
 	//Beer's Law is what I'm using to determine water color.
 	float fogAccum = 1.0 / exp(waterDepth * 0.2);
-	vec3 fogColor = vec3(0.15, 0.4, 0.98) * 0.5 * waterDepth;
 	
+	vec3 waterFogColor = vec3(0.0015, 0.004, 0.0098) * sunlightColor;
+	vec3 waterColor = mix(waterFogColor, waterFogColor * sunlightColor * 50, vec3(scatter * 10));
 	
-	color0 = vec3(0.15, 0.4, 0.98) * fogAccum * pow(fogColor, vec3(2.0));
+	color1 *= pow(vec3(0.7, 0.88, 1.0), vec3(waterDepth * 0.45 + 0.8));
+	color1 = mix(waterColor, color1, clamp01(fogAccum));
+
+	return color1;
 }
 
 
@@ -278,7 +289,7 @@ void main() {
 	color1 = texture2D(colortex1, refractedCoord).rgb;
 	
 	color0 = mix(color1, color0, mask.transparent);
-	if(mask.water > 0.5) waterFog(color0, viewSpacePosition0, viewSpacePosition1, skyLightmap);
+	if(mask.water > 0.5) color0 = waterFog(color1, normal, viewSpacePosition0, viewSpacePosition1, skyLightmap);
 	
 	
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
