@@ -1,11 +1,22 @@
 #define PI 3.141592
-#define iSteps 16
-#define jSteps 8
+#define iSteps 1
+#define jSteps 1
 
-const float     planetRadius = 6371.0;
-const float atmosphereRadius = 6471.0;
+const float     planetRadius = 6371.0e3;
+const float atmosphereRadius = 6471.0e3;
 
-const vec2 radiiSquared = pow(vec2(planetSquared, atmosphereSquared), vec2(2.0));
+const vec2 radiiSquared = pow(vec2(planetRadius, atmosphereRadius), vec2(2.0));
+
+const vec3  kRlh = vec3(5.5e-6, 13.0e-6, 22.4e-6);
+const float kMie = 21e-6;
+
+const float g = 0.758;
+const float shRlh = 20.0e3;
+const float shMie = 1.2e3;
+
+const vec2 invScatterHeight = -1.0 / vec2(shRlh, shMie); // Optical step constant to save computations inside the loop
+
+const vec3 swizzle = vec3(1.0, 0.0, -1.0);
 
 float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection, const bool definatelyInAtmosphere) {
 	// Returns the length of air visible to the pixel inside the atmosphere
@@ -18,76 +29,75 @@ float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection, const bool
 	float bb = b * b;
 	vec2  c  = dot(worldPosition, worldPosition) - radiiSquared;
 	
-	vec2 delta = sqrt(max(bb - c, 0.0));
+	vec2 delta   = sqrt(max(bb - c, 0.0)); // .x is for planet distance, .y is for atmosphere distance
+	     delta.x = -delta.x; // Invert delta.x so we don't have to subtract it later
 	
 	if (definatelyInAtmosphere || worldPosition.y < atmosphereRadius) { // Uniform condition
-		if (bb < c.x && b > 0.0) // If the earth is not visible to the ray, check against the atmosphere instead
-			delta.x = delta.y;
-		
-		return b * 0.5 + delta.x; // find the distance to the sphere's near surface
+		return b + (bb < c.x || b < 0.0 ? delta.y : delta.x); // If the earth is not visible to the ray, check against the atmosphere instead
 	} else {
-		if (bb < c.x && b > 0.0)
-			return 2.0 * delta.y; // Find the length of the ray passing through the atmosphere, not occluded by the planet
+		if (b < 0.0) return 0.0;
 		
-		return delta.x - delta.y;
+		if (bb < c.x) return 2.0 * delta.y;
+		
+		return delta.y + delta.x;
 	}
 }
 
-vec3 ComputeAtmosphericSky(vec3 worldPosition, vec3 playerSpacePosition, vec3 pSun, float iSun, float rPlanet, float rAtmos, vec3 kRlh, float kMie, float shRlh, float shMie, float g) {
+vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pSun, float iSun) {
 	vec3 worldDirection = normalize(playerSpacePosition);
 	
-	// Calculate the step size of the primary ray
+    // Calculate the step size of the primary ray
     float iStepSize = AtmosphereLength(worldPosition, worldDirection, false) / float(iSteps);
 	
     float iCount = 0.0; // Initialize the primary ray counter
 	
-    mat2x3 accumulator = mat2x3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // Initialize accumulator for Rayleigh and Mie scattering
+    vec3 totalRlh = vec3(0.0); // Initialize accumulators for Rayleigh and Mie scattering
+    vec3 totalMie = vec3(0.0);
 	
-    // Initialize optical depth accumulators for the primary ray
-	vec4 opticalDepth = vec4(0.0); // .rg = rayleigh & mie depth for the "i" iterator, .ba represent the same for the "j" iterator
+    vec4 opticalDepth = vec4(0.0); // Initialize optical depth accumulators, .rg represents rayleigh and mie for the 'i' loop, .ba represent the same for the 'j' loop
 	
-	vec2 invScatterHeight = -1.0 / vec2(shRlh, shMie);
-	
-    // Sample the primary ray.
+    // Sample the primary ray
     for (int i = 0; i < iSteps; i++) {
-        vec3 iPos = r0 + r * (iCount + iStepSize * 0.5); // Calculate the primary ray sample position
+        vec3 iPos = worldPosition + worldDirection * (iCount + iStepSize * 0.5); // Calculate the primary ray sample position
 		
-        float iHeight = length(iPos) - rPlanet; // Calculate the height of the sample
+        float iHeight = length(iPos) - planetRadius; // Calculate the height of the sample
 		
-		vec2 opticalStep = exp(iHeight * invScatterHeight) * iStepSize; // Calculate the optical depth of the Rayleigh and Mie scattering for this step
+        vec2 opticalStep = exp(iHeight * invScatterHeight) * iStepSize; // Calculate the optical depth of the Rayleigh and Mie scattering for this step
 		
-		opticalDepth.rg += opticalStep; // Accumulate optical depth
+        opticalDepth.rg += opticalStep; // Accumulate optical depth
 		
         float jStepSize = AtmosphereLength(iPos, pSun, true) / float(jSteps); // Calculate the step size of the secondary ray
 		
         float jCount = 0.0; // Initialize the secondary ray counter
 		
+		opticalDepth.ba = vec2(0.0); // Re-initialize optical depth accumulators for the 'j' loop (secondary ray)
+		
         // Sample the secondary ray.
         for (int j = 0; j < jSteps; j++) {
-            vec3 jPos = iPos + pSun * (jCount + jStepSize * 0.5); // Calculate the secondary ray sample position
+            vec3 jPos = iPos + pSun * (jCount + jStepSize * 0.5); // Calculate the secondary ray sample position.
 			
-            float jHeight = length(jPos) - rPlanet; // Calculate the height of the sample
+            float jHeight = length(jPos) - planetRadius; // Calculate the height of the sample
 			
-			opticalDepth.ba += exp(jHeight * invScatterHeight) * jStepSize; // Accumulate the optical depth
+            opticalDepth.ba += exp(jHeight * invScatterHeight) * jStepSize; // Accumulate optical depth.
 			
             jCount += jStepSize; // Increment the secondary ray counter
         }
 		
         // Calculate attenuation
-        vec3 attn = exp(-(kRlh * (opticalDepth.r + opticalDepth.b) + kMie * (opticalDepth.g + opticalDepth.a)));
+        vec3 attn = exp(kRlh * dot(opticalDepth.rb, swizzle.bb) + kMie * dot(opticalDepth.ga, swizzle.bb));
 		
-        accumulator += opticalStep.rrrggg * attn; // Accumulate scattering
+        totalRlh += opticalStep.r * attn; // Accumulate scattering
+        totalMie += opticalStep.g * attn;
 		
         iCount += iStepSize; // Increment the primary ray counter
     }
 	
-	// Calculate the Rayleigh and Mie phases.
-    float mu = dot(worldDirection, pSun);
-    float mumu = mu * mu;
-    float gg = g * g;
-    float pRlh = 3.0 / (16.0 * PI) * (1.0 + mumu);
-    float pMie = 3.0 / ( 8.0 * PI) * (1.0 + mumu) * (1.0 - gg) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+	// Calculate the Rayleigh and Mie phases
+    float  mu = dot(worldDirection, pSun);
+    const float gg = g * g;
+    float  pRlh = 3.0 / (16.0 * PI) * (1.0 + mu * mu);
+    float  pMie = pRlh * 2.0 * (1.0 - gg) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
 	
-    // Calculate and return the final color.
-    return iSun * (pRlh * kRlh * accumulator[0] + pMie * kMie * accumulator[1]);
+    // Calculate and return the final color
+    return iSun * (pRlh * kRlh * totalRlh + pMie * kMie * totalMie);
 }
