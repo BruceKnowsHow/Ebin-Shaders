@@ -165,6 +165,9 @@ option.AO_MODE.comment=1: AlchemyAO. 2: HBAO
 option.PBR=Physically Based Rendering
 option.PBR.comment=Physically Based Rendering or PBR is an effect that defines how light interacts with different materials. Needs a supported PBR resource pack!
 
+option.PBR_Diffuse=Diffuse Rendering
+option.PBR_Diffuse.comment=The way light diffuses into and off of the surface to your eye. 1: Lambertian. 2:Oren Nayar, Physical. 3: Gotanda, Physical
+
 option.IOR=IOR
 option.IOR.comment=Changes how much light is allowed to reflect. If the game seems too shiny lower the number.
 

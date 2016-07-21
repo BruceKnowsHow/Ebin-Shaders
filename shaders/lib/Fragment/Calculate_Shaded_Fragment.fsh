@@ -34,7 +34,7 @@ struct Lightmap {    // Contains vector light levels with color
 vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 GI, in float AO, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
 	Shading shading;
 	
-	shading.normal = GetOrenNayarShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
+	shading.normal = GetDiffuseShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
 	
 	#ifdef PBR
 		if(mask.transparent > 0.5) shading.normal = max0(dot(normal, lightVector)); //LEAVE THIS LINE ALONE IT FIXED PBR
