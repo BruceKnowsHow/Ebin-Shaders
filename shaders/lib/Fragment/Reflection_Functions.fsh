@@ -94,7 +94,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb;
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
-	vec3 offscreen = (reflectedSky + reflectedSunspot * sunlightColor * 100.0);
+	vec3 offscreen = (reflectedSky + reflectedSunspot * sunlightColor * 50.0);
 	if(mask.metallic > 0.5) offscreen *= smoothness + 0.1;
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
