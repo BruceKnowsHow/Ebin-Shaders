@@ -215,15 +215,16 @@ vec3 waterFog(in vec3 color1, in vec3 normal, in vec4 viewSpacePosition0, in vec
 	float waterDepth = distance(viewSpacePosition1.xyz, viewSpacePosition0.xyz); //How far is the water.
 	
 	//Beer's Law is what I'm using to determine water color.
-	float fogAccum = 1.0 / exp(waterDepth * 0.2);
+	float fogAccum = 1.0 / exp(waterDepth * 0.3);
 	
-	vec3 waterFogColor = vec3(0.15, 0.4, 0.68);
-	vec3 waterColor = mix(waterFogColor, waterFogColor * 2, vec3(scatter));
+	vec3 waterDepthColors = vec3(0.0015, 0.004, 0.0098) * sunlightColor;
+	vec3 waterFogColor = vec3(0.1, 0.5, 0.8);
+			 
+	waterFogColor = mix(waterFogColor, sunlightColor * waterFogColor, vec3(scatter));
 	
-	color1 += waterFogColor * 2;
 	color1 *= pow(vec3(0.7, 0.88, 1.0), vec3(waterDepth));
-	color1 = mix(waterColor, color1, clamp01(fogAccum));
-	show(color1);
+	color1 = mix(waterDepthColors, color1, clamp01(fogAccum));
+
 	return color1;
 }
 
@@ -263,7 +264,7 @@ void main() {
 			viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
 			
 			alpha = texture2D(colortex2, refractedCoord).r;
-			if(mask.water > 0.5) alpha = 0.1;
+			if(mask.water > 0.5) alpha = 1.0;
 		}
 	}
 	
