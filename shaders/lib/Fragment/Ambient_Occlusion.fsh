@@ -2,41 +2,33 @@
 	#define CalculateSSAO(a, b) 1.0
 #elif AO_MODE == 1 // AlchemyAO
 float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
-	cfloat sampleRadius   = 0.5;
-	cfloat shadowScalar   = 0.1;
-	cfloat depthThreshold = 0.0025;
-	cfloat shadowContrast = 0.4;
-	cint   numSamples     = 8;
+	cint samples = 12;
+	cfloat radius = 0.5;
+	cfloat intensity = 0.15;
+	cfloat contrast = 0.4;
+	cfloat depthBias = 0.0025;
+	cfloat underflowBias = 0.0001;
 	
-	float sampleArea = sampleRadius / viewSpacePosition.z;
-	float sampleStep = sampleArea   / numSamples;
+	float sampleArea = radius / viewSpacePosition.z;
+	float sampleStep = sampleArea / samples;
 	
-	float angle     = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 64.0).x * PI * 2.0;
-	float angleStep = PI * 2.0 / numSamples;
-	
-	float AO = 0.0;
-	
-	for(int i = 0; i < numSamples; i++) {
-		vec2 pixelOffset = vec2(sampleStep * cos(angle), sampleStep * sin(angle));
-		vec2 offsetCoord = texcoord + pixelOffset;
+	float randomAngle = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 64.0).x * PI * 2.0;
+	float angleMarch = PI * 2.0 / samples;
+	float AO;
+
+	for(int i = 1; i < samples; i++) {
+		vec2 pixelOffset = texcoord + vec2(sampleStep * cos(randomAngle), sampleStep * sin(randomAngle));
+		vec3 offsetPosition = CalculateViewSpacePosition(pixelOffset, GetDepth(pixelOffset)).xyz;
 		
-		float EdgeError = step(0.0, offsetCoord.x) * step(0.0, 1.0 - offsetCoord.x) *
-		                  step(0.0, offsetCoord.y) * step(0.0, 1.0 - offsetCoord.y);
-		
-		vec3 offsetPosition = CalculateViewSpacePosition(offsetCoord, GetDepth(offsetCoord)).xyz;
-		vec3 differential   = offsetPosition - viewSpacePosition.xyz;
-		
+		vec3 differential = offsetPosition - viewSpacePosition.xyz;
 		float diffLength = lengthSquared(differential);
-		
-		AO    += (max(0.0, dot(normal, differential) + depthThreshold * viewSpacePosition.z) * step(sqrt(diffLength), sampleRadius) * EdgeError) / max(pow2(shadowScalar), (diffLength + 0.0001));
-		angle += angleStep;
+
+		AO += (max(0.0, dot(normal, differential) + depthBias * viewSpacePosition.z) * step(sqrt(diffLength), radius)) / (diffLength + 0.0001);
+		randomAngle += angleMarch;
 	}
-  
-	AO *= (2.0 * shadowScalar) / numSamples;
-	AO  = max(0.0, 1.0 - pow(AO, shadowContrast));
-	show(AO);
-	
-	return AO;
+	AO = 1.0 - (AO * (2 * intensity)) / samples;
+	show(pow(max0(AO), contrast));
+	return pow(max0(AO), contrast);
 }
 
 #else // HBAO
