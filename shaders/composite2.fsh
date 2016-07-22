@@ -217,12 +217,13 @@ vec3 waterFog(in vec3 color1, in vec3 normal, in vec4 viewSpacePosition0, in vec
 	//Beer's Law is what I'm using to determine water color.
 	float fogAccum = 1.0 / exp(waterDepth * 0.2);
 	
-	vec3 waterFogColor = vec3(0.0015, 0.004, 0.0098) * sunlightColor;
-	vec3 waterColor = mix(waterFogColor, waterFogColor * sunlightColor * 50, vec3(scatter * 10));
+	vec3 waterFogColor = vec3(0.15, 0.4, 0.68);
+	vec3 waterColor = mix(waterFogColor, waterFogColor * 2, vec3(scatter));
 	
-	color1 *= pow(vec3(0.7, 0.88, 1.0), vec3(waterDepth * 0.45 + 0.8));
+	color1 += waterFogColor * 2;
+	color1 *= pow(vec3(0.7, 0.88, 1.0), vec3(waterDepth));
 	color1 = mix(waterColor, color1, clamp01(fogAccum));
-
+	show(color1);
 	return color1;
 }
 
