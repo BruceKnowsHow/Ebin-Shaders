@@ -188,7 +188,7 @@ void main() {
 	
 	vec3 GI; float volFog; float AO;
 	BilateralUpsample(normal, depth1, GI, volFog, AO);
-	
+	show(AO);
 	
 	gl_FragData[1] = vec4(encode1);
 	gl_FragData[2] = vec4(volFog, 0.0, 0.0, 1.0);

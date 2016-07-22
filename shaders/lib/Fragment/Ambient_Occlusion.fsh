@@ -5,7 +5,7 @@ float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 	cint samples = 12;
 	cfloat radius = 0.5;
 	cfloat intensity = 0.15;
-	cfloat contrast = 0.4;
+	cfloat contrast = 0.5;
 	cfloat depthBias = 0.0025;
 	
 	float sampleArea = radius / viewSpacePosition.z;
