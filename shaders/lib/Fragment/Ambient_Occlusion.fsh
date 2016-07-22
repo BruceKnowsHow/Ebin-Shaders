@@ -25,8 +25,8 @@ float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 		AO += (max(0.0, dot(normal, differential) + depthBias * viewSpacePosition.z) * step(sqrt(diffLength), radius)) / (diffLength + 0.0001);
 		randomAngle += angleMarch;
 	}
+	
 	AO = 1.0 - (AO * (2 * intensity)) / samples;
-	show(pow(max0(AO), contrast));
 	return pow(max0(AO), contrast);
 }
 
