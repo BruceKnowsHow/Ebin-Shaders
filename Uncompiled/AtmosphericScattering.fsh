@@ -1,6 +1,6 @@
 #define PI 3.141592
-#define iSteps 1
-#define jSteps 1
+#define iSteps 4
+#define jSteps 2
 
 const float     planetRadius = 6371.0e3;
 const float atmosphereRadius = 6471.0e3;
@@ -12,13 +12,13 @@ const float kMie = 21e-6;
 
 const float g = 0.758;
 const float shRlh = 20.0e3;
-const float shMie = 1.2e3;
+const float shMie = 1.2e3 * 3.5;
 
 const vec2 invScatterHeight = -1.0 / vec2(shRlh, shMie); // Optical step constant to save computations inside the loop
 
 const vec3 swizzle = vec3(1.0, 0.0, -1.0);
 
-float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection, const bool definatelyInAtmosphere) {
+vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
 	// Returns the length of air visible to the pixel inside the atmosphere
 	// Considers the planet's center as the coordinate origin, as per convention
 	
@@ -32,22 +32,36 @@ float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection, const bool
 	vec2 delta   = sqrt(max(bb - c, 0.0)); // .x is for planet distance, .y is for atmosphere distance
 	     delta.x = -delta.x; // Invert delta.x so we don't have to subtract it later
 	
-	if (definatelyInAtmosphere || worldPosition.y < atmosphereRadius) { // Uniform condition
-		return b + (bb < c.x || b < 0.0 ? delta.y : delta.x); // If the earth is not visible to the ray, check against the atmosphere instead
+	if (worldPosition.y < atmosphereRadius) { // Uniform condition
+		return vec2(b + (bb < c.x || b < 0.0 ? delta.y : delta.x), 0.0); // If the earth is not visible to the ray, check against the atmosphere instead
 	} else {
-		if (b < 0.0) return 0.0;
+		if (b < 0.0) return swizzle.gg;
 		
-		if (bb < c.x) return 2.0 * delta.y;
+		if (bb < c.x) return vec2(2.0 * delta.y, b - delta.y);
 		
-		return delta.y + delta.x;
+		return vec2(delta.y + delta.x, b - delta.y);
 	}
 }
 
-vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pSun, float iSun) {
+float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection) { // Assumes the sample is inside the atmosphere
+	float b  = -dot(worldPosition, worldDirection);
+	float bb = b * b;
+	vec2  c  = dot(worldPosition, worldPosition) - radiiSquared;
+	
+	vec2 delta = sqrt(max(bb - c, 0.0));
+	
+	return b + (bb < c.x || b < 0.0 ? delta.y : -delta.x);
+}
+
+vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pSun, const float iSun) {
 	vec3 worldDirection = normalize(playerSpacePosition);
 	
+	vec2 atmosphereDistances = AtmosphereDistances(worldPosition, worldDirection);
+	
+	if (atmosphereDistances.x <= 0.0) return vec3(0.0);
+	
     // Calculate the step size of the primary ray
-    float iStepSize = AtmosphereLength(worldPosition, worldDirection, false) / float(iSteps);
+    float iStepSize = atmosphereDistances.x / float(iSteps);
 	
     float iCount = 0.0; // Initialize the primary ray counter
 	
@@ -56,17 +70,17 @@ vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pS
 	
     vec4 opticalDepth = vec4(0.0); // Initialize optical depth accumulators, .rg represents rayleigh and mie for the 'i' loop, .ba represent the same for the 'j' loop
 	
+	vec3 iPos = worldPosition + worldDirection * (iStepSize * 0.5 + atmosphereDistances.y); // Calculate the primary ray sample position
+	
     // Sample the primary ray
     for (int i = 0; i < iSteps; i++) {
-        vec3 iPos = worldPosition + worldDirection * (iCount + iStepSize * 0.5); // Calculate the primary ray sample position
-		
         float iHeight = length(iPos) - planetRadius; // Calculate the height of the sample
 		
-        vec2 opticalStep = exp(iHeight * invScatterHeight) * iStepSize; // Calculate the optical depth of the Rayleigh and Mie scattering for this step
+		vec2 opticalStep = exp(iHeight * invScatterHeight) * iStepSize; // Calculate the optical depth of the Rayleigh and Mie scattering for this step
 		
         opticalDepth.rg += opticalStep; // Accumulate optical depth
 		
-        float jStepSize = AtmosphereLength(iPos, pSun, true) / float(jSteps); // Calculate the step size of the secondary ray
+        float jStepSize = AtmosphereLength(iPos, pSun) / float(jSteps); // Calculate the step size of the secondary ray
 		
         float jCount = 0.0; // Initialize the secondary ray counter
 		
@@ -89,7 +103,7 @@ vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pS
         totalRlh += opticalStep.r * attn; // Accumulate scattering
         totalMie += opticalStep.g * attn;
 		
-        iCount += iStepSize; // Increment the primary ray counter
+		iPos += worldDirection * iStepSize; // Increment the primary ray
     }
 	
 	// Calculate the Rayleigh and Mie phases
