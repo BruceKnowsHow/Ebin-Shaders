@@ -163,21 +163,15 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 	
 	if (lightMult < 0.05) return vec3(0.0);
 	
-	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
-	
-	float depthLOD	= 2.0 * LodCoeff * 0.0;
-	float sampleLOD	= 5.0 * LodCoeff * 0.0;
-	
 	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;    // For linear comparisons (GI_MODE = 1)
 	
 	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position. Position can also be used for exponential comparisons (GI_MODE = 2)
-	normal   = vec3(-1.0, -1.0,  1.0) * (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
+	normal = vec3(-1.0, -1.0,  1.0) * (shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
 	
-	float  brightness = 0.000075 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
-	cfloat scale      = radius / 1024.0;
+	float brightness = 0.000075 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
+	cfloat scale  = radius / 1024.0;
 	
 	vec3 GI = vec3(0.0);
-	
 	noise *= scale;
 	
 	#include "/lib/Samples/GI.glsl"
@@ -189,7 +183,7 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		
 		vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
 		
-		samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
+		samplePos.z = texture2DLod(shadowtex1, mapPos, 0.0).x;
 		samplePos.z = samplePos.z * 8.0 - 4.0;    // Convert range from unsigned to signed and undo z-shrinking
 		
 		vec3 sampleDiff = position.xyz - samplePos.xyz;
@@ -200,15 +194,15 @@ vec3 ComputeGlobalIllumination(in vec4 position, in vec3 normal, in float skyLig
 		vec3 sampleDir = normalize(sampleDiff);
 		
 		vec3 shadowNormal;
-		     shadowNormal.xy = texture2DLod(shadowcolor1, mapPos, sampleLOD).xy * 2.0 - 1.0;
+		     shadowNormal.xy = texture2DLod(shadowcolor1, mapPos, 0.0).xy * 2.0 - 1.0;
 		     shadowNormal.z  = -sqrt(1.0 - lengthSquared(shadowNormal.xy));
 		
-		float viewNormalCoeff   = max0(dot(      normal, sampleDir));
+		float viewNormalCoeff   = max0(dot(normal, sampleDir));
 		float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
 		
 		viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
 		
-		vec3 flux = pow(texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
+		vec3 flux = pow(texture2DLod(shadowcolor, mapPos, 2).rgb, vec3(2.2));
 		
 		GI += flux * viewNormalCoeff * shadowNormalCoeff * distanceCoeff;
 	}
