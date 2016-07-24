@@ -21,8 +21,11 @@ float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 		
 		vec3 differential = offsetPosition - viewSpacePosition.xyz;
 		float diffLength = lengthSquared(differential);
+		
+		float EdgeError = step(0.0, pixelOffset.x) * step(0.0, 1.0 - pixelOffset.x) *
+                      step(0.0, pixelOffset.y) * step(0.0, 1.0 - pixelOffset.y);
 
-		AO += (max(0.0, dot(normal, differential) + depthBias * viewSpacePosition.z) * step(sqrt(diffLength), radius)) / (diffLength + 0.0001);
+		AO += (max(0.0, dot(normal, differential) + depthBias * viewSpacePosition.z) * step(sqrt(diffLength), radius) * EdgeError) / (diffLength + 0.0001);
 		randomAngle += angleMarch;
 	}
 	
