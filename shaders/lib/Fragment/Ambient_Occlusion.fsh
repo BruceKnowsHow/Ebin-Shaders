@@ -10,8 +10,8 @@ float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 	float sampleArea = radius / viewSpacePosition.z;
 	float sampleStep = sampleArea / samples;
 	
-	float randomAngle = GetDitherred2DNoise(texcoord, 64.0).x * PI * 2.0;
-	float angleMarch = PI * 2.0 / samples;
+	float randomAngle = GetDitherred2DNoise(texcoord, 64.0).x * 6.28318530718; // 6.28318530718 is 2.0 * PI
+	cfloat angleMarch = 6.28318530718 / samples;
 	float AO;
 
 	for(int i = 0; i < samples; i++) {
