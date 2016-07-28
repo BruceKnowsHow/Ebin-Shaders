@@ -43,10 +43,6 @@ vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyL
 		shading.normal += SubSurfaceDiffusion;
 	}
 	
-	#ifdef PBR
-		if(mask.transparent > 0.5) shading.normal = max0(dot(normal, lightVector)); //LEAVE THIS LINE ALONE IT FIXED PBR
-	#endif
-	
 	shading.sunlight  = shading.normal;
 	shading.sunlight *= pow2(skyLightmap);
 	shading.sunlight  = ComputeShadows(ViewSpacePosition, shading.sunlight);

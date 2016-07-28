@@ -6,7 +6,7 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 	return shading;
 }
 
-float GetSubSurfaceDiffuse(in vec4 viewSpacePosition, in vec3 normal) { //This is a crude
+float GetSubSurfaceDiffuse(in vec4 viewSpacePosition, in vec3 normal) { // This is a crude
 	cfloat wrap = 0.6;
 	cfloat scatterWidth = 0.4;
 	
@@ -27,7 +27,7 @@ float GetSubSurfaceDiffuse(in vec4 viewSpacePosition, in vec3 normal) { //This i
 	#if PBR_Diffuse == 1
 		#define GetDiffuseShading(a, b, c, d) GetLambertianShading(b, d)
 	#elif PBR_Diffuse == 2
-	float GetDiffuseShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in Mask mask) { //Oren Nayar from Gotanda 2012
+	float GetDiffuseShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in Mask mask) { // Oren Nayar from Gotanda 2012
 		if(roughness > 0.9) return GetLambertianShading(normal, mask);
 		
 		vec3 viewVector = -normalize(viewSpacePosition.xyz);
