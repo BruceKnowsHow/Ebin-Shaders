@@ -1,7 +1,7 @@
 #define  PI 3.1415926 // Pi
 #define RAD 0.0174533 // Degrees per radian
 
-#define TIME 0
+#define TIME frameTimeCounter
 
 cvec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 
@@ -20,6 +20,10 @@ cvec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 
 #include "/lib/Utility/blending.glsl"
 
+
+vec2 clampScreen(in vec2 coord, in vec2 pixel) {
+	return clamp(coord, pixel, 1.0 - pixel);
+}
 
 vec3 SetSaturationLevel(in vec3 color, in float level) {
 	float luminance = max(0.1175, dot(color, lumaCoeff));

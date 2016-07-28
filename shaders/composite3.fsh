@@ -11,10 +11,8 @@ const bool colortex3MipmapEnabled = true;
 
 uniform sampler2D colortex3;
 
-uniform float viewWidth;
-uniform float viewHeight;
-
 varying vec2 texcoord;
+varying vec2 pixelSize;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
@@ -23,8 +21,6 @@ varying vec2 texcoord;
 
 vec3 ComputeBloomTile(cfloat scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
 	// Each bloom tile uses (1.0 / scale + pixelSize * 2.0) texcoord-units of the screen
-	
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	
 	vec2 coord  = texcoord;
 	     coord -= offset + pixelSize; // A pixel is added to the offset to give the bloom tile a padding
@@ -62,8 +58,6 @@ vec3 ComputeBloomTile(cfloat scale, vec2 offset) { // Computes a single bloom ti
 }
 
 vec3 ComputeBloom() {
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
-	
 	vec3 bloom  = ComputeBloomTile(  4, vec2(0.0                         ,                          0.0));
 	     bloom += ComputeBloomTile(  8, vec2(0.0                         , 0.25     + pixelSize.y * 2.0));
 	     bloom += ComputeBloomTile( 16, vec2(0.125    + pixelSize.x * 2.0, 0.25     + pixelSize.y * 2.0));
