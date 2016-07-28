@@ -58,17 +58,32 @@ float Get3DNoise(in vec3 pos) {
 
 /////////////////////////////////////////////////////////////////////////
 //This point is where we have the patters for multiple volumetric clouds.
-float cumulusFBM(vec3 pos, vec3 time){
-	pos += time / 8.0;
-
-	float noiseMod = 0.33, frq = 0.5, ap = 0.4;
-
-    noiseMod += Get3DNoise(pos*frq)*ap; frq *= 5.0; ap *= 0.05;
-    noiseMod += Get3DNoise(pos*frq)*ap; frq *= 1.0; ap *= 1.5;
-    noiseMod += Get3DNoise(pos*frq)*ap; frq *= 2.0; ap *= 1.5;
-    noiseMod += Get3DNoise(pos*frq)*ap;
+float cumulusFBM(vec3 pos, float time) {
+	pos.x -= time * 0.04;
 	
-	return noiseMod;
+	float noise = Get3DNoise(pos);
+	
+	pos *= 4.0;
+	pos.x += time * 0.02;
+	
+	noise += (1.0 - abs(Get3DNoise(pos) * 3.0 - 1.0)) * 0.20;
+	
+	pos    *= 3.0;
+	pos.xz += time * 0.05;
+	
+	noise += (1.0 - abs(Get3DNoise(pos) * 3.0 - 1.5) - 0.2) * 0.065;
+	
+	pos.xz -= time * 0.115;
+	
+	noise += (1.0 - abs(Get3DNoise(pos) * 3.0 - 1.0)) * 0.05;
+	
+	pos *= 2.0;
+	
+	noise += (1.0 - abs(Get3DNoise(pos) * 2.0 - 1.0)) * 0.015;
+	
+	noise /= 1.4;
+	
+	return noise;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -86,11 +101,9 @@ vec4 cumulusClouds(in vec3 rayPos, float steps) {
 	if (rayPos.y < cloudInv || rayPos.y > cloud)
 		return vec4(0.0f);
 		
-	vec3 position = rayPos / 100.0;
-	vec3 wind = vec3(TIME / 5.0, 0.0, 0.0);
-	position -= wind * 0.02;
+	vec3 position = rayPos / 300.0;
 	
-	float cumulus = cumulusFBM(position, wind);
+	float cumulus = cumulusFBM(position, TIME);
 	float cloudMod = 1.0 - clamp01((rayPos.y - cloudHeight) / cloudShapeMult);
 	float coverage = 0.93 - rainStrength * 0.93;
 	
@@ -140,6 +153,6 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 }
 
 vec3 CompositeClouds(in vec4 viewSpacePosition) {
-	//return RayMarchClouds(viewSpacePosition);
-	return vec3(0.0);
+	return RayMarchClouds(viewSpacePosition);
+	//return vec3(0.0);
 }
