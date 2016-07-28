@@ -1,7 +1,7 @@
 #define  PI 3.1415926 // Pi
 #define RAD 0.0174533 // Degrees per radian
 
-#define TIME frameTimeCounter
+#define TIME 0
 
 cvec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 
