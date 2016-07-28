@@ -32,7 +32,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
-	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 100.0 * 0;
+	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 10.0;
 	
 	if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition))
 		reflection = offscreen;
