@@ -30,7 +30,15 @@ vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
 	     delta.x = -delta.x; // Invert delta.x so we don't have to subtract it later
 	
 	if (worldPosition.y < atmosphereRadius) { // Uniform condition
-		return vec2(b + (bb < c.x || b < 0.0 ? delta.y : delta.x), 0.0); // If the earth is not visible to the ray, check against the atmosphere instead
+		if (bb < c.x || b < 0.0) return vec2(b + delta.y, 0.0); // If the earth is not visible to the ray, check against the atmosphere instead
+		
+		vec2 dist     = b + delta;
+		vec3 hitPoint = worldPosition + worldDirection * dist.x;
+		vec3 normal   = -normalize(hitPoint - vec3(0.0, planetRadius, 0.0));
+		
+	//	return vec2(dist.x, 0.0);
+		
+		return vec2(mix(dist.x, dist.y, min1(dot(normal, vec3(0.0, 1.0, 0.0)) * 100.0)), 0.0);
 	} else {
 		if (b < 0.0) return swizzle.gg;
 		
@@ -54,6 +62,8 @@ vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pS
 	vec3 worldDirection = normalize(playerSpacePosition);
 	
 	vec2 atmosphereDistances = AtmosphereDistances(worldPosition, worldDirection);
+	
+	show(atmosphereDistances.x / planetRadius);
 	
 	if (atmosphereDistances.x <= 0.0) return vec3(0.0);
 	
