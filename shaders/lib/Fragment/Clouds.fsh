@@ -89,7 +89,7 @@ float cumulusFBM(vec3 pos, float time) {
 /////////////////////////////////////////////////////////////////////////
 //This point is where we color and compile each cloud type.
 
-float cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
+float cumulusClouds(in vec3 rayPos) {
 	float cloudHeight = 1000.0;
 	float cloudShapeMult = 2.0;
 
@@ -114,8 +114,6 @@ float cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
 
 	if(cumulus < 0.001)
 		return 0.0;
-
-	float cloudDepth = clamp01(distance(rayDepth, cloudHeight));
 
 	return cumulus;
 }
@@ -158,7 +156,7 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 	while(rayDepth > 0.0) {
 		vec3 rayPosition = CloudSpace(rayDepth);
 
-		clouds.a += cumulusClouds(rayPosition * worldPositionSize, rayStep, rayDepth);
+		clouds.a += cumulusClouds(rayPosition * worldPositionSize);
     clouds.rgb += cloudLighting(rayPosition * worldPositionSize);
 
     // Optimization: When we've accumulated a full cloud, break.
