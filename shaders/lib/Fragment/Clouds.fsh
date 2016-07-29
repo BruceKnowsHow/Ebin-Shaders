@@ -135,6 +135,10 @@ vec3 cloudLighting(in vec3 position) {
     // Now you have two numbers: ambient light strength and direct light strength. Multiply them by their respective colors and add
     // them together. Return this term.
 		
+		//Edit: Instead of just multiplying the two terms together firstly add beersPowderLaw to compute the amount of light that is going toward the eye.
+		//Add a 2 lobed phase function to simulate silver lining and more correct light scattering.
+		//use an energy conservitive method to compile these features (S - S * exp(-at * O)) / at 
+		
 		return vec3(1.0);
 }
 
