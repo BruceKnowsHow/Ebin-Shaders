@@ -99,7 +99,7 @@ float cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
 	float cloudInv = cloudHeight - cloudShapeMult;
 
 	if (rayPos.y < cloudInv || rayPos.y > cloud)
-		return vec4(0.0f);
+		return 0.0;
 
 	float cloudHeightGradiant = clamp01((rayPos.y - cloudInv) / (cloudShapeMult * 0.5));
 
@@ -113,7 +113,7 @@ float cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
 	cumulus = pow(cumulus, 50.0);
 
 	if(cumulus < 0.001)
-		return vec4(0.0);
+		return 0.0;
 
 	float cloudDepth = clamp01(distance(rayDepth, cloudHeight));
 
@@ -134,6 +134,8 @@ vec3 cloudLighting(in vec3 position) {
     // The sun should be occluded by max(O, Of)
     // Now you have two numbers: ambient light strength and direct light strength. Multiply them by their respective colors and add
     // them together. Return this term.
+		
+		return vec3(1.0);
 }
 
 vec3 RayMarchClouds(in vec4 viewSpacePosition) {
@@ -153,13 +155,10 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 		vec3 rayPosition = CloudSpace(rayDepth);
 
 		clouds.a += cumulusClouds(rayPosition * worldPositionSize, rayStep, rayDepth);
+    clouds.rgb += cloudLighting(rayPosition * worldPositionSize);
 
-        clouds.rgb = cloudLighting(rayPos * worldPositionSize);
-
-        // Optimization: When we've accumulated a full cloud, break. Increased FPS from 73 to 88 on my GTX 970M
-        if(clouds.a > 1.0) {
-            break;
-        }
+    // Optimization: When we've accumulated a full cloud, break.
+    if(clouds.a > 1.0) break;
 
 		float marchDepth = length((rayPosition - cameraPosition) / worldPositionSize);
 
