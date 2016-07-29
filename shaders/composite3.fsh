@@ -28,9 +28,9 @@ vec3 ComputeBloomTile(cfloat scale, vec2 offset) { // Computes a single bloom ti
 	
 	vec2 padding = pixelSize * scale;
 	
-	if (coord.s <= -padding.s || coord.s >= 1.0 + padding.s
-	 || coord.t <= -padding.t || coord.t >= 1.0 + padding.t)
+	if (any(greaterThanEqual(abs(coord - 0.5), padding + 0.5)))
 		return vec3(0.0);
+	
 	
 	cfloat Lod = log2(scale);
 	
