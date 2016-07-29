@@ -2,16 +2,16 @@
 #define jSteps 3
 
 cfloat     planetRadius = 6371.0e3;
-cfloat atmosphereRadius = 6471.0e3;
+cfloat atmosphereRadius = 7071.0e3;
 
 cvec2 radiiSquared = pow(vec2(planetRadius, atmosphereRadius), vec2(2.0));
 
-cvec3  rayleighCoeff = vec3(5.5e-6, 13.0e-6, 22.4e-6);
-cfloat      mieCoeff = 21e-6;
+cvec3  rayleighCoeff = vec3(5.8e-6, 1.35e-5, 3.31e-5);
+cfloat      mieCoeff = 21e-6 * 2.0;
 
 cfloat g = 0.85;
-cfloat rayleighHeight = 8.0e3;
-cfloat      mieHeight = 1.2e3;
+cfloat rayleighHeight = 40.0e3;
+cfloat      mieHeight = 1.2e3 * 10.0;
 
 cvec2 invScatterHeight = -1.0 / vec2(rayleighHeight, mieHeight); // Optical step constant to save computations inside the loop
 
@@ -111,8 +111,6 @@ vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pS
     float  mu = dot(worldDirection, pSun);
     float rayleighPhase = 1.5 * (1.0 + mu * mu);
     float      miePhase = rayleighPhase * (1.0 - gg) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
-	
-	show(mie * 0.001);
 	
     // Calculate and return the final color
     return iSun * (rayleigh * rayleighPhase * rayleighCoeff + mie * miePhase * mieCoeff);
