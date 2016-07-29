@@ -39,6 +39,7 @@ uniform float far;
 uniform int isEyeInWater;
 
 varying vec2 texcoord;
+varying vec2 pixelSize;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
@@ -164,11 +165,7 @@ vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangent
 	
 	refractedCoord = refractedCoord / screenSpacePosition.w * 0.5 + 0.5;
 	
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
-	vec2 minCoord  = pixelSize;
-	vec2 maxCoord  = 1.0 - pixelSize;
-	
-	refractedCoord = clamp(refractedCoord, minCoord, maxCoord);
+	refractedCoord = clampScreen(refractedCoord, pixelSize);
 	
 	return refractedCoord;
 }

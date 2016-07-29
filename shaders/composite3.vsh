@@ -9,6 +9,7 @@ uniform float viewWidth;
 uniform float viewHeight;
 
 varying vec2 texcoord;
+varying vec2 pixelSize;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
@@ -20,8 +21,8 @@ void main() {
 	texcoord    = gl_MultiTexCoord0.st;
 	gl_Position = ftransform();
 	
+	pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	
 	vec2 vertexScale = vec2(0.25 + pixelSize.x * 2.0, 0.375 + pixelSize.y * 4.0);
 	

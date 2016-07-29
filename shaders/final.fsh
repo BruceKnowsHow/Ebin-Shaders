@@ -17,10 +17,8 @@ uniform mat4 gbufferPreviousProjection;
 uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
 
-uniform float viewWidth;
-uniform float viewHeight;
-
 varying vec2 texcoord;
+varying vec2 pixelSize;
 
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
@@ -62,7 +60,7 @@ void MotionBlur(inout vec3 color, in float depth) {
 	     velocity = clamp(velocity, vec2(-maxVelocity), vec2(maxVelocity));
 	
 	#ifdef VARIABLE_MOTION_BLUR_SAMPLES
-	float sampleCount = length(velocity * vec2(viewWidth, viewHeight)) * VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT; // There should be exactly 1 sample for every pixel when the sample coefficient is 1.0
+	float sampleCount = length(velocity / pixelSize) * VARIABLE_MOTION_BLUR_SAMPLE_COEFFICIENT; // There should be exactly 1 sample for every pixel when the sample coefficient is 1.0
 	      sampleCount = floor(clamp(sampleCount, 1, MAX_MOTION_BLUR_SAMPLE_COUNT));
 	#else
 	cfloat sampleCount = CONSTANT_MOTION_BLUR_SAMPLE_COUNT;
@@ -70,16 +68,12 @@ void MotionBlur(inout vec3 color, in float depth) {
 	
 	vec2 sampleStep = velocity / sampleCount;
 	
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
-	vec2 minCoord  = pixelSize;
-	vec2 maxCoord  = 1.0 - pixelSize;
-	
 	color *= 0.001;
 	
 	for(float i = 1.0; i <= sampleCount; i++) {
 		vec2 coord = texcoord - sampleStep * i;
 		
-		color += pow(texture2D(colortex3, clamp(coord, minCoord, maxCoord)).rgb, vec3(2.2));
+		color += pow(texture2D(colortex3, clampScreen(coord, pixelSize)).rgb, vec3(2.2));
 	}
 	
 	color *= 1000.0 / max(sampleCount + 1.0, 1.0);
@@ -87,8 +81,6 @@ void MotionBlur(inout vec3 color, in float depth) {
 }
 
 vec3 GetBloomTile(cint scale, vec2 offset) {
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
-	
 	vec2 coord  = texcoord;
 	     coord /= scale;
 	     coord += offset + pixelSize;
@@ -100,8 +92,6 @@ vec3[8] GetBloom() {
 	vec3[8] bloom;
 	
 #ifdef BLOOM_ENABLED
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
-	
 	// These arguments should be identical to those in composite2.fsh
 	bloom[1] = GetBloomTile(  4, vec2(0.0                         ,                          0.0));
 	bloom[2] = GetBloomTile(  8, vec2(0.0                         , 0.25     + pixelSize.y * 2.0));
@@ -113,7 +103,7 @@ vec3[8] GetBloom() {
 	
 	bloom[0] = vec3(0.0);
 	
-	for (int index = 1; index <= 7; index++)
+	for (uint index = 1; index <= 7; index++)
 		bloom[0] += bloom[index];
 	
 	bloom[0] /= 7.0;

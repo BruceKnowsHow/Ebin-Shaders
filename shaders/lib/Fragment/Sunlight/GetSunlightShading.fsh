@@ -24,12 +24,12 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	float C1 = 1.0 - 0.5 * alpha2 / (alpha2 + 0.33);
 	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? 1.0 / max(NoL, NoV) : 1.0);
 	
-	float shading = 2.5 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
+	float shading  = 2.5 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
 	      shading *= max0(NoL);
-	      shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
-	      shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
+	      shading  = shading * (1.0 - mask.grass       ) + mask.grass       ;
+	      shading  = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
 	
-	return shading;
+	return max0(shading);
 }
 
 float GetGotandaShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in Mask mask) {
