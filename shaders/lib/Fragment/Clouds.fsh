@@ -89,7 +89,7 @@ float cumulusFBM(vec3 pos, float time) {
 /////////////////////////////////////////////////////////////////////////
 //This point is where we color and compile each cloud type.
 
-vec4 cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
+float cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
 	float cloudHeight = 1000.0;
 	float cloudShapeMult = 2.0;
 
@@ -117,12 +117,23 @@ vec4 cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
 
 	float cloudDepth = clamp01(distance(rayDepth, cloudHeight));
 
-	float beersLaw = exp(-cloudDepth);
-	float powderEffect = 1.0 - exp(-cloudDepth * 2.0);
+	return cumulus;
+}
 
-	vec3 cloudColor = vec3(beersLaw * powderEffect);
-
-	return vec4(cloudColor * 0.4 * steps, cumulus);
+vec3 cloudLighting(in vec3 position) {
+    // What to do:
+    //
+    // Find five points in a cone going from position toward the light vector
+    // For each of those points, calculate the amount of cloud at that point
+    // Additionally, generate one point directly in the direction of the light and farther away than the points in the cone.
+    // How much farther? fuck if I know. Try twice or three times the distance
+    // Get the amount of clouds at the far away point. This amount is now called Of
+    // Sum all those cloud amounts together. That sum will now be called O
+    // O is the amount of light occlusion at your cloud. You should multiply your ambient light by 1 - O
+    // Of is how much the sun is occluded by far away clouds, and O is the amount that the sun is occluded in total.
+    // The sun should be occluded by max(O, Of)
+    // Now you have two numbers: ambient light strength and direct light strength. Multiply them by their respective colors and add
+    // them together. Return this term.
 }
 
 vec3 RayMarchClouds(in vec4 viewSpacePosition) {
@@ -141,7 +152,9 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 	while(rayDepth > 0.0) {
 		vec3 rayPosition = CloudSpace(rayDepth);
 
-		clouds += cumulusClouds(rayPosition * worldPositionSize, rayStep, rayDepth);
+		clouds.a += cumulusClouds(rayPosition * worldPositionSize, rayStep, rayDepth);
+
+        clouds.rgb = cloudLighting(rayPos * worldPositionSize);
 
         // Optimization: When we've accumulated a full cloud, break. Increased FPS from 73 to 88 on my GTX 970M
         if(clouds.a > 1.0) {
