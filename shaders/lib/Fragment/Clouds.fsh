@@ -89,7 +89,7 @@ float cumulusFBM(vec3 pos, float time) {
 /////////////////////////////////////////////////////////////////////////
 //This point is where we color and compile each cloud type.
 
-vec4 cumulusClouds(in vec3 rayPos, float steps) {
+vec4 cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
 	float cloudHeight = 1000.0;
 	float cloudShapeMult = 2.0;
 	
@@ -101,21 +101,28 @@ vec4 cumulusClouds(in vec3 rayPos, float steps) {
 	if (rayPos.y < cloudInv || rayPos.y > cloud)
 		return vec4(0.0f);
 		
+	float cloudHeightGradiant = clamp01((rayPos.y - cloudInv) / (cloudShapeMult * 0.5));
+		
 	vec3 position = rayPos / 300.0;
 	
 	float cumulus = cumulusFBM(position, TIME);
 	float cloudMod = 1.0 - clamp01((rayPos.y - cloudHeight) / cloudShapeMult);
 	float coverage = 0.93 - rainStrength * 0.93;
 	
-	cumulus *= pow(cloudMod * 1.7 * coverage, 1.2);
+	cumulus *= pow(cloudMod * 1.7 * coverage * cloudHeightGradiant, 1.2);
 	cumulus = pow(cumulus, 50.0);
 	
 	if(cumulus < 0.001)
 		return vec4(0.0);
+	
+	float cloudDepth = clamp01(distance(rayDepth, cloudHeight));
 		
-	vec3 cloudColor = vec3(1.0);
+	float beersLaw = exp(-cloudDepth);
+	float powderEffect = 1.0 - exp(-cloudDepth * 2.0);
+	
+	vec3 cloudColor = vec3(beersLaw * powderEffect);
 		
-	return vec4(cloudColor * 0.01 * steps, cumulus);
+	return vec4(cloudColor * 0.4 * steps, cumulus);
 }
 
 vec3 RayMarchClouds(in vec4 viewSpacePosition) {
@@ -123,7 +130,7 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 	float worldDistance = length(worldPosition.xyz);
 	float worldPositionSize = 1.953125;
 	
-	float rayStep = far / 6.0;
+	float rayStep = far / 2.0;
 	float dither = dither8(texcoord) * rayStep;
 	
 	float rayDepth = far - 10.0 + dither;
@@ -134,7 +141,7 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 	while(rayDepth > 0.0) {
 		vec3 rayPosition = CloudSpace(rayDepth);
 		
-		clouds += cumulusClouds(rayPosition * worldPositionSize, rayStep);
+		clouds += cumulusClouds(rayPosition * worldPositionSize, rayStep, rayDepth);
 		
 		float marchDepth = length((rayPosition - cameraPosition) / worldPositionSize);
 		
