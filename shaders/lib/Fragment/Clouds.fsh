@@ -28,15 +28,15 @@ float linearDepth(float depth) {
 
 
 vec3 CloudSpace(float minDist){
-			vec4 rayworldposition = gbufferProjectionInverse * vec4(vec3(texcoord.st, linearDepth(minDist)) * 2.0 - 1.0, 1.0);
-	    rayworldposition /= rayworldposition.w;
+	vec4 rayworldposition = gbufferProjectionInverse * vec4(vec3(texcoord.st, linearDepth(minDist)) * 2.0 - 1.0, 1.0);
+	rayworldposition /= rayworldposition.w;
 
-			rayworldposition = gbufferModelViewInverse * rayworldposition;
-			rayworldposition /= rayworldposition.w;
-			
-			rayworldposition.xyz += cameraPosition.xyz;
-			
-			return rayworldposition.rgb;
+	rayworldposition = gbufferModelViewInverse * rayworldposition;
+	rayworldposition /= rayworldposition.w;
+
+	rayworldposition.xyz += cameraPosition.xyz;
+
+	return rayworldposition.rgb;
 }
 
 
@@ -46,13 +46,13 @@ float Get3DNoise(in vec3 pos) {
 	vec3 whole = fract(pos);
 
 	cvec2 zscale = vec2(17.0, 0.0);
-	
+
 	vec4 coord = part.xyxy + whole.xyxy + part.z * zscale.x + zscale.yyxx + 0.5;
 	     coord /= noiseTextureResolution;
-	
+
 	float Noise1 = texture2D(noisetex, coord.xy).x;
 	float Noise2 = texture2D(noisetex, coord.zw).x;
-	
+
 	return mix(Noise1, Noise2, whole.z);
 }
 
@@ -60,29 +60,29 @@ float Get3DNoise(in vec3 pos) {
 //This point is where we have the patters for multiple volumetric clouds.
 float cumulusFBM(vec3 pos, float time) {
 	pos.x -= time * 0.04;
-	
+
 	float noise = Get3DNoise(pos);
-	
+
 	pos *= 4.0;
 	pos.x += time * 0.02;
-	
+
 	noise += (1.0 - abs(Get3DNoise(pos) * 3.0 - 1.0)) * 0.20;
-	
+
 	pos    *= 3.0;
 	pos.xz += time * 0.05;
-	
+
 	noise += (1.0 - abs(Get3DNoise(pos) * 3.0 - 1.5) - 0.2) * 0.065;
-	
+
 	pos.xz -= time * 0.115;
-	
+
 	noise += (1.0 - abs(Get3DNoise(pos) * 3.0 - 1.0)) * 0.05;
-	
+
 	pos *= 2.0;
-	
+
 	noise += (1.0 - abs(Get3DNoise(pos) * 2.0 - 1.0)) * 0.015;
-	
+
 	noise /= 1.4;
-	
+
 	return noise;
 }
 
@@ -92,36 +92,36 @@ float cumulusFBM(vec3 pos, float time) {
 vec4 cumulusClouds(in vec3 rayPos, float steps, in float rayDepth) {
 	float cloudHeight = 1000.0;
 	float cloudShapeMult = 2.0;
-	
+
 	cloudShapeMult = cloudShapeMult * (1.0 + (rayPos.y * 0.5));
-	
+
 	float cloud = cloudHeight + cloudShapeMult;
 	float cloudInv = cloudHeight - cloudShapeMult;
-	
+
 	if (rayPos.y < cloudInv || rayPos.y > cloud)
 		return vec4(0.0f);
-		
+
 	float cloudHeightGradiant = clamp01((rayPos.y - cloudInv) / (cloudShapeMult * 0.5));
-		
+
 	vec3 position = rayPos / 300.0;
-	
+
 	float cumulus = cumulusFBM(position, TIME);
 	float cloudMod = 1.0 - clamp01((rayPos.y - cloudHeight) / cloudShapeMult);
 	float coverage = 0.93 - rainStrength * 0.93;
-	
+
 	cumulus *= pow(cloudMod * 1.7 * coverage * cloudHeightGradiant, 1.2);
 	cumulus = pow(cumulus, 50.0);
-	
+
 	if(cumulus < 0.001)
 		return vec4(0.0);
-	
+
 	float cloudDepth = clamp01(distance(rayDepth, cloudHeight));
-		
+
 	float beersLaw = exp(-cloudDepth);
 	float powderEffect = 1.0 - exp(-cloudDepth * 2.0);
-	
+
 	vec3 cloudColor = vec3(beersLaw * powderEffect);
-		
+
 	return vec4(cloudColor * 0.4 * steps, cumulus);
 }
 
@@ -129,33 +129,38 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 	vec3 worldPosition = (gbufferModelViewInverse * viewSpacePosition).xyz;
 	float worldDistance = length(worldPosition.xyz);
 	float worldPositionSize = 1.953125;
-	
+
 	float rayStep = far / 2.0;
 	float dither = dither8(texcoord) * rayStep;
-	
+
 	float rayDepth = far - 10.0 + dither;
 	float rayWeight = rayDepth / rayStep;
-	
+
 	vec4 clouds;
-	
+
 	while(rayDepth > 0.0) {
 		vec3 rayPosition = CloudSpace(rayDepth);
-		
+
 		clouds += cumulusClouds(rayPosition * worldPositionSize, rayStep, rayDepth);
-		
+
+        // Optimization: When we've accumulated a full cloud, break. Increased FPS from 73 to 88 on my GTX 970M
+        if(clouds.a > 1.0) {
+            break;
+        }
+
 		float marchDepth = length((rayPosition - cameraPosition) / worldPositionSize);
-		
+
 		//if (worldDistance < marchDepth * worldPositionSize)
 			//clouds = vec4(0.0);
-		
+
 		rayDepth -= rayStep;
 	}
-	
+
 	clouds /= rayWeight;
-	
+
 	clouds.rgb = mix(vec3(0.0), clouds.rgb * 10, min(1.0, clouds.a));
-	
-	
+
+
 	return clouds.rgb;
 }
 
