@@ -115,18 +115,20 @@ float cumulusClouds(in vec3 rayPos) {
 	if(cumulus < 0.001)
 		return 0.0;
 
-	return cumulus;
+	return cumulus * 20;
 }
 
 vec3 cloudLighting(in vec3 position) {
 	float jCount = 1.0;
 	
 	float clouds = 0.0;
+	float accumulation = 0.0;
 	
 	for (int j = 0; j < 6; j++) {
-		vec3 jpos = position + lightVector * jCount;
+		vec3 jpos = position + lightVector + j;
+		clouds += cumulusClouds(jpos); // Use a simplified cumulus clouds function or something
 		
-	//	clouds += cumulusClouds(jpos); // Use a simplified cumulus clouds function or something
+		accumulation += exp(-clouds) * (1.0 - exp(-clouds * 2.0));
 		
 		jCount++;
 	}
@@ -149,7 +151,8 @@ vec3 cloudLighting(in vec3 position) {
 		//Add a 2 lobed phase function to simulate silver lining and more correct light scattering.
 		//use an energy conservitive method to compile these features (S - S * exp(-at * O)) / at 
 		
-		return vec3(1.0);
+		show(accumulation);
+		return vec3(accumulation);
 }
 
 vec3 RayMarchClouds(in vec4 viewSpacePosition) {
@@ -169,7 +172,7 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 		vec3 rayPosition = CloudSpace(rayDepth);
 
 		clouds.a += cumulusClouds(rayPosition * worldPositionSize);
-    clouds.rgb += cloudLighting(rayPosition * worldPositionSize);
+    clouds.rgb = cloudLighting(rayPosition * worldPositionSize);
 
     // Optimization: When we've accumulated a full cloud, break.
     if(clouds.a > 1.0) break;
@@ -185,12 +188,12 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 	clouds /= rayWeight;
 
 	clouds.rgb = mix(vec3(0.0), clouds.rgb * 10, min(1.0, clouds.a));
-
+	show(clouds.rgb);
 
 	return clouds.rgb;
 }
 
 vec3 CompositeClouds(in vec4 viewSpacePosition) {
-	return RayMarchClouds(viewSpacePosition);
-	//return vec3(0.0);
+	//return RayMarchClouds(viewSpacePosition);
+	return vec3(0.0);
 }
