@@ -73,7 +73,7 @@ vec3 CalculateSky(in vec4 viewSpacePosition, in float alpha, cbool reflection) {
 	
 //	if (visibility < 0.001 && !reflection) return vec3(0.0);
 	
-//	return CalculateAtmosphericSky(viewSpacePosition);
+	return CalculateAtmosphericSky(viewSpacePosition);
 	
 	vec3 gradient = CalculateSkyGradient(viewSpacePosition, visibility);
 	vec3 sunspot  = reflection ? vec3(0.0) : CalculateSunspot(viewSpacePosition) * pow(visibility, 25) * alpha;
