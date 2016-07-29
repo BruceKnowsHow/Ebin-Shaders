@@ -119,6 +119,18 @@ float cumulusClouds(in vec3 rayPos) {
 }
 
 vec3 cloudLighting(in vec3 position) {
+	float jCount = 1.0;
+	
+	float clouds = 0.0;
+	
+	for (int j = 0; j < 6; j++) {
+		vec3 jpos = position + lightVector * jCount;
+		
+	//	clouds += cumulusClouds(jpos); // Use a simplified cumulus clouds function or something
+		
+		jCount++;
+	}
+	
     // What to do:
     //
     // Find five points in a cone going from position toward the light vector

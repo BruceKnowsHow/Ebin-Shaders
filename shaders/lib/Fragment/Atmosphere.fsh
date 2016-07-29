@@ -1,22 +1,19 @@
-#define PI 3.141592
 #define iSteps 8
 #define jSteps 2
 
-const float     planetRadius = 6371.0e3;
-const float atmosphereRadius = 6471.0e3;
+cfloat     planetRadius = 6371.0e3;
+cfloat atmosphereRadius = 6471.0e3;
 
-const vec2 radiiSquared = pow(vec2(planetRadius, atmosphereRadius), vec2(2.0));
+cvec2 radiiSquared = pow(vec2(planetRadius, atmosphereRadius), vec2(2.0));
 
-const vec3  rayleighCoeff = vec3(5.5e-6, 13.0e-6, 22.4e-6);
-const float      mieCoeff = 21e-6;
+cvec3  rayleighCoeff = vec3(5.5e-6, 13.0e-6, 22.4e-6);
+cfloat      mieCoeff = 21e-6;
 
-const float g = 0.85;
-const float rayleighHeight = 8.0e3;
-const float      mieHeight = 1.2e3;
+cfloat g = 0.85;
+cfloat rayleighHeight = 8.0e3;
+cfloat      mieHeight = 1.2e3;
 
-const vec2 invScatterHeight = -1.0 / vec2(rayleighHeight, mieHeight); // Optical step constant to save computations inside the loop
-
-const vec3 swizzle = vec3(1.0, 0.0, -1.0);
+cvec2 invScatterHeight = -1.0 / vec2(rayleighHeight, mieHeight); // Optical step constant to save computations inside the loop
 
 vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
 	// Returns the length of air visible to the pixel inside the atmosphere
@@ -53,7 +50,7 @@ float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection) { // Assum
 	return b + (bb < c.x || b < 0.0 ? delta.y : -delta.x);
 }
 
-vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pSun, const float iSun) {
+vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pSun, cfloat iSun) {
 	vec3 worldDirection = normalize(playerSpacePosition);
 	
 	vec2 atmosphereDistances = AtmosphereDistances(worldPosition, worldDirection);
@@ -106,8 +103,8 @@ vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pS
     }
 	
 	// Calculate the Rayleigh and Mie phases
-	const float gg = g * g;
-    float mu = dot(worldDirection, pSun);
+	cfloat gg = g * g;
+    float  mu = dot(worldDirection, pSun);
     float rayleighPhase = 1.5 * (1.0 + mu * mu);
     float      miePhase = rayleighPhase * (1.0 - gg) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
 	

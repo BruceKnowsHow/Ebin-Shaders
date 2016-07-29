@@ -3,6 +3,8 @@
 
 #define TIME frameTimeCounter
 
+cvec3 swizzle = vec3(1.0, 0.0, -1.0);
+
 cvec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 
 
