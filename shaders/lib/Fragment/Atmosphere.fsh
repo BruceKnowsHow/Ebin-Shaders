@@ -15,7 +15,7 @@ cfloat      mieCoeff = 21e-6 * ebin;
 
 cfloat g = 0.9;
 cfloat rayleighHeight = 8.0e3 / ebin;
-cfloat      mieHeight = 1.2e3 * 2.0/ ebin;
+cfloat      mieHeight = 1.2e3 * 1.5 / ebin;
 
 cvec2 invScatterHeight = -1.0 / vec2(rayleighHeight, mieHeight); // Optical step constant to save computations inside the loop
 
