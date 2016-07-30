@@ -138,10 +138,7 @@ void main() {
 	
 	vec3[8] bloom = GetBloom();
 	
-	//color = mix(color, pow(bloom[0], vec3(BLOOM_CURVE)), BLOOM_AMOUNT);
-	color = pow(color, vec3(2.2));
-	color += pow(bloom[0], vec3(2.2 * BLOOM_CURVE)) * BLOOM_AMOUNT * 0.5;
-	color = pow(color, vec3(1.0/2.2));
+	color = mix(color, pow(bloom[0], vec3(BLOOM_CURVE)), BLOOM_AMOUNT);
 	
 	color = Uncharted2Tonemap(color);
 	
