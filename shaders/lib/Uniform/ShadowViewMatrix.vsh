@@ -25,7 +25,12 @@ float CalculateShadowView() {
 	
 	float isNight = abs(sign(float(mod(timeAngle, 360.0) > 180.0) - float(mod(abs(pathRotationAngle) + 90.0, 360.0) > 180.0))); // When they're not both above or below the horizon
 	
+#ifdef CUSTOM_TIME_CYCLE
 	timeAngle = -mod(timeAngle, 360.0) * RAD;
+#else
+	timeAngle = -mod(timeAngle, 180.0) * RAD;
+#endif
+	
 	pathRotationAngle = (mod(pathRotationAngle + 90.0, 180.0) - 90.0) * RAD;
 	twistAngle *= RAD;
 	

@@ -72,7 +72,7 @@ vec3 CalculateAtmosphericSky(in vec4 viewSpacePosition) {
 #endif
 	*/
 	
-	return ComputeAtmosphericSky(playerSpacePosition, worldPosition, worldLightVector, 1.0);
+	return ComputeAtmosphericSky(playerSpacePosition, worldPosition, worldLightVector, 2.0);
 	
 	return vec3(0.0);
 }
