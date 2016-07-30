@@ -90,7 +90,7 @@ float cumulusFBM(vec3 pos, float time) {
 //This point is where we color and compile each cloud type.
 
 float cumulusClouds(in vec3 rayPos) {
-	float cloudHeight = 1000.0;
+	float cloudHeight = 250.0;
 	float cloudShapeMult = 2.0;
 
 	cloudShapeMult = cloudShapeMult * (1.0 + (rayPos.y * 0.5));
