@@ -194,6 +194,6 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 }
 
 vec3 CompositeClouds(in vec4 viewSpacePosition) {
-	return RayMarchClouds(viewSpacePosition);
-	//return vec3(0.0);
+	//return RayMarchClouds(viewSpacePosition);
+	return vec3(0.0);
 }
