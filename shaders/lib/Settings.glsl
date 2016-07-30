@@ -118,6 +118,9 @@ const int noiseTextureResolution = 64;
 #define DEBUG_VIEW 1 // [-1 0 1 2 3 7]
 
 
+//#define CUSTOM_TIME_CYCLE
+
+
 #ifdef DEFAULT_TEXTURE_PACK
 	#define TEXTURE_PACK_RESOLUTION 16
 #else

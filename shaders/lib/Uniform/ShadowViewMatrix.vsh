@@ -16,7 +16,9 @@ float CalculateShadowView() {
 	twistAngle = 0.0;
 	
 	
+#ifdef CUSTOM_TIME_CYCLE
 	UserRotation();
+#endif
 	
 	
 	timeCycle = timeAngle;
