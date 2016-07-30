@@ -1,26 +1,26 @@
-#define iSteps 128
-#define jSteps 3
+#define iSteps 50
+#define jSteps 1
 
-cfloat     planetRadius = 6371.0e3;
-cfloat atmosphereRadius = 7071.0e3;
+cfloat ebin = 1.0e0;
+
+cfloat     planetRadius = 6371.0e3 / ebin;
+cfloat atmosphereRadius = 6471.0e3 / ebin;
+
+cfloat atmosphereHeight = atmosphereRadius - planetRadius;
 
 cvec2 radiiSquared = pow(vec2(planetRadius, atmosphereRadius), vec2(2.0));
 
-cvec3  rayleighCoeff = vec3(5.8e-6, 1.35e-5, 3.31e-5);
-cfloat      mieCoeff = 21e-6 * 2.0;
+cvec3  rayleighCoeff = vec3(5.8e-6, 1.35e-5, 3.31e-5) * ebin;
+cfloat      mieCoeff = 21e-6 * ebin;
 
-cfloat g = 0.85;
-cfloat rayleighHeight = 40.0e3;
-cfloat      mieHeight = 1.2e3 * 10.0;
+cfloat g = 0.9;
+cfloat rayleighHeight = 8.0e3 / ebin;
+cfloat      mieHeight = 1.2e3 * 2.0/ ebin;
 
 cvec2 invScatterHeight = -1.0 / vec2(rayleighHeight, mieHeight); // Optical step constant to save computations inside the loop
 
 vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
-	// Returns the length of air visible to the pixel inside the atmosphere
 	// Considers the planet's center as the coordinate origin, as per convention
-	
-	// worldPosition should probably be: vec3(0.0, planetRadius + cameraPosition.y, 0.0)
-	// worldDirection is just the normalized worldSpacePosition
 	
 	float b  = -dot(worldPosition, worldDirection);
 	float bb = b * b;
@@ -32,13 +32,17 @@ vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
 	if (worldPosition.y < atmosphereRadius) { // Uniform condition
 		if (bb < c.x || b < 0.0) return vec2(b + delta.y, 0.0); // If the earth is not visible to the ray, check against the atmosphere instead
 		
-		vec2 dist     = b + delta;
-		vec3 hitPoint = worldPosition + worldDirection * dist.x;
-		vec3 normal   = -normalize(hitPoint - vec3(0.0, planetRadius, 0.0));
+		vec2  dist     = b + delta;
+		vec3  hitPoint = worldPosition + worldDirection * dist.x;
+		vec3  normal   = -normalize(hitPoint);
 		
-	//	return vec2(dist.x, 0.0);
+		float horizonCoeff  = dot(normal, worldDirection);
+		      horizonCoeff  = exp(-(horizonCoeff * 5.0 - 4.0)) / exp(4.0);
+		      horizonCoeff *= pow(clamp01(1.0 - (worldPosition.y - planetRadius) / (atmosphereRadius - planetRadius)), sqrt(2.0));
 		
-		return vec2(mix(dist.x, dist.y, min1(dot(normal, vec3(0.0, 1.0, 0.0)) * 100.0)), 0.0);
+		show(pow(clamp01(1.0 - (worldPosition.y - planetRadius) / (atmosphereRadius - planetRadius)), 8.0));
+		
+		return vec2(mix(dist.x, dist.y, horizonCoeff), 0.0);
 	} else {
 		if (b < 0.0) return swizzle.gg;
 		
@@ -48,14 +52,14 @@ vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
 	}
 }
 
-float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection) { // Assumes the sample is inside the atmosphere
+float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection) {
+	// Simplified ray-sphere intersection
+	// To be used on samples which are always inside the atmosphere
+	
 	float b  = -dot(worldPosition, worldDirection);
-	float bb = b * b;
-	vec2  c  = dot(worldPosition, worldPosition) - radiiSquared;
+	float c  = radiiSquared.y - dot(worldPosition, worldPosition);
 	
-	vec2 delta = sqrt(max(bb - c, 0.0));
-	
-	return b + delta.y;
+	return b + sqrt(b*b + c);
 }
 
 vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pSun, cfloat iSun) {
@@ -63,12 +67,9 @@ vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pS
 	
 	vec2 atmosphereDistances = AtmosphereDistances(worldPosition, worldDirection);
 	
-	show(atmosphereDistances.x / planetRadius);
-	
 	if (atmosphereDistances.x <= 0.0) return vec3(0.0);
 	
-	// Calculate the step size of the primary ray
-	float iStepSize = atmosphereDistances.x / float(iSteps);
+	float iStepSize = atmosphereDistances.x / float(iSteps); // Calculate the step size of the primary ray
 	vec3  iStep     = worldDirection * iStepSize;
 	
 	float iCount = 0.0; // Initialize the primary ray counter
@@ -110,6 +111,8 @@ vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pS
 		
 		vec3 attn = exp(rayleighCoeff * dot(opticalDepth.rb, swizzle.bb) + mieCoeff * dot(opticalDepth.ga, swizzle.bb));
 		
+		opticalStep = min(opticalStep, (2147483647.0)); // Fix NaN samples
+		
 		rayleigh += opticalStep.r * attn;
 		mie      += opticalStep.g * attn;
 		
@@ -121,6 +124,8 @@ vec3 ComputeAtmosphericSky(vec3 playerSpacePosition, vec3 worldPosition, vec3 pS
     float  mu = dot(worldDirection, pSun);
     float rayleighPhase = 1.5 * (1.0 + mu * mu);
     float      miePhase = rayleighPhase * (1.0 - gg) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+	
+	mie = max0(mie);
 	
     // Calculate and return the final color
     return iSun * (rayleigh * rayleighPhase * rayleighCoeff + mie * miePhase * mieCoeff);
