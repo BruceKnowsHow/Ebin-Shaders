@@ -63,29 +63,35 @@ vec3 CalculateAtmosphericSky(in vec4 viewSpacePosition) {
 	vec3 worldLightVector    = (gbufferModelViewInverse * vec4(lightVector, 0.0)).xyz;
 	vec3 worldPosition       = vec3(0.0, planetRadius + 1.061e3 / ebin + max0(cameraPosition.y - HORIZON_HEIGHT) * 400.0 / ebin, 0.0);
 	
+	/*
 #ifdef CUSTOM_HORIZON_HEIGHT
 	float radius = max(176.0, far * sqrt(2.0) * 2.0);
 	
 	playerSpacePosition.y  = radius * playerSpacePosition.y / length(playerSpacePosition.xz) + cameraPosition.y - HORIZON_HEIGHT; // Reproject the world vector to have a consistent horizon height
 	playerSpacePosition.xz = normalize(playerSpacePosition.xz) * radius;
 #endif
+	*/
 	
 	return ComputeAtmosphericSky(playerSpacePosition, worldPosition, worldLightVector, 1.0);
 	
 	return vec3(0.0);
 }
 
+
 vec3 CalculateSky(in vec4 viewSpacePosition, in float alpha, cbool reflection) {
 	float visibility = CalculateFogFactor(viewSpacePosition, FOG_POWER);
 	
 	if (visibility < 0.001 && !reflection) return vec3(0.0);
-	vec3 clouds   = CompositeClouds(viewSpacePosition);
 	
-	return CalculateAtmosphericSky(viewSpacePosition) + clouds;
+	vec3 clouds = CompositeClouds(viewSpacePosition);
 	
+#ifdef PHYSICAL_ATMOSPHERE
+	vec3 gradient = CalculateAtmosphericSky(viewSpacePosition);
+	vec3 sunspot = vec3(0.0);
+#else
 	vec3 gradient = CalculateSkyGradient(viewSpacePosition, visibility);
-	vec3 sunspot  = reflection ? vec3(0.0) : CalculateSunspot(viewSpacePosition) * pow(visibility, 25) * alpha;
-
+	vec3 sunspot = reflection ? vec3(0.0) : CalculateSunspot(viewSpacePosition) * pow(visibility, 25) * alpha;
+#endif
 	
 	return (gradient + sunspot + clouds) * SKY_BRIGHTNESS;
 }

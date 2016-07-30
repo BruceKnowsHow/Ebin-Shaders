@@ -200,9 +200,14 @@ option.REFLECTION_EDGE_FALLOFF.comment=Whether or not screen-space-reflections "
 
 
 
+screen.Debug=Devlopment
+
 option.DEBUG=Debug Mode
 
 option.DEBUG_VIEW=Debug Shader View
 option.DEBUG_VIEW.comment=The shader stage you're debugging. -1: gbuffers_textured_lit.fsh. 0: composite.fsh. 1: composite1.fsh. 2: composite2.fsh. 3: composite3.fsh. 7: final.fsh
 
+option.PHYSICAL_ATMOSPHERE=Physical Atmosphere
+option.ENABLE_CLOUDS=Enable Clouds
 option.CUSTOM_TIME_CYCLE=Custom Time Cycle
+
