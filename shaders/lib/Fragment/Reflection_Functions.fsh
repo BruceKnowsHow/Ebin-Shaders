@@ -80,7 +80,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float  reflectFresnel = Fresnel(F0, vdotn, mask.metallic);
 	float  lightFresnel = Fresnel(F0, vdoth, mask.metallic);
 	
-	float alpha = lightFresnel * smoothness;
+	float alpha = lightFresnel * pow2(smoothness);
 	if(mask.metallic > 0.45) alpha = lightFresnel;
 	
 	//This breaks some things.
@@ -92,7 +92,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	float diffuse = diffuse(viewSpacePosition, normal, roughness);
 	
-	vec3 offscreen = (reflectedSky + specular * sunlightColor * 10.0);
+	vec3 offscreen = (reflectedSky * 2.0 + specular * sunlightColor * 10.0);
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
@@ -108,7 +108,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 		} else {
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, 2);
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 2) * 3.0;
 			
 			colorSample = mix(colorSample, reflectedSky, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			
@@ -129,6 +129,6 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	reflection = max(reflection, 0.0);
 	
-	color = mix(color * (1.0 - mask.metallic), reflection, alpha * 0.25);
+	color = mix(color * (1.0 - mask.metallic), reflection, alpha * 0.15);
 }
 #endif
