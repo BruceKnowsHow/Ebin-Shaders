@@ -40,8 +40,6 @@ vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
 		      horizonCoeff  = exp(-(horizonCoeff * 5.0 - 4.0)) / exp(4.0);
 		      horizonCoeff *= pow(clamp01(1.0 - (worldPosition.y - planetRadius) / (atmosphereRadius - planetRadius)), sqrt(2.0));
 		
-		show(pow(clamp01(1.0 - (worldPosition.y - planetRadius) / (atmosphereRadius - planetRadius)), 8.0));
-		
 		return vec2(mix(dist.x, dist.y, horizonCoeff), 0.0);
 	} else {
 		if (b < 0.0) return swizzle.gg;

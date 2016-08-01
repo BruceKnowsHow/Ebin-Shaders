@@ -22,20 +22,19 @@ float lambertDiffuse() {
 	return 1.0 / PI;
 }
 
-// [Burley 2012, "Physically-Based Shading at Disney"]
 float GetBurleyDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
 	
 	float VoH = dot(viewVector, halfVector); 
 	float NoV = dot(normal, viewVector);
-		float NoL = dot(normal, lightVector);
+	float NoL = dot(normal, lightVector);
 	
-	float FD90 = 0.5 + 2 * VoH * VoH * roughness;
-	float FdV = 1 + (FD90 - 1) * pow(1 - NoV, 5.0);
-	float FdL = 1 + (FD90 - 1) * pow(1 - NoL, 5.0);
+	float FD90 = 0.5 + 2.0 * VoH * VoH * roughness;
+	float FdV = 1.0 + (FD90 - 1.0) * pow(1.0 - NoV, 5.0);
+	float FdL = 1.0 + (FD90 - 1.0) * pow(1.0 - NoL, 5.0);
 	
-	return (1 / PI) * FdV * FdL;
+	return (1.0 / PI) * FdV * FdL;
 }
 
 float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
@@ -48,15 +47,13 @@ float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	
 	float alpha = pow2(roughness);
 	float alpha2 = pow2(alpha);
-	float VoL = VoH * VoH;
+	float VoL = 2.0 * VoH * VoH - 1.0;
 	float Cosri = VoL - NoV * NoL;
 	
-	float C1 = 1.0 - 0.5 * alpha2 / (alpha2 + 0.33);
-	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? 1.0 / max(NoL, NoV) : 1.0);
+	float C1 = 1.0 - 0.5 * alpha2 / (alpha2 + 0.65);
+	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? clamp01(1.0 / max(NoL, NoV)) : 1.0);
 	
-	float shading  = 1.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
-	
-	return clamp01(shading);
+	return 1.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
 }
 
 float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
@@ -67,25 +64,23 @@ float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roug
 	float NoV = dot(normal, viewVector);
 	float NoL = dot(normal, lightVector);
 	
-	cfloat F0 = 0.04;
+	cfloat F0 = 0.15;
 	
 	float alpha = pow2(roughness);
 	float alpha2 = pow2(alpha);
-	float VoL = VoH * VoH * 0.5 + 0.5;
+	float VoL = 2.0 * VoH * VoH - 1.0;
 	float Cosri = VoL - NoV * NoL;
 	
 	float alpha213 = alpha2 + 1.36053;
-	float Fr = (1.0 - (0.542026 * alpha2 + 0.303573 * alpha) / alpha213) * (1.0 - pow(1.0 - NoV, 4 * alpha2) / alpha213) *
+	float Fr = (1.0 - (0.542026 * alpha2 + 0.303573 * alpha) / alpha213) * (1.0 - pow(1.0 - NoV, 5.0 - 4.0 * alpha2) / alpha213) *
 	          ((-0.733996 * alpha2 * alpha + 1.50912 * alpha2 - 1.16402 * alpha) * pow(1.0 - NoV, 1.0 + (1.0 / 39 * alpha2 * alpha2 + 1.0)) + 1.0);
 	
-	float Lm = (max0(1.0 - 2.0 * alpha) * (1.0 - pow(1.0 - NoL, 5.0)) + min(2.0 * alpha, 1.0)) * (1.0 - 0.5 * alpha * (NoL - 1.0)) * NoL;
-	float Vd = (alpha2 / ((alpha2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (1.0 - pow(1.0 - NoL, (1.0 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
+	float Lm = (max0(1.0 - 2.0 * alpha) * (1.0 - pow(1.0 - NoL, 5.0)) + min(2.0 * alpha, 1.0)) * ((1.0 - 0.5 * alpha) * NoL + 0.5 * alpha * pow2(NoL));
+	float Vd = (alpha2 / ((alpha2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (1.0 - pow(1.0 - NoL, (1 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
 	float Bp = Cosri < 0.0 ? 1.4 * NoV * NoL * Cosri : Cosri;
-	float Lr = (21.0 / 20.0) * (1.0 - F0) * (Fr * Lm + Vd + Bp);
-	
-	float shading  = 1.0 / PI * Lr;
-	
-	return max0(shading);
+	float Lr = (21.0 / 20.0 * PI) * (1.0 - F0) * (Fr * Lm + Vd * Bp);
+
+	return 1.0 / PI * Lr;
 }
 
 float diffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
@@ -352,6 +347,6 @@ vec3 BlendMaterial(in vec3 color, in float diffuse, in vec3 specular, in float R
   float scRange = smoothstep(0.25, 0.45, R0Calc(R0, metallic));
   vec3  dielectric = vec3(diffuse + specular);
   vec3  metal = specular * color * 0.25;
-	show(diffuse * 0.05);
+	
   return mix(dielectric, metal, scRange);
 }

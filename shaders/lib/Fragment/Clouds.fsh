@@ -151,7 +151,6 @@ vec3 cloudLighting(in vec3 position) {
 		//Add a 2 lobed phase function to simulate silver lining and more correct light scattering.
 		//use an energy conservitive method to compile these features (S - S * exp(-at * O)) / at 
 		
-		show(accumulation);
 		return vec3(accumulation);
 }
 
@@ -188,7 +187,6 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 	clouds /= rayWeight;
 
 	clouds.rgb = mix(vec3(0.0), clouds.rgb * 10, min(1.0, clouds.a));
-	show(clouds.rgb);
 
 	return clouds.rgb;
 }
