@@ -69,7 +69,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	float roughness = 1.0 - smoothness;
 	
-	#define IOR 0.15 // [0.05 0.1 0.15 0.25 0.5]
+	cfloat F0 = 0.15;
 	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
@@ -77,12 +77,11 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float vdotn   = clamp01(dot(viewVector, normal));
 	float vdoth   = clamp01(dot(viewVector, halfVector));
 	
-	vec3  sColor  = mix(vec3(IOR), clamp(color * 0.25, 0.02, 0.99), vec3(mask.metallic));
-	vec3  reflectFresnel = Fresnel(sColor, vdotn);
-	vec3  lightFresnel = Fresnel(sColor, vdoth);
+	float  reflectFresnel = Fresnel(F0, vdotn, mask.metallic);
+	float  lightFresnel = Fresnel(F0, vdoth, mask.metallic);
 	
-	vec3 alpha = reflectFresnel * smoothness;
-	if(mask.metallic > 0.1) alpha = sColor;
+	float alpha = lightFresnel * smoothness;
+	if(mask.metallic > 0.45) alpha = lightFresnel;
 	
 	//This breaks some things.
 	//if (length(alpha) < 0.01) return;
@@ -90,10 +89,10 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
-	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
+	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
+	float diffuse = diffuse(viewSpacePosition, normal, roughness);
 	
-	vec3 offscreen = (reflectedSky + reflectedSunspot * sunlightColor * 10.0);
-	if(mask.metallic > 0.5) offscreen *= smoothness + 0.1;
+	vec3 offscreen = (reflectedSky + specular * sunlightColor * 10.0);
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
@@ -126,8 +125,10 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	reflection /= PBR_RAYS;
 	
+	reflection = BlendMaterial(color, diffuse, reflection, F0, mask.metallic);
+	
 	reflection = max(reflection, 0.0);
 	
-	color = mix(color * (1.0 - mask.metallic), reflection, alpha);
+	color = mix(color * (1.0 - mask.metallic), reflection, alpha * 0.25);
 }
 #endif

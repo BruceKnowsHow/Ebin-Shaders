@@ -11,21 +11,99 @@ float randAngle() {
 	return float(30u * pow(x, y) + 10u * x * y);
 }
 
+float R0Calc(in float R0, in float metallic) {
+	if(metallic > 0.01) R0 = metallic;
+	return R0 = clamp(R0, 0.02, 0.99);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
-vec3 Fresnel(vec3 R0, float vdoth) {
-	vec3 fresnel;
+float lambertDiffuse() {
+	return 1.0 / PI;
+}
+
+float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+	vec3 viewVector = normalize(viewSpacePosition.xyz);
+	vec3 halfVector = normalize(lightVector - viewVector);
+	
+	float VoH = dot(viewVector, halfVector); 
+	float NoV = dot(normal, viewVector);
+	float NoL = dot(normal, lightVector);
+	
+	float alpha = pow2(roughness);
+	float alpha2 = pow2(alpha);
+	float VoL = VoH * VoH;
+	float Cosri = VoL - NoV * NoL;
+	
+	float C1 = 1.0 - 0.5 * alpha2 / (alpha2 + 0.33);
+	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? 1.0 / max(NoL, NoV) : 1.0);
+	
+	float shading  = 1.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
+	      //shading *= max0(NoL);
+	
+	return max0(shading);
+}
+
+float GetGotandaShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+	vec3 viewVector = normalize(viewSpacePosition.xyz);
+	vec3 halfVector = normalize(lightVector - viewVector);
+	
+	float VoH = dot(viewVector, halfVector); 
+	float NoV = dot(normal, viewVector);
+	float NoL = dot(normal, lightVector);
+	
+	cfloat F0 = 0.04;
+	
+	float alpha = pow2(roughness);
+	float alpha2 = pow2(alpha);
+	float VoL = VoH * VoH * 0.5 + 0.5;
+	float Cosri = VoL - NoV * NoL;
+	
+	float alpha213 = alpha2 + 1.36053;
+	float Fr = (1.0 - (0.542026 * alpha2 + 0.303573 * alpha) / alpha213) * (1.0 - pow(1.0 - NoV, 4 * alpha2) / alpha213) *
+	          ((-0.733996 * alpha2 * alpha + 1.50912 * alpha2 - 1.16402 * alpha) * pow(1.0 - NoV, 1.0 + (1.0 / 39 * alpha2 * alpha2 + 1.0)) + 1.0);
+	
+	float Lm = (max0(1.0 - 2.0 * alpha) * (1.0 - pow(1.0 - NoL, 5.0)) + min(2.0 * alpha, 1.0)) * (1.0 - 0.5 * alpha * (NoL - 1.0)) * NoL;
+	float Vd = (alpha2 / ((alpha2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (1.0 - pow(1.0 - NoL, (1.0 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
+	float Bp = Cosri < 0.0 ? 1.4 * NoV * NoL * Cosri : Cosri;
+	float Lr = (21.0 / 20.0) * (1.0 - F0) * (Fr * Lm + Vd + Bp);
+	
+	float shading  = 1.0 / PI * Lr;
+	      //shading *= max0(NoL);
+	
+	return max0(shading);
+}
+
+float diffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+float diffuse;
+	#if PBR_Diffuse == 1
+		diffuse = lambertDiffuse();
+	#elif PBR_Diffuse == 2
+		diffuse = GetOrenNayarShading(viewSpacePosition, normal, roughness);
+	#else 
+		diffuse = GetGotandaShading(viewSpacePosition, normal, roughness);
+	#endif
+	
+	return diffuse;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+float Fresnel(float R0, float vdoth, in float metallic) {
+	float fresnel;
+	
+	R0 = R0Calc(R0, metallic);
 	
 	#if FRESNEL == 1
-		fresnel = R0 + (vec3(1.0) - R0) * max0(pow(1.0 - vdoth, 5.0));
+		fresnel = R0 + (1.0 - R0) * max0(pow(1.0 - vdoth, 5.0));
 		
 	#elif FRESNEL == 2
-		fresnel = R0 + (vec3(1) - R0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
+		fresnel = R0 + (1 - R0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
 		
 	#elif FRESNEL == 3
-		vec3 nFactor = (1.0 + sqrt(R0)) / (1.0 - sqrt(R0));
-		vec3 gFactor = sqrt(pow(nFactor, vec3(2.0)) + pow(vdoth, 2.0) - 1.0);
-		fresnel = 0.5 * pow((gFactor - vdoth) / (gFactor + vdoth), vec3(2.0)) * (1 + pow(((gFactor + vdoth) * vdoth - 1.0) / ((gFactor - vdoth) * vdoth + 1.0), vec3(2.0)));
+		float nFactor = (1.0 + sqrt(R0)) / (1.0 - sqrt(R0));
+		float gFactor = sqrt(pow2(nFactor) + pow2(vdoth) - 1.0);
+		fresnel = 0.5 * pow((gFactor - vdoth) / (gFactor + vdoth), 2.0) * (1.0 + pow(((gFactor + vdoth) * vdoth - 1.0) / ((gFactor - vdoth) * vdoth + 1.0), 2.0));
 
 	#endif
 	
@@ -233,10 +311,10 @@ float CalculateMicrofacetDistribution(in vec3 halfVector, in vec3 normal, in flo
  *
  * \return The color of the specular highlight at the current fragment
  */
-vec3 CalculateSpecularHighlight(
+float CalculateSpecularHighlight(
 	in vec3 lightVector,
 	in vec3 normal,
-	in vec3 fresnel,
+	in float fresnel,
 	in vec3 viewVector,
 	in float roughness) {
 	
@@ -252,4 +330,11 @@ vec3 CalculateSpecularHighlight(
 	float vdotn = max(0.01, dot(viewVector, normal));
 	
 	return fresnel * geometryFactor * microfacetDistribution * ldotn / (4.0 * ldotn * vdotn);
+}
+
+vec3 BlendMaterial(in vec3 color, in float diffuse, in vec3 specular, in float R0, in float metallic) {
+  float scRange = smoothstep(0.25, 0.45, R0Calc(R0, metallic));
+  vec3  dielectric = vec3(diffuse + specular);
+  vec3  metal = specular * color * 0.25;
+  return mix(dielectric, metal, scRange);
 }
