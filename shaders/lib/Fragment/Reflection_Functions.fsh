@@ -129,6 +129,6 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	reflection = max(reflection, 0.0);
 	
-	color = mix(color * (1.0 - mask.metallic), reflection, alpha * 0.15);
+	color = mix(color * (1.0 - mask.metallic), reflection, alpha * 0.35);
 }
 #endif
