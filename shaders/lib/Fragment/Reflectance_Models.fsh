@@ -22,7 +22,23 @@ float lambertDiffuse() {
 	return 1.0 / PI;
 }
 
-float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+// [Burley 2012, "Physically-Based Shading at Disney"]
+float GetBurleyDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+	vec3 viewVector = normalize(viewSpacePosition.xyz);
+	vec3 halfVector = normalize(lightVector - viewVector);
+	
+	float VoH = dot(viewVector, halfVector); 
+	float NoV = dot(normal, viewVector);
+		float NoL = dot(normal, lightVector);
+	
+	float FD90 = 0.5 + 2 * VoH * VoH * roughness;
+	float FdV = 1 + (FD90 - 1) * pow(1 - NoV, 5.0);
+	float FdL = 1 + (FD90 - 1) * pow(1 - NoL, 5.0);
+	
+	return (1 / PI) * FdV * FdL;
+}
+
+float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
 	
@@ -39,12 +55,11 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? 1.0 / max(NoL, NoV) : 1.0);
 	
 	float shading  = 1.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
-	      //shading *= max0(NoL);
 	
 	return clamp01(shading);
 }
 
-float GetGotandaShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
 	
@@ -69,7 +84,6 @@ float GetGotandaShading(in vec4 viewSpacePosition, in vec3 normal, in float roug
 	float Lr = (21.0 / 20.0) * (1.0 - F0) * (Fr * Lm + Vd + Bp);
 	
 	float shading  = 1.0 / PI * Lr;
-	      shading *= max0(NoL);
 	
 	return max0(shading);
 }
@@ -79,9 +93,11 @@ float diffuse;
 	#if PBR_Diffuse == 1
 		diffuse = lambertDiffuse();
 	#elif PBR_Diffuse == 2
-		diffuse = GetOrenNayarShading(viewSpacePosition, normal, roughness);
-	#else 
-		diffuse = GetGotandaShading(viewSpacePosition, normal, roughness);
+		diffuse = GetBurleyDiffuse(viewSpacePosition, normal, roughness);
+	#elif PBR_Diffuse ==3
+		diffuse = GetOrenNayarDiffuse(viewSpacePosition, normal, roughness);
+	#else
+		diffuse = GetGotandaDiffuse(viewSpacePosition, normal, roughness);
 	#endif
 	
 	return diffuse;
