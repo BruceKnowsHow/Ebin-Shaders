@@ -41,7 +41,7 @@ float GetOrenNayarShading(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	float shading  = 1.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
 	      //shading *= max0(NoL);
 	
-	return max0(shading);
+	return clamp01(shading);
 }
 
 float GetGotandaShading(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
@@ -69,7 +69,7 @@ float GetGotandaShading(in vec4 viewSpacePosition, in vec3 normal, in float roug
 	float Lr = (21.0 / 20.0) * (1.0 - F0) * (Fr * Lm + Vd + Bp);
 	
 	float shading  = 1.0 / PI * Lr;
-	      //shading *= max0(NoL);
+	      shading *= max0(NoL);
 	
 	return max0(shading);
 }
@@ -336,5 +336,6 @@ vec3 BlendMaterial(in vec3 color, in float diffuse, in vec3 specular, in float R
   float scRange = smoothstep(0.25, 0.45, R0Calc(R0, metallic));
   vec3  dielectric = vec3(diffuse + specular);
   vec3  metal = specular * color * 0.25;
+	show(diffuse * 0.05);
   return mix(dielectric, metal, scRange);
 }
