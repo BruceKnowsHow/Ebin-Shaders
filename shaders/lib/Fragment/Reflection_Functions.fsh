@@ -16,11 +16,12 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float vdotn   = clamp01(dot(viewVector, normal));
 	float vdoth   = clamp01(dot(viewVector, halfVector));
 	
-	vec3  sColor  = mix(vec3(0.15), color * 0.2, vec3(mask.metallic));
-	vec3  reflectFresnel = Fresnel(sColor, vdotn);
-	vec3  lightFresnel = Fresnel(sColor, vdoth);
+	cfloat F0 = 0.15; //To be replaced with metalloic
 	
-	vec3 alpha = reflectFresnel * smoothness;
+	float  reflectFresnel = Fresnel(F0, vdotn, mask.metallic);
+	float  lightFresnel = Fresnel(F0, vdoth, mask.metallic);
+	
+	vec3 alpha = vec3(lightFresnel * smoothness);
 	
 	if (length(alpha) < 0.001) return;
 	
@@ -30,7 +31,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb;
 	     reflectedSky *= 1.0;
 	
-	vec3 reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
+	float reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
 	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 10.0;
 	
@@ -51,7 +52,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	reflection = max(reflection, 0.0);
 	
-	color = mix(color, reflection, alpha);
+	color = mix(color, reflection, alpha * 0.25);
 }
 
 #else
