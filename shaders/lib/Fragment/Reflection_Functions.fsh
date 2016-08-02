@@ -61,7 +61,7 @@ float noise(in vec2 coord) {
 }
 
 void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
-	if (mask.water < 0.5) smoothness = pow(smoothness, 4.8);
+	smoothness = pow2(smoothness);
 	
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
@@ -70,7 +70,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	float roughness = 1.0 - smoothness;
 	
-	cfloat F0 = 0.15;
+	float F0 = 0.15;
 	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
@@ -80,10 +80,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	float  reflectFresnel = Fresnel(F0, vdotn, mask.metallic);
 	float  lightFresnel = Fresnel(F0, vdoth, mask.metallic);
-	
-	float alpha = lightFresnel * pow2(smoothness);
-	if(mask.metallic > 0.45) alpha = lightFresnel;
-	
+
 	//This breaks some things.
 	//if (length(alpha) < 0.01) return;
 	
@@ -126,10 +123,10 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	reflection /= PBR_RAYS;
 	
-	reflection = BlendMaterial(color, diffuse, reflection, F0, mask.metallic);
+	reflection = BlendMaterial(color, diffuse, reflection, lightFresnel * smoothness * 0.05, F0, mask.metallic);
 	
 	reflection = max(reflection, 0.0);
 	
-	color = mix(color * (1.0 - mask.metallic), reflection, alpha * 0.35);
+	color = reflection;
 }
 #endif
