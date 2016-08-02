@@ -70,7 +70,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	float roughness = 1.0 - smoothness;
 	
-	float F0 = 0.15;
+	float R0 = 0.10;
+	R0 = R0Calc(R0, mask.metallic);
 	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
@@ -78,8 +79,8 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	float vdotn   = clamp01(dot(viewVector, normal));
 	float vdoth   = clamp01(dot(viewVector, halfVector));
 	
-	float  reflectFresnel = Fresnel(F0, vdotn, mask.metallic);
-	float  lightFresnel = Fresnel(F0, vdoth, mask.metallic);
+	float  reflectFresnel = Fresnel(R0, vdotn, mask.metallic);
+	float  lightFresnel = Fresnel(R0, vdoth, mask.metallic);
 
 	//This breaks some things.
 	//if (length(alpha) < 0.01) return;
@@ -88,9 +89,9 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
 	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
-	float diffuse = diffuse(viewSpacePosition, normal, roughness);
+	float diffuse = diffuse(R0, viewSpacePosition, normal, roughness);
 	
-	vec3 offscreen = (reflectedSky * 2.0 + specular * sunlightColor * 10.0);
+	vec3 offscreen = (clamp01(reflectedSky * 0.4) * lightFresnel + specular * sunlightColor) / 2.0;
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
@@ -102,11 +103,11 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 		vec3 rayDirection = reflect(normalize(viewSpacePosition.xyz), reflectDir);
 		
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) { //this is much faster I tested
-			reflection += offscreen + 0.5 * mask.metallic;
+			reflection += offscreen;
 		} else {
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, 2) * 3.0;
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 2);
 			
 			colorSample = mix(colorSample, reflectedSky, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			
@@ -117,13 +118,13 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 				colorSample      = mix(colorSample, reflectedSky, pow(1.0 - edge, 10.0));
 			#endif
 			
-			reflection += colorSample;
+			reflection += colorSample * reflectFresnel;
 		}
 	}
 	
 	reflection /= PBR_RAYS;
 	
-	reflection = BlendMaterial(color, diffuse, reflection, lightFresnel * smoothness * 0.05, F0, mask.metallic);
+	reflection = BlendMaterial(color, diffuse, reflection, R0, smoothness);
 	
 	reflection = max(reflection, 0.0);
 	

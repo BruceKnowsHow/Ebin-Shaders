@@ -53,7 +53,7 @@ float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	float C1 = 1.0 - 0.5 * alpha2 / (alpha2 + 0.65);
 	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? clamp01(1.0 / max(NoL, NoV)) : 1.0);
 
-	return 2.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
+	return 2.5 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
 }
 
 float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
@@ -83,7 +83,7 @@ float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roug
 	return 1.0 / PI * Lr;
 }
 
-float diffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+float diffuse(in float R0, in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
 float diffuse;
 	#if PBR_Diffuse == 1
 		diffuse = lambertDiffuse();
@@ -95,15 +95,13 @@ float diffuse;
 		diffuse = GetGotandaDiffuse(viewSpacePosition, normal, roughness);
 	#endif
 	
-	return diffuse;
+	return diffuse * (1.0 - R0);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 float Fresnel(float R0, float vdoth, in float metallic) {
 	float fresnel;
-	
-	R0 = R0Calc(R0, metallic);
 	
 	#if FRESNEL == 1
 		fresnel = R0 + (1.0 - R0) * max0(pow(1.0 - vdoth, 5.0));
@@ -350,10 +348,10 @@ float CalculateSpecularHighlight(
 	return fresnel * geometryFactor * microfacetDistribution * ldotn / (4.0 * ldotn * vdotn);
 }
 
-vec3 BlendMaterial(in vec3 color, in float diffuse, in vec3 specular, in float alpha, in float R0, in float metallic) {
-  float scRange = smoothstep(0.25, 0.45, R0Calc(R0, metallic));
-  vec3  dielectric = mix(diffuse * color, specular, alpha);
-  vec3  metal = specular * color * 0.1;
-	
+vec3 BlendMaterial(in vec3 color, in float diffuse, in vec3 specular, in float R0, in float smoothness) {
+  float scRange = smoothstep(0.25, 0.45, R0);
+  vec3  dielectric = diffuse * color + specular * smoothness * 0.5;
+  vec3  metal = specular * color * 0.6;
+
   return mix(dielectric, metal, scRange);
 }
