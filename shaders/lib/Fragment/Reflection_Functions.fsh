@@ -70,7 +70,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	float roughness = 1.0 - smoothness;
 	
-	float R0 = 0.10;
+	float R0 = undefR0;
 	R0 = R0Calc(R0, mask.metallic);
 	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
@@ -124,7 +124,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 	
 	reflection /= PBR_RAYS;
 	
-	reflection = BlendMaterial(color, diffuse, reflection, R0, smoothness);
+	reflection = BlendMaterial(color, reflection, R0, smoothness);
 	
 	reflection = max(reflection, 0.0);
 	

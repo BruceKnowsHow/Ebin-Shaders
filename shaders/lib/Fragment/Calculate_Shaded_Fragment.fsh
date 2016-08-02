@@ -34,7 +34,23 @@ struct Lightmap {    // Contains vector light levels with color
 vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 GI, in float AO, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
 	Shading shading;
 	
-	shading.normal = GetDiffuseShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
+	float R0 = undefR0;
+	R0 = R0Calc(R0, mask.metallic);
+	
+	#ifndef PBR
+		shading.normal = GetDiffuseShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
+	#else
+		float diffuseLighting = diffuse(R0, ViewSpacePosition, normal, 1.0 - pow2(smoothness));
+		
+		diffuseLighting = diffuseLighting * (1.0 - mask.grass       ) + mask.grass  * 0.5;
+		diffuseLighting = diffuseLighting * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
+		
+		float scRange = smoothstep(0.25, 0.45, R0);
+		float  dielectric = diffuseLighting;
+	  float  metal = max0(dot(normal, lightVector));
+
+		shading.normal = mix(dielectric, metal, scRange);
+	#endif
 	
 	vec3 SubSurfaceColor = vec3(1.0);
 	if(mask.leaves > 0.5 || mask.grass > 0.5) {

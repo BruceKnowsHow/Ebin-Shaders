@@ -6,6 +6,8 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 	return shading;
 }
 
+#include "/lib/Fragment/Reflectance_Models.fsh"
+
 float GetSubSurfaceDiffuse(in vec4 viewSpacePosition, in vec3 normal) { // This is a crude
 	cfloat wrap = 0.6;
 	cfloat scatterWidth = 0.4;

@@ -18,8 +18,8 @@ float R0Calc(in float R0, in float metallic) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-float lambertDiffuse() {
-	return 1.0 / PI;
+float lambertDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+	return 2.0 / PI * dot(normal, lightVector);
 }
 
 float GetBurleyDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
@@ -37,7 +37,7 @@ float GetBurleyDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float rough
 	return (1.0 / PI) * FdV * FdL;
 }
 
-float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in float R0) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
@@ -50,13 +50,13 @@ float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	float alpha2 = pow2(alpha);
 	float Cosri = VoL - NoV * NoL;
 	
-	float C1 = 1.0 - 0.5 * alpha2 / (alpha2 + 0.65);
+	float C1 = NoL * (1.0 - R0) * (1.0 - 0.5 * alpha2 / (alpha2 + 0.65));
 	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? clamp01(1.0 / max(NoL, NoV)) : 1.0);
 
-	return 2.5 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
+	return 2.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
 }
 
-float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in float R0) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
@@ -64,8 +64,6 @@ float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roug
 	float NoV = dot(normal, viewVector);
 	float NoL = dot(normal, lightVector);
 	float VoL = dot(viewVector, lightVector);
-	
-	cfloat F0 = 0.15;
 	
 	float alpha = pow2(roughness);
 	float alpha2 = pow2(alpha);
@@ -78,7 +76,7 @@ float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roug
 	float Lm = (max0(1.0 - 2.0 * alpha) * (1.0 - pow(1.0 - NoL, 5.0)) + min(2.0 * alpha, 1.0)) * ((1.0 - 0.5 * alpha) * NoL + 0.5 * alpha * pow2(NoL));
 	float Vd = (alpha2 / ((alpha2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (1.0 - pow(1.0 - NoL, (1 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
 	float Bp = Cosri < 0.0 ? 1.4 * NoV * NoL * Cosri : Cosri;
-	float Lr = (21.0 / 20.0 * PI) * (1.0 - F0) * (Fr * Lm + Vd * Bp);
+	float Lr = (21.0 / 20.0 * PI) * (1.0 - R0) * (Fr * Lm + Vd * Bp);
 
 	return 1.0 / PI * Lr;
 }
@@ -86,16 +84,16 @@ float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roug
 float diffuse(in float R0, in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
 float diffuse;
 	#if PBR_Diffuse == 1
-		diffuse = lambertDiffuse();
+		diffuse = lambertDiffuse(viewSpacePosition, normal, roughness);
 	#elif PBR_Diffuse == 2
 		diffuse = GetBurleyDiffuse(viewSpacePosition, normal, roughness);
 	#elif PBR_Diffuse ==3
-		diffuse = GetOrenNayarDiffuse(viewSpacePosition, normal, roughness);
+		diffuse = GetOrenNayarDiffuse(viewSpacePosition, normal, roughness, R0);
 	#else
-		diffuse = GetGotandaDiffuse(viewSpacePosition, normal, roughness);
+		diffuse = GetGotandaDiffuse(viewSpacePosition, normal, roughness, R0);
 	#endif
 	
-	return diffuse * (1.0 - R0);
+	return diffuse;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -348,9 +346,9 @@ float CalculateSpecularHighlight(
 	return fresnel * geometryFactor * microfacetDistribution * ldotn / (4.0 * ldotn * vdotn);
 }
 
-vec3 BlendMaterial(in vec3 color, in float diffuse, in vec3 specular, in float R0, in float smoothness) {
+vec3 BlendMaterial(in vec3 color, in vec3 specular, in float R0, in float smoothness) {
   float scRange = smoothstep(0.25, 0.45, R0);
-  vec3  dielectric = diffuse * color + specular * smoothness * 0.5;
+  vec3  dielectric = color + specular * smoothness * 0.5;
   vec3  metal = specular * color * 0.6;
 
   return mix(dielectric, metal, scRange);
