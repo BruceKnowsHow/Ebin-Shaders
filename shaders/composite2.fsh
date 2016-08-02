@@ -230,7 +230,10 @@ void main() {
 	float depth0 = GetDepth(texcoord);
 	vec4  viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
 	
-	Mask mask = CalculateMasks(Decode16(texture2D(colortex4, texcoord).a).g);
+	
+	vec2 encode = Decode16(texture2D(colortex4, texcoord).a);
+	float torchLightmap = encode.r;
+	Mask mask = CalculateMasks(encode.g);
 	
 	vec2  refractedCoord     = texcoord;
 	float depth1             = depth0;

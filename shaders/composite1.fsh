@@ -182,7 +182,7 @@ void main() {
 		
 		encode0.r = mod(encode0.r, 0.5);
 		
-		encode1 = vec4(encode0.rgb, Encode16(vec2(0.0, mask.materialIDs)));
+		encode1 = vec4(encode0.rgb, Encode16(vec2(torchLightmap, mask.materialIDs)));
 	}
 	
 	
