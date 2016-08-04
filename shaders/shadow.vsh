@@ -58,7 +58,7 @@ vec4 BiasShadowProjection(vec4 position) {
 	position.z  += 0.000005 / (abs(position.x) + 1.0);
 	position.z  += 0.002 * pow(biasCoeff * 2.0, 2.0);
 	
-	position.z  /= 4.0; // Shrink the domaof the z-buffer. This counteracts the noticable issue where far terrawould not have shadows cast, especially when the sun was near the horizon
+	position.z  /= 4.0; // Shrink the domain of the z-buffer. This counteracts the noticable issue where far terrain would not have shadows cast, especially when the sun was near the horizon
 	
 	return position;
 }

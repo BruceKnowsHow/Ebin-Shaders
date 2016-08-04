@@ -1,4 +1,4 @@
-float cubesmooth(float x) { // Applies a subtle S-shaped curve, doma[0 to 1]
+float cubesmooth(float x) { // Applies a subtle S-shaped curve, domain [0 to 1]
 	return x * x * (3.0 - 2.0 * x);
 }
 

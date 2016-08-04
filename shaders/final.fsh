@@ -92,7 +92,7 @@ vec3[8] GetBloom() {
 	vec3[8] bloom;
 	
 #ifdef BLOOM_ENABLED
-	// These arguments should be identical to those composite2.fsh
+	// These arguments should be identical to those in composite2.fsh
 	bloom[1] = GetBloomTile(  4, vec2(0.0                         ,                          0.0));
 	bloom[2] = GetBloomTile(  8, vec2(0.0                         , 0.25     + pixelSize.y * 2.0));
 	bloom[3] = GetBloomTile( 16, vec2(0.125    + pixelSize.x * 2.0, 0.25     + pixelSize.y * 2.0));
