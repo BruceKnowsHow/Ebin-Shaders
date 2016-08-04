@@ -137,16 +137,9 @@ vec3 cloudLighting(vec3 position) {
     //
     // Find five points in a cone going from position toward the light vector
     // For each of those points, calculate the amount of cloud at that point
-    // Additionally, generate one point directly in the direction of the light and farther away than the points in the cone.
-    // How much farther? fuck if I know. Try twice or three times the distance
-    // Get the amount of clouds at the far away point. This amount is now called Of
-    // Sum all those cloud amounts together. That sum will now be called O
-    // O is the amount of light occlusion at your cloud. You should multiply your ambient light by 1 - O
-     -    // Of is how much the sun is occluded by far away clouds, and O is the amount that the sun is occluded in total.
+    // Of is how much the sun is occluded by far away clouds, and O is the amount that the sun is occluded in total.
     // The sun should be occluded by max(O, Of)
-    // Now you have two numbers: ambient light strength and direct light strength. Multiply them by their respective colors and add
-    // them together. Return this term.
-		
+   	
 		//Edit: Instead of just multiplying the two terms together firstly add beersPowderLaw to compute the amount of light that is going toward the eye.
 		//Add a 2 lobed phase function to simulate silver lining and more correct light scattering.
 		//use an energy conservitive method to compile these features (S - S * exp(-at * O)) / at 
