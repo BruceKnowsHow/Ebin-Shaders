@@ -1,10 +1,10 @@
-void rotate(inout vec2 vector, in float radians) {
+void rotate(inout vec2 vector, float radians) {
 	vector *= mat2(
 		cos(radians), -sin(radians),
 		sin(radians),  cos(radians));
 }
 
-void rotateDeg(inout vec2 vector, in float degrees) {
+void rotateDeg(inout vec2 vector, float degrees) {
 	degrees = radians(degrees);
 	
 	vector *= mat2(

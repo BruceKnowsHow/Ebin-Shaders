@@ -1,4 +1,4 @@
-vec3 CalculateVertexDisplacements(in vec3 worldSpacePosition, in float skyLightmap) {
+vec3 CalculateVertexDisplacements(vec3 worldSpacePosition, float skyLightmap) {
 	worldSpacePosition += cameraPosition.xyz;
 	
 	vec3 wave = vec3(0.0);

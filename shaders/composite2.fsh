@@ -50,23 +50,23 @@ varying vec2 pixelSize;
 #include "/lib/Fragment/Reflectance_Models.fsh"
 
 
-vec3 GetColor(in vec2 coord) {
+vec3 GetColor(vec2 coord) {
 	return texture2D(colortex1, coord).rgb;
 }
 
-vec3 GetColorLod(in vec2 coord, in float lod) {
+vec3 GetColorLod(vec2 coord, float lod) {
 	return texture2DLod(colortex1, coord, lod).rgb;
 }
 
-float GetDepth(in vec2 coord) {
+float GetDepth(vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
 
-float GetTransparentDepth(in vec2 coord) {
+float GetTransparentDepth(vec2 coord) {
 	return texture2D(depthtex1, coord).x;
 }
 
-vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
+vec4 CalculateViewSpacePosition(vec2 coord, float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
 	
@@ -79,11 +79,11 @@ vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
 	return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
 }
 
-vec3 GetNormal(in vec2 coord) {
+vec3 GetNormal(vec2 coord) {
 	return DecodeNormal(texture2D(colortex4, coord).xy);
 }
 
-float GetVolumetricFog(in vec2 coord) {
+float GetVolumetricFog(vec2 coord) {
 #ifdef VOLUMETRIC_FOG
 	return texture2D(colortex6, coord).r;
 #else
@@ -96,7 +96,7 @@ float GetVolumetricFog(in vec2 coord) {
 
 #include "/lib/Fragment/Sky.fsh"
 
-bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirection, in float firstStepSize, cfloat rayGrowth, cint maxSteps, cint maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
+bool ComputeRaytracedIntersection(vec3 startingViewPosition, vec3 rayDirection, float firstStepSize, cfloat rayGrowth, cint maxSteps, cint maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
 	vec3 rayStep = rayDirection * firstStepSize;
 	vec4 ray = vec4(startingViewPosition + rayStep, 1.0);
 	
@@ -152,7 +152,7 @@ bool ComputeRaytracedIntersection(in vec3 startingViewPosition, in vec3 rayDirec
 #include "/lib/Fragment/Reflection_Functions.fsh"
 
 
-vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangentNormal) {
+vec2 GetRefractedCoord(vec2 coord, vec4 viewSpacePosition, vec3 tangentNormal) {
 	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
 	
 	float fov = atan(1.0 / gbufferProjection[1].y) * 2.0 / RAD;
@@ -170,7 +170,7 @@ vec2 GetRefractedCoord(in vec2 coord, in vec4 viewSpacePosition, in vec3 tangent
 	return refractedCoord;
 }
 
-mat3 DecodeTBN(in float tbnIndex) {
+mat3 DecodeTBN(float tbnIndex) {
 	tbnIndex = round(tbnIndex * 16.0);
 	
 	vec3 tangent;
@@ -201,7 +201,7 @@ mat3 DecodeTBN(in float tbnIndex) {
 	return mat3(tangent, binormal, normal);
 }
 
-vec3 waterFog(in vec3 color1, in vec3 normal, in vec4 viewSpacePosition0, in vec4 viewSpacePosition1, in float skyLightmap) {
+vec3 waterFog(vec3 color1, vec3 normal, vec4 viewSpacePosition0, vec4 viewSpacePosition1, float skyLightmap) {
 	cfloat wrap = 0.2;
 	cfloat scatterWidth = 0.5;
 	

@@ -35,11 +35,11 @@ vec4 GetWorldSpacePositionShadow() {
 	return shadowModelViewInverse * shadowProjectionInverse * ftransform();
 }
 
-vec4 WorldSpaceToShadowProjection(in vec4 worldSpacePosition) {
+vec4 WorldSpaceToShadowProjection(vec4 worldSpacePosition) {
 	return shadowProjection * shadowModelView * worldSpacePosition;
 }
 
-vec4 WorldSpaceToShadowProjection1(in vec4 worldSpacePosition) {
+vec4 WorldSpaceToShadowProjection1(vec4 worldSpacePosition) {
 	return shadowProjection * shadowView * worldSpacePosition;
 }
 
@@ -49,7 +49,7 @@ vec4 WorldSpaceToShadowProjection1(in vec4 worldSpacePosition) {
 
 #include "/lib/Misc/Bias_Functions.glsl"
 
-vec4 BiasShadowProjection(in vec4 position) {
+vec4 BiasShadowProjection(vec4 position) {
 	float biasCoeff = GetShadowBias(position.xy);
 	
 	position.xy /= biasCoeff;
@@ -58,7 +58,7 @@ vec4 BiasShadowProjection(in vec4 position) {
 	position.z  += 0.000005 / (abs(position.x) + 1.0);
 	position.z  += 0.002 * pow(biasCoeff * 2.0, 2.0);
 	
-	position.z  /= 4.0; // Shrink the domain of the z-buffer. This counteracts the noticable issue where far terrain would not have shadows cast, especially when the sun was near the horizon
+	position.z  /= 4.0; // Shrink the domaof the z-buffer. This counteracts the noticable issue where far terrawould not have shadows cast, especially when the sun was near the horizon
 	
 	return position;
 }
@@ -86,7 +86,7 @@ void main() {
 	#ifndef PLAYER_SHADOW
 	if (   mc_Entity.x == 0 // If the vertex is an entity
 		&& abs(position.x) < 1.0
-		&& position.y > -0.1 &&  position.y < 2.0 // Check if the vertex is in A bounding box around the player, so that at least non-near entities still cast shadows
+		&& position.y > -0.1 &&  position.y < 2.0 // Check if the vertex is A bounding box around the player, so that at least non-near entities still cast shadows
 		&& abs(position.z) < 1.0
 	) color.a = 0.0;
 	#endif
@@ -94,7 +94,7 @@ void main() {
 	#ifndef PLAYER_GI_BOUNCE
 	if (   mc_Entity.x == 0 // If the vertex is an entity
 		&& abs(position.x) < 1.0
-		&& position.y > -0.1 &&  position.y < 2.0 // Check if the vertex is in A bounding box around the player, so that at least non-near entities still cast shadows
+		&& position.y > -0.1 &&  position.y < 2.0 // Check if the vertex is A bounding box around the player, so that at least non-near entities still cast shadows
 		&& abs(position.z) < 1.0
 	) color.rgb = vec3(0.0);
 	#endif

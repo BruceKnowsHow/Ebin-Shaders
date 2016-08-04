@@ -1,7 +1,7 @@
 #ifndef AO_ENABLED
 	#define CalculateSSAO(a, b) 1.0
 #elif AO_MODE == 1 // AlchemyAO
-float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
+float CalculateSSAO(vec4 viewSpacePosition, vec3 normal) {
 	cint samples = 12;
 	cfloat radius = 0.7;
 	cfloat intensity = 0.10;
@@ -34,7 +34,7 @@ float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
 
 // HBAO paper http://rdimitrov.twistedsanity.net/HBAO_SIGGRAPH08.pdf
 // HBAO SIGGRAPH presentation http://developer.download.nvidia.com/presentations/2008/SIGGRAPH/HBAO_SIG08b.pdf
-float CalculateSSAO(in vec4 viewSpacePosition, in vec3 normal) {
+float CalculateSSAO(vec4 viewSpacePosition, vec3 normal) {
 	cfloat sampleRadius     = 0.5;
 	cint   sampleDirections = 6;
 	cfloat sampleStep       = 0.016;

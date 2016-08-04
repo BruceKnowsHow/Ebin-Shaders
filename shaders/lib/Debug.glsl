@@ -9,23 +9,23 @@ vec3 Debug;
 #endif
 
 
-void show(in bool x) {
+void show(bool x) {
 	Debug = vec3(float(x));
 }
 
-void show(in float x) {
+void show(float x) {
 	Debug = vec3(x);
 }
 
-void show(in vec2 x) {
+void show(vec2 x) {
 	Debug = vec3(length(x));
 }
 
-void show(in vec3 x) {
+void show(vec3 x) {
 	Debug = x;
 }
 
-void show(in vec4 x) {
+void show(vec4 x) {
 	Debug = x.rgb;
 }
 

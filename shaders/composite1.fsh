@@ -48,37 +48,37 @@ varying vec2 texcoord;
 #include "/lib/Misc/Calculate_Fogfactor.glsl"
 
 
-vec3 GetDiffuse(in vec2 coord) {
+vec3 GetDiffuse(vec2 coord) {
 	return texture2D(colortex1, coord).rgb;
 }
 
-float GetDepth(in vec2 coord) {
+float GetDepth(vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
 
-float GetTransparentDepth(in vec2 coord) {
+float GetTransparentDepth(vec2 coord) {
 	return texture2D(depthtex1, coord).x;
 }
 
-float ExpToLinearDepth(in float depth) {
+float ExpToLinearDepth(float depth) {
 	return 2.0 * near * (far + near - depth * (far - near));
 }
 
-vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
+vec4 CalculateViewSpacePosition(vec2 coord, float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
 	
 	return position;
 }
 
-vec3 GetNormal(in vec2 coord) {
+vec3 GetNormal(vec2 coord) {
 	return DecodeNormal(texture2D(colortex4, coord).xy);
 }
 
 
 #include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 
-void BilateralUpsample(in vec3 normal, in float depth, out vec3 GI, out float volFog, out float AO) {
+void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float volFog, out float AO) {
 	GI = vec3(0.0);
 	volFog = 0.0;
 	AO = 0.0;

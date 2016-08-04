@@ -1,4 +1,4 @@
-vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
+vec2 GetDitherred2DNoise(vec2 coord, float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
 	coord *= vec2(viewWidth, viewHeight);
 	coord  = mod(coord, vec2(n));
 	coord /= noiseTextureResolution;
@@ -6,7 +6,7 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 }
 
 #define ComputeShadows(x, y) ComputeVariablySoftShadows(x, y)
-float ComputeVariablySoftShadows(in vec4 viewSpacePosition, in float sunlightCoeff) { // Variable softness shadows (PCSS)
+float ComputeVariablySoftShadows(vec4 viewSpacePosition, float sunlightCoeff) { // Variable softness shadows (PCSS)
 	if (sunlightCoeff <= 0.01) return 0.0;
 	
 	float biasCoeff;

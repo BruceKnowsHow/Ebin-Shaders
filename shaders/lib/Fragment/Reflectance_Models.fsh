@@ -11,18 +11,18 @@ float randAngle() {
 	return float(30u * pow(x, y) + 10u * x * y);
 }
 
-float R0Calc(in float R0, in float metallic) {
+float R0Calc(float R0, float metallic) {
 	if(metallic > 0.01) R0 = metallic;
 	return R0 = clamp(R0, 0.02, 0.99);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-float lambertDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+float lambertDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 	return 2.0 / PI * dot(normal, lightVector);
 }
 
-float GetBurleyDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+float GetBurleyDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
 	
@@ -37,7 +37,7 @@ float GetBurleyDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float rough
 	return (1.0 / PI) * FdV * FdL;
 }
 
-float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in float R0) {
+float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float R0) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
@@ -56,7 +56,7 @@ float GetOrenNayarDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float ro
 	return 2.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
 }
 
-float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roughness, in float R0) {
+float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float R0) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
@@ -81,7 +81,7 @@ float GetGotandaDiffuse(in vec4 viewSpacePosition, in vec3 normal, in float roug
 	return 1.0 / PI * Lr;
 }
 
-float diffuse(in float R0, in vec4 viewSpacePosition, in vec3 normal, in float roughness) {
+float diffuse(float R0, vec4 viewSpacePosition, vec3 normal, float roughness) {
 float diffuse;
 	#if PBR_Diffuse == 1
 		diffuse = lambertDiffuse(viewSpacePosition, normal, roughness);
@@ -98,7 +98,7 @@ float diffuse;
 
 /////////////////////////////////////////////////////////////////////////////
 
-float Fresnel(float R0, float vdoth, in float metallic) {
+float Fresnel(float R0, float vdoth, float metallic) {
 	float fresnel;
 	
 	#if FRESNEL == 1
@@ -124,28 +124,28 @@ float Fresnel(float R0, float vdoth, in float metallic) {
   return fresnel;
 }
 
-float ImplictGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 normal) {
+float ImplictGeom(vec3 viewDirection, vec3 lightDirection, vec3 normal) {
 	float ndotl = max0(dot(normal, lightDirection));
 	float ndotv = max0(dot(normal, viewDirection));
 	
 	return ndotl * ndotv;
 }
 
-float NewmannGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 normal) {
+float NewmannGeom(vec3 viewDirection, vec3 lightDirection, vec3 normal) {
 	float ndotl = max0(dot(normal, lightDirection));
 	float ndotv = max0(dot(normal, viewDirection));
 	
 	return (ndotl * ndotv) / max(ndotl, ndotv);
 }
 
-float SmithGeom(in vec3 viewDirection, in vec3 normal, in float alpha) {
+float SmithGeom(vec3 viewDirection, vec3 normal, float alpha) {
 	float ndotv = max0(dot(normal, viewDirection));
 	float alphaCoeff = sqrt((2.0 * pow2(alpha)) / PI);
 	
 	return ndotv / (ndotv * (1.0 - alphaCoeff) + alphaCoeff);
 }
 
-float cookTorranceGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 halfVector, in vec3 normal) {
+float cookTorranceGeom(vec3 viewDirection, vec3 lightDirection, vec3 halfVector, vec3 normal) {
 	float hdotn = max0(dot(halfVector, normal));
 	float vdoth = max0(dot(viewDirection, halfVector));
 	float ndotv = max0(dot(normal, viewDirection));
@@ -159,14 +159,14 @@ float cookTorranceGeom(in vec3 viewDirection, in vec3 lightDirection, in vec3 ha
 	return min1(min(g1, g2));
 }
 
-float GGXSmithGeom(in vec3 i, in vec3 normal, in float alpha) {
+float GGXSmithGeom(vec3 i, vec3 normal, float alpha) {
 	float idotn = max0(dot(normal, i));
 	float idotn2 = pow2(idotn);
 	
 	return 2.0 * idotn / (idotn + sqrt(idotn2 + pow(alpha, 2.0) * (1 - idotn2)));
 }
 
-float SchlickBeckmannGeom(in vec3 i, in vec3 normal, in float alpha) {
+float SchlickBeckmannGeom(vec3 i, vec3 normal, float alpha) {
 	float k = sqrt((2.0 * pow2(alpha)) / PI);
 	float idotn = max0(dot(normal, i));
 	
@@ -175,21 +175,21 @@ float SchlickBeckmannGeom(in vec3 i, in vec3 normal, in float alpha) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-float GGXDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
+float GGXDistribution(vec3 halfVector, vec3 normal, float alpha) {
 	float alpha2 = pow2(alpha);
 	float hdotn = max0(dot(halfVector, normal));
 	
 	return alpha2 / (PI * pow2(1.0 + pow2(hdotn) * (alpha2 - 1.0)));
 }
 
-float BeckmannDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
+float BeckmannDistribution(vec3 halfVector, vec3 normal, float alpha) {
 	float hdotn = max0(dot(halfVector, normal));
 	float alpha2 = pow2(alpha);
 	
 	return (1.0 / (PI * alpha2 * pow(hdotn, 3.0))) * exp((pow2(hdotn) - 1.0) / (pow2(hdotn) * alpha2));
 }
 
-float phongDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
+float phongDistribution(vec3 halfVector, vec3 normal, float alpha) {
 	float roughnessCoeff = 2.0 / pow2(alpha) - 2.0;
 	float hdotn = max0(dot(halfVector, normal));
 	float Xp = (hdotn <= 0.0 ? 0.0 : 1.0);
@@ -197,7 +197,7 @@ float phongDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
 	return Xp * ((roughnessCoeff + 2.0) / (2.0 * PI)) * pow(hdotn, roughnessCoeff);
 }
 
-vec3 phongSkew(in vec2 epsilon, in float roughness) {
+vec3 phongSkew(vec2 epsilon, float roughness) {
 	// Uses the Phong sample skewing Functions
 	float Ap = (2.0 / pow2(roughness)) - 2.0;
 	float theta = acos(pow(epsilon.x, (2.0 / Ap + 2.0)));
@@ -212,7 +212,7 @@ vec3 phongSkew(in vec2 epsilon, in float roughness) {
 	return vec3(x, y, z);
 }
 
-vec3 beckmannSkew(in vec2 epsilon, in float roughness) {
+vec3 beckmannSkew(vec2 epsilon, float roughness) {
 	// Uses the Beckman sample skewing Functions
 	float theta = atan(sqrt(-pow2(roughness) * log(1.0 - epsilon.x)));
 	float phi = 2.0 * PI * epsilon.y;
@@ -226,7 +226,7 @@ vec3 beckmannSkew(in vec2 epsilon, in float roughness) {
 	return vec3(x, y, z);
 }
 
-vec3 ggxSkew(in vec2 epsilon, in float roughness) {
+vec3 ggxSkew(vec2 epsilon, float roughness) {
 	// Uses the GGX sample skewing Functions
 	float theta = atan(sqrt(roughness * roughness * epsilon.x / (1.0 - epsilon.x)));
 	float phi = 2.0 * PI * epsilon.y;
@@ -240,7 +240,7 @@ vec3 ggxSkew(in vec2 epsilon, in float roughness) {
 	return vec3(x, y, z);
 }
 
-vec3 skew(in vec2 epsilon, in float roughness) {
+vec3 skew(vec2 epsilon, float roughness) {
 	vec3 skew;
 		
 	#if PBR_SKEW == 1
@@ -263,7 +263,7 @@ vec3 skew(in vec2 epsilon, in float roughness) {
  *
  * \return The geometry distribution of the given fragment
  */
-float CalculateGeometryDistribution(in vec3 lightVector, in vec3 viewVector, in vec3 halfVector, in vec3 normal, in float alpha) {
+float CalculateGeometryDistribution(vec3 lightVector, vec3 viewVector, vec3 halfVector, vec3 normal, float alpha) {
 	float geometry;
 	
 	#if PBR_GEOMETRY_MODEL == 1
@@ -297,7 +297,7 @@ float CalculateGeometryDistribution(in vec3 lightVector, in vec3 viewVector, in 
  *
  * \return The microfacet distribution for the current fragment
  */
-float CalculateMicrofacetDistribution(in vec3 halfVector, in vec3 normal, in float alpha) {
+float CalculateMicrofacetDistribution(vec3 halfVector, vec3 normal, float alpha) {
 	float distribution;
 		
 	#if PBR_DISTROBUTION_MODEL == 1	
@@ -320,17 +320,17 @@ float CalculateMicrofacetDistribution(in vec3 halfVector, in vec3 normal, in flo
  * \param lightVector The normalized view space vector from the fragment being shaded to the light
  * \param normal The normalized view space normal of the fragment being shaded
  * \param fresnel The fresnel foctor for this fragment
- * \param viewVector The normalized vector from the fragment to the camera being shaded, expressed in view space
+ * \param viewVector The normalized vector from the fragment to the camera being shaded, expressed view space
  * \param roughness The roughness of the fragment
  *
  * \return The color of the specular highlight at the current fragment
  */
 float CalculateSpecularHighlight(
-	in vec3 lightVector,
-	in vec3 normal,
-	in float fresnel,
-	in vec3 viewVector,
-	in float roughness) {
+	vec3 lightVector,
+	vec3 normal,
+	float fresnel,
+	vec3 viewVector,
+	float roughness) {
 	
 	roughness = pow2(roughness * 0.5);
 	roughness = clamp01(roughness);
@@ -346,7 +346,7 @@ float CalculateSpecularHighlight(
 	return fresnel * geometryFactor * microfacetDistribution * ldotn / (4.0 * ldotn * vdotn);
 }
 
-vec3 BlendMaterial(in vec3 color, in vec3 specular, in float R0, in float smoothness) {
+vec3 BlendMaterial(vec3 color, vec3 specular, float R0, float smoothness) {
   float scRange = smoothstep(0.25, 0.45, R0);
   vec3  dielectric = color + specular * smoothness * 0.5;
   vec3  metal = specular * color * 0.6;

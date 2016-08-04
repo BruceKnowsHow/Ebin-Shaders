@@ -9,7 +9,7 @@ float dither8(vec2 pos) {
   	0, 32, 8, 40, 2, 34, 10, 42, /* 8x8 Bayer ordered dithering */
   	48, 16, 56, 24, 50, 18, 58, 26, /* pattern. Each input pixel */
   	12, 44, 4, 36, 14, 46, 6, 38, /* is scaled to the 0..63 range */
-  	60, 28, 52, 20, 62, 30, 54, 22, /* before looking in this table */
+  	60, 28, 52, 20, 62, 30, 54, 22, /* before looking this table */
   	3, 35, 11, 43, 1, 33, 9, 41, /* to determine the action. */
   	51, 19, 59, 27, 49, 17, 57, 25,
   	15, 47, 7, 39, 13, 45, 5, 37,
@@ -41,7 +41,7 @@ vec3 CloudSpace(float minDist){
 
 
 //Noise is one of the most important aspects of this. clouds could not be possible without them.
-float Get3DNoise(in vec3 pos) {
+float Get3DNoise(vec3 pos) {
 	vec3 part  = floor(pos);
 	vec3 whole = fract(pos);
 
@@ -89,7 +89,7 @@ float cumulusFBM(vec3 pos, float time) {
 /////////////////////////////////////////////////////////////////////////
 //This point is where we color and compile each cloud type.
 
-float cumulusClouds(in vec3 rayPos) {
+float cumulusClouds(vec3 rayPos) {
 	float cloudHeight = 250.0;
 	float cloudShapeMult = 2.0;
 
@@ -118,7 +118,7 @@ float cumulusClouds(in vec3 rayPos) {
 	return cumulus * 20;
 }
 
-vec3 cloudLighting(in vec3 position) {
+vec3 cloudLighting(vec3 position) {
 	float jCount = 1.0;
 	
 	float clouds = 0.0;
@@ -135,14 +135,14 @@ vec3 cloudLighting(in vec3 position) {
 	
     // What to do:
     //
-    // Find five points in a cone going from position toward the light vector
+    // Find five points a cone going from position toward the light vector
     // For each of those points, calculate the amount of cloud at that point
-    // Additionally, generate one point directly in the direction of the light and farther away than the points in the cone.
+    // Additionally, generate one point directly the direction of the light and farther away than the points the cone.
     // How much farther? fuck if I know. Try twice or three times the distance
     // Get the amount of clouds at the far away point. This amount is now called Of
     // Sum all those cloud amounts together. That sum will now be called O
     // O is the amount of light occlusion at your cloud. You should multiply your ambient light by 1 - O
-    // Of is how much the sun is occluded by far away clouds, and O is the amount that the sun is occluded in total.
+    // Of is how much the sun is occluded by far away clouds, and O is the amount that the sun is occluded total.
     // The sun should be occluded by max(O, Of)
     // Now you have two numbers: ambient light strength and direct light strength. Multiply them by their respective colors and add
     // them together. Return this term.
@@ -154,7 +154,7 @@ vec3 cloudLighting(in vec3 position) {
 		return vec3(accumulation);
 }
 
-vec3 RayMarchClouds(in vec4 viewSpacePosition) {
+vec3 RayMarchClouds(vec4 viewSpacePosition) {
 	vec3 worldPosition = (gbufferModelViewInverse * viewSpacePosition).xyz;
 	float worldDistance = length(worldPosition.xyz);
 	float worldPositionSize = 1.953125;
@@ -191,7 +191,7 @@ vec3 RayMarchClouds(in vec4 viewSpacePosition) {
 	return clouds.rgb;
 }
 
-vec3 CompositeClouds(in vec4 viewSpacePosition) {
+vec3 CompositeClouds(vec4 viewSpacePosition) {
 #ifndef ENABLE_CLOUDS
 	return vec3(0.0);
 #endif

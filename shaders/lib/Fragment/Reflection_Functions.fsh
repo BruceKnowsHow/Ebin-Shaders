@@ -1,5 +1,5 @@
 #ifndef PBR
-void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
+void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal, float smoothness, float skyLightmap, Mask mask) {
 	if (mask.water < 0.5) smoothness = pow(smoothness, 2.0) * 0.85;
 	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
@@ -56,11 +56,11 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 }
 
 #else
-float noise(in vec2 coord) {
+float noise(vec2 coord) {
     return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
-void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 normal, in float smoothness, in float skyLightmap, in Mask mask) {
+void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal, float smoothness, float skyLightmap, Mask mask) {
 	smoothness = pow2(smoothness);
 	
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
@@ -105,7 +105,7 @@ void ComputeReflectedLight(inout vec3 color, in vec4 viewSpacePosition, in vec3 
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.3, 30, 3, reflectedCoord, reflectedViewSpacePosition)) { //this is much faster I tested
 			reflection += offscreen;
 		} else {
-			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
+			// Maybe give previous reflection Intersection to make sure we dont compute rays the same pixel twice.
 			
 			vec3 colorSample = GetColorLod(reflectedCoord.st, 2);
 			

@@ -1,4 +1,4 @@
-float GetLambertianShading(in vec3 normal, in Mask mask) {
+float GetLambertianShading(vec3 normal, Mask mask) {
 	float shading = max0(dot(normal, lightVector));
 	      shading = shading * (1.0 - mask.grass       ) + mask.grass       ;
 	      shading = shading * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
@@ -8,7 +8,7 @@ float GetLambertianShading(in vec3 normal, in Mask mask) {
 
 #include "/lib/Fragment/Reflectance_Models.fsh"
 
-float GetSubSurfaceDiffuse(in vec4 viewSpacePosition, in vec3 normal) { // This is a crude
+float GetSubSurfaceDiffuse(vec4 viewSpacePosition, vec3 normal) { // This is a crude
 	cfloat wrap = 0.6;
 	cfloat scatterWidth = 0.4;
 	

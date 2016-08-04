@@ -1,4 +1,4 @@
-vec3 GetWavingGrass(in vec3 position, in float magnitude) {
+vec3 GetWavingGrass(vec3 position, float magnitude) {
 	vec3 wave = vec3(0.0);
 	
 	#ifdef WAVING_GRASS
@@ -18,7 +18,7 @@ vec3 GetWavingGrass(in vec3 position, in float magnitude) {
 	return wave * magnitude;
 }
 
-vec3 GetWavingLeaves(in vec3 position, in float magnitude) {
+vec3 GetWavingLeaves(vec3 position, float magnitude) {
 	vec3 wave = vec3(0.0);
 	
 	#ifdef WAVING_LEAVES
@@ -39,7 +39,7 @@ vec3 GetWavingLeaves(in vec3 position, in float magnitude) {
 	return wave * magnitude;
 }
 
-vec3 GetWavingWater(in vec3 position, in float magnitude) {
+vec3 GetWavingWater(vec3 position, float magnitude) {
 	vec3 wave = vec3(0.0);
 	
 	#ifdef WAVING_WATER

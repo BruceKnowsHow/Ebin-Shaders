@@ -1,4 +1,4 @@
-float Encode16(in vec2 encodedBuffer) {
+float Encode16(vec2 encodedBuffer) {
 	cvec2 encode = vec2(1.0, exp2(8.0));
 	
 	encodedBuffer = round(encodedBuffer * 255.0);
@@ -6,7 +6,7 @@ float Encode16(in vec2 encodedBuffer) {
 	return dot(encodedBuffer, encode) / (exp2(16.0) - 1.0);
 }
 
-vec2 Decode16(in float encodedBuffer) {
+vec2 Decode16(float encodedBuffer) {
 	cvec2 decode = 1.0 / (exp2(8.0) - 1.0) / vec2(1.0, exp2(8.0));
 	
 	vec2 decoded;
@@ -19,7 +19,7 @@ vec2 Decode16(in float encodedBuffer) {
 	return decoded * decode;
 }
 
-void Decode16(in float encodedBuffer, out float buffer0, out float buffer1) {
+void Decode16(float encodedBuffer, out float buffer0, out float buffer1) {
 	cvec2 decode = 1.0 / (exp2(8.0) - 1.0) / vec2(1.0, exp2(8.0));
 	
 	vec2 decoded;
@@ -35,11 +35,11 @@ void Decode16(in float encodedBuffer, out float buffer0, out float buffer1) {
 	buffer1 = decoded.g;
 }
 
-vec3 EncodeColor(in vec3 color) { // Prepares the color to be sent through a limited dynamic range pipeline
+vec3 EncodeColor(vec3 color) { // Prepares the color to be sent through a limited dynamic range pipeline
 	return pow(color * 0.001, vec3(1.0 / 2.2));
 }
 
-vec3 DecodeColor(in vec3 color) {
+vec3 DecodeColor(vec3 color) {
 	return pow(color, vec3(2.2)) * 1000.0;
 }
 

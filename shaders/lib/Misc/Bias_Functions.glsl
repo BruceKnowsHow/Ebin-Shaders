@@ -1,4 +1,4 @@
-float GetShadowBias(in vec2 shadowProjection) {
+float GetShadowBias(vec2 shadowProjection) {
 	if (!biasShadowMap) return 1.0;
 
 	#ifdef EXTENDED_SHADOW_DISTANCE
@@ -10,20 +10,20 @@ float GetShadowBias(in vec2 shadowProjection) {
 	#endif
 }
 
-vec2 BiasShadowMap(in vec2 shadowProjection, out float biasCoeff) {
+vec2 BiasShadowMap(vec2 shadowProjection, out float biasCoeff) {
 	biasCoeff = GetShadowBias(shadowProjection);
 	return shadowProjection / biasCoeff;
 }
 
-vec2 BiasShadowMap(in vec2 shadowProjection) {
+vec2 BiasShadowMap(vec2 shadowProjection) {
 	return shadowProjection / GetShadowBias(shadowProjection);
 }
 
-vec3 BiasShadowProjection(in vec3 position, out float biasCoeff) {
+vec3 BiasShadowProjection(vec3 position, out float biasCoeff) {
 	biasCoeff = GetShadowBias(position.xy);
 	return position / vec3(vec2(biasCoeff), 4.0); // Apply bias to position.xy, shrink z-buffer
 }
 
-vec3 BiasShadowProjection(in vec3 position) {
+vec3 BiasShadowProjection(vec3 position) {
 	return position / vec3(vec2(GetShadowBias(position.xy)), 4.0);
 }

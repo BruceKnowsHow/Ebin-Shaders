@@ -1,4 +1,4 @@
-float GetMaterialIDs(in int mc_ID) { // Gather material masks
+float GetMaterialIDs(int mc_ID) { // Gather material masks
 #if defined gbuffers_hand
 	return 5.0;
 #endif

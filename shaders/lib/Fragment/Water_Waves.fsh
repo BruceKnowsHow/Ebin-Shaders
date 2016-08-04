@@ -1,4 +1,4 @@
-vec2 SmoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
+vec2 SmoothNoiseCoord(vec2 coord) { // Reduce bilinear artifacts by biasing the lookup coordinate towards the pixel center
 	coord *= noiseTextureResolution;
 	coord  = floor(coord) + cubesmooth(fract(coord)) + 0.5;
 	coord /= noiseTextureResolution;
@@ -6,7 +6,7 @@ vec2 SmoothNoiseCoord(in vec2 coord) { // Reduce bilinear artifacts by biasing t
 	return coord;
 }
 
-float SharpenWave(in float wave) {
+float SharpenWave(float wave) {
 	wave = 1.0 - abs(wave * 2.0 - 1.0);
 	
 	if (wave > 0.78) wave = 5.0 * wave - pow2(wave) * 2.5 - 1.6;
@@ -14,7 +14,7 @@ float SharpenWave(in float wave) {
 	return wave;
 }
 
-float GetWave(in vec2 coord) {
+float GetWave(vec2 coord) {
 	return texture2D(noisetex, SmoothNoiseCoord(coord)).x;
 }
 
@@ -58,7 +58,7 @@ float GetWaves(vec3 position, cfloat speed) {
 	return waves * WAVE_MULT / weights;
 }
 
-vec2 GetWaveDifferentials(in vec3 position) { // Get finite wave differentials for the world-space X and Z coordinates
+vec2 GetWaveDifferentials(vec3 position) { // Get finite wave differentials for the world-space X and Z coordinates
 	cfloat speed = 0.35;
 	
 	float a  = GetWaves(position                      , speed);
@@ -69,7 +69,7 @@ vec2 GetWaveDifferentials(in vec3 position) { // Get finite wave differentials f
 }
 
 
-vec2 GetWaveNormals(in vec4 viewSpacePosition, in vec3 flatWorldNormal) {
+vec2 GetWaveNormals(vec4 viewSpacePosition, vec3 flatWorldNormal) {
 	vec3 position = (gbufferModelViewInverse * vec4(viewSpacePosition.xyz, 0.0)).xyz;
 	
 	vec2 diff = GetWaveDifferentials(position + cameraPosition);

@@ -1,25 +1,23 @@
 #define iSteps 50
 #define jSteps 1
 
-cfloat ebin = 1.0e0;
-
-cfloat     planetRadius = 6371.0e3 / ebin;
-cfloat atmosphereRadius = 6471.0e3 / ebin;
+cfloat     planetRadius = 6371.0e3;
+cfloat atmosphereRadius = 6471.0e3;
 
 cfloat atmosphereHeight = atmosphereRadius - planetRadius;
 
 cvec2 radiiSquared = pow(vec2(planetRadius, atmosphereRadius), vec2(2.0));
 
-cvec3  rayleighCoeff = vec3(5.8e-6, 1.35e-5, 3.31e-5) * ebin;
-cfloat      mieCoeff = 21e-6 * ebin;
+cvec3  rayleighCoeff = vec3(5.8e-6, 1.35e-5, 3.31e-5);
+cfloat      mieCoeff = 21e-6;
 
 cfloat g = 0.9;
-cfloat rayleighHeight = 8.0e3 / ebin;
-cfloat      mieHeight = 1.2e3 * 1.5 / ebin;
+cfloat rayleighHeight = 8.0e3;
+cfloat      mieHeight = 1.2e3 * 1.5;
 
 cvec2 invScatterHeight = -1.0 / vec2(rayleighHeight, mieHeight); // Optical step constant to save computations inside the loop
 
-vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
+vec2 AtmosphereDistances(vec3 worldPosition, vec3 worldDirection) {
 	// Considers the planet's center as the coordinate origin, as per convention
 	
 	float b  = -dot(worldPosition, worldDirection);
@@ -50,7 +48,7 @@ vec2 AtmosphereDistances(in vec3 worldPosition, in vec3 worldDirection) {
 	}
 }
 
-float AtmosphereLength(in vec3 worldPosition, in vec3 worldDirection) {
+float AtmosphereLength(vec3 worldPosition, vec3 worldDirection) {
 	// Simplified ray-sphere intersection
 	// To be used on samples which are always inside the atmosphere
 	

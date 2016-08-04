@@ -1,4 +1,4 @@
-float CalculateFogFactor(in vec4 viewSpacePosition, in float power) {
+float CalculateFogFactor(vec4 viewSpacePosition, float power) {
 	if (abs(viewSpacePosition.z) > far * 1.9) return 1.0;
 	
 #ifndef FOG_ENABLED

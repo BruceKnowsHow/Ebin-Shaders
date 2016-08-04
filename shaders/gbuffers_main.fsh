@@ -1,4 +1,4 @@
-/* DRAWBUFFERS:0123456 */
+/* DRAWBUFFERS:01234 */
 
 uniform sampler2D texture;
 uniform sampler2D normals;
@@ -63,7 +63,7 @@ vec3 GetTangentNormal() {
 #endif
 }
 
-vec2 GetSpecularity(in float height, in float skyLightmap) {
+vec2 GetSpecularity(float height, float skyLightmap) {
 #ifdef SPECULARITY_MAPS
 	vec2 specular = texture2D(specular, texcoord).rg;
 	
@@ -84,7 +84,7 @@ vec2 GetSpecularity(in float height, in float skyLightmap) {
 #endif
 }
 
-vec2 EncodeNormalData(in vec3 normalTexture, in float tbnIndex) {
+vec2 EncodeNormalData(vec3 normalTexture, float tbnIndex) {
 	vec2 encode;
 	
 	encode.r = (tbnIndex + 8.0 * waterMask) / 16.0;
@@ -98,9 +98,7 @@ void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
 	vec4 diffuse = GetDiffuse();
-	
 	if (diffuse.a < 0.1000003) discard;
-	
 	
 	vec4 normal = GetNormal();
 	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	

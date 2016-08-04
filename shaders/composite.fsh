@@ -50,27 +50,27 @@ varying vec2 texcoord;
 
 #define texture2DRaw(x, y) texelFetch(x, ivec2(y * vec2(viewWidth, viewHeight)), 0) // texture2DRaw bypasses downscaled interpolation, which causes issues with encoded buffers
 
-float GetDepth(in vec2 coord) {
+float GetDepth(vec2 coord) {
 	return texture2DRaw(gdepthtex, coord).x;
 }
 
-float GetDepthLinear(in vec2 coord) {	
+float GetDepthLinear(vec2 coord) {	
 	return (near * far) / (texture2DRaw(gdepthtex, coord).x * (near - far) + far);
 }
 
-vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
+vec4 CalculateViewSpacePosition(vec2 coord, float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
 	
 	return position;
 }
 
-vec3 GetNormal(in vec2 coord) {
+vec3 GetNormal(vec2 coord) {
 	return DecodeNormal(texture2DRaw(colortex4, coord).xy);
 }
 
 
-vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
+vec2 GetDitherred2DNoise(vec2 coord, float n) { // Returns a random noise pattern ranging {-1.0 to 1.0} that repeats every n pixels
 	coord *= vec2(viewWidth, viewHeight);
 	coord  = mod(coord, vec2(n));
 	coord /= noiseTextureResolution;
@@ -88,7 +88,7 @@ vec2 GetDitherred2DNoise(in vec2 coord, in float n) { // Returns a random noise 
 #ifndef VOLUMETRIC_FOG
 	#define ComputeVolumetricFog(a) 1.0
 #else
-float ComputeVolumetricFog(in vec4 viewSpacePosition) {
+float ComputeVolumetricFog(vec4 viewSpacePosition) {
 	float fog    = 0.0;
 	float weight = 0.0;
 	

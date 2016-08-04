@@ -1,4 +1,4 @@
-void CalculateTBN(in vec3 position, out mat3 tbnMatrix) {
+void CalculateTBN(vec3 position, out mat3 tbnMatrix) {
 	vec3 tangent  = at_tangent.xyz;
 	vec3 binormal = -cross(gl_Normal, at_tangent.xyz);
 	

@@ -26,22 +26,22 @@ varying vec2 pixelSize;
 #include "/lib/Fragment/Masks.fsh"
 
 
-vec3 GetColor(in vec2 coord) {
+vec3 GetColor(vec2 coord) {
 	return DecodeColor(texture2D(colortex3, coord).rgb);
 }
 
-float GetDepth(in vec2 coord) {
+float GetDepth(vec2 coord) {
 	return texture2D(gdepthtex, coord).x;
 }
 
-vec4 CalculateViewSpacePosition(in vec2 coord, in float depth) {
+vec4 CalculateViewSpacePosition(vec2 coord, float depth) {
 	vec4 position  = gbufferProjectionInverse * vec4(vec3(coord, depth) * 2.0 - 1.0, 1.0);
 	     position /= position.w;
 	
 	return position;
 }
 
-void MotionBlur(inout vec3 color, in float depth) {
+void MotionBlur(inout vec3 color, float depth) {
 #ifdef MOTION_BLUR
 //	if (mask.hand > 0.5) return;
 	
@@ -92,7 +92,7 @@ vec3[8] GetBloom() {
 	vec3[8] bloom;
 	
 #ifdef BLOOM_ENABLED
-	// These arguments should be identical to those in composite2.fsh
+	// These arguments should be identical to those composite2.fsh
 	bloom[1] = GetBloomTile(  4, vec2(0.0                         ,                          0.0));
 	bloom[2] = GetBloomTile(  8, vec2(0.0                         , 0.25     + pixelSize.y * 2.0));
 	bloom[3] = GetBloomTile( 16, vec2(0.125    + pixelSize.x * 2.0, 0.25     + pixelSize.y * 2.0));
@@ -112,7 +112,7 @@ vec3[8] GetBloom() {
 	return bloom;
 }
 
-vec3 Uncharted2Tonemap(in vec3 color) {
+vec3 Uncharted2Tonemap(vec3 color) {
 	cfloat A = 0.5, B = 0.7, C = 0.2, D = 0.2, E = 0.02, F = 0.6, W = 10.0;
 	cfloat whiteScale = 1.0 / (((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F);
 	cfloat ExposureBias = 1.5 * EXPOSURE;

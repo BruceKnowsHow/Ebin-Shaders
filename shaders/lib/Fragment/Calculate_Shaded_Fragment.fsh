@@ -31,7 +31,7 @@ struct Lightmap {    // Contains vector light levels with color
 // Underwater light caustics
 #endif
 
-vec3 CalculateShadedFragment(in Mask mask, in float torchLightmap, in float skyLightmap, in vec3 GI, in float AO, in vec3 normal, in float smoothness, in vec4 ViewSpacePosition) {
+vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, vec3 GI, float AO, vec3 normal, float smoothness, vec4 ViewSpacePosition) {
 	Shading shading;
 	
 	float R0 = undefR0;

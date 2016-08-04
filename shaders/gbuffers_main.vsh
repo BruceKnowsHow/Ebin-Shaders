@@ -33,7 +33,7 @@ varying float waterMask;
 #endif
 
 
-vec2 GetDefaultLightmap(in vec2 lightmapCoord) { // Gets the lightmap from the default lighting engine, ignoring any texture pack lightmap. First channel is torch lightmap, second channel is sky lightmap.
+vec2 GetDefaultLightmap(vec2 lightmapCoord) { // Gets the lightmap from the default lighting engine, ignoring any texture pack lightmap. First channel is torch lightmap, second channel is sky lightmap.
 	return clamp((lightmapCoord * pow2(1.031)) - 0.032, 0.0, 1.0).st; // Default lightmap texture coordinates work somewhat as lightmaps, however they need to be adjusted to use the full range of 0.0-1.0
 }
 
@@ -43,7 +43,7 @@ vec4 GetWorldSpacePosition() {
 	return gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
 }
 
-vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
+vec4 WorldSpaceToProjectedSpace(vec4 worldSpacePosition) {
 #if !defined gbuffers_hand
 	return gbufferProjection * gbufferModelView * worldSpacePosition;
 #else
@@ -56,7 +56,7 @@ vec4 WorldSpaceToProjectedSpace(in vec4 worldSpacePosition) {
 #include "/lib/Vertex/CalculateTBN.vsh"
 
 
-float EncodePlanarTBN(in vec3 worldNormal) { // Encode the TBN matrix into a 3-bit float
+float EncodePlanarTBN(vec3 worldNormal) { // Encode the TBN matrix into a 3-bit float
 	// Only valid for axis-oriented TBN matrices
 	
 	float tbnIndex = 6.0; // Default is 5.0, which corresponds to an upward facing block, such as ocean

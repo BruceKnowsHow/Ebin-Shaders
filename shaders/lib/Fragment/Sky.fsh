@@ -1,11 +1,11 @@
-float CalculateSunglow(in vec4 viewSpacePosition) {
+float CalculateSunglow(vec4 viewSpacePosition) {
 	float sunglow = max0(dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
 	      sunglow = pow(sunglow, 8.0);
 	
 	return sunglow;
 }
 
-vec3 CalculateSkyGradient(in vec4 viewSpacePosition, in float fogFactor) {
+vec3 CalculateSkyGradient(vec4 viewSpacePosition, float fogFactor) {
 	vec4 worldPosition = gbufferModelViewInverse * vec4(normalize(viewSpacePosition.xyz), 0.0);
 	
 #ifdef CUSTOM_HORIZON_HEIGHT
@@ -38,7 +38,7 @@ vec3 CalculateSkyGradient(in vec4 viewSpacePosition, in float fogFactor) {
 	return color * 0.9;
 }
 
-vec3 CalculateSunspot(in vec4 viewSpacePosition) {
+vec3 CalculateSunspot(vec4 viewSpacePosition) {
 	float sunspot  = max0(dot(normalize(viewSpacePosition.xyz), lightVector) - 0.01);
 	      sunspot  = pow(sunspot, 350.0);
 	      sunspot  = pow(sunspot + 1.0, 400.0) - 1.0;
@@ -48,7 +48,7 @@ vec3 CalculateSunspot(in vec4 viewSpacePosition) {
 	return sunspot * sunlightColor * sunlightColor * vec3(1.0, 0.8, 0.6);
 }
 
-vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
+vec3 CalculateAtmosphereScattering(vec4 viewSpacePosition) {
 	float factor = pow(length(viewSpacePosition.xyz), 1.4) * 0.0001 * ATMOSPHERIC_SCATTERING_AMOUNT;
 	
 	return pow(skylightColor, vec3(2.5)) * factor;
@@ -58,10 +58,10 @@ vec3 CalculateAtmosphereScattering(in vec4 viewSpacePosition) {
 
 #include "/lib/Fragment/Atmosphere.fsh"
 
-vec3 CalculateAtmosphericSky(in vec4 viewSpacePosition) {
+vec3 CalculateAtmosphericSky(vec4 viewSpacePosition) {
 	vec3 playerSpacePosition = (gbufferModelViewInverse * vec4(viewSpacePosition.xyz, 0.0)).xyz;
 	vec3 worldLightVector    = (gbufferModelViewInverse * vec4(lightVector, 0.0)).xyz;
-	vec3 worldPosition       = vec3(0.0, planetRadius + 1.061e3 / ebin + max0(cameraPosition.y - HORIZON_HEIGHT) * 400.0 / ebin, 0.0);
+	vec3 worldPosition       = vec3(0.0, planetRadius + 1.061e3 + max0(cameraPosition.y - HORIZON_HEIGHT) * 400.0, 0.0);
 	
 	/*
 #ifdef CUSTOM_HORIZON_HEIGHT
@@ -78,7 +78,7 @@ vec3 CalculateAtmosphericSky(in vec4 viewSpacePosition) {
 }
 
 
-vec3 CalculateSky(in vec4 viewSpacePosition, in float alpha, cbool reflection) {
+vec3 CalculateSky(vec4 viewSpacePosition, float alpha, cbool reflection) {
 	float visibility = CalculateFogFactor(viewSpacePosition, FOG_POWER);
 	
 	if (visibility < 0.001 && !reflection) return vec3(0.0);

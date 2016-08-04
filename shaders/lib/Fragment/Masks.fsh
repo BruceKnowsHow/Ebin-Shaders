@@ -13,7 +13,7 @@ struct Mask {
 	float transparent;
 };
 
-float EncodeMaterialIDs(in float materialIDs, in float bit0, in float bit1, in float bit2, in float bit3) {
+float EncodeMaterialIDs(float materialIDs, float bit0, float bit1, float bit2, float bit3) {
 	bit0 = float(bit0 > 0.5);
 	bit1 = float(bit1 > 0.5);
 	bit2 = float(bit2 > 0.5);
@@ -46,11 +46,11 @@ void DecodeMaterialIDs(inout float matID, out float[4] bit) {
 	matID -= bit[3] * 16.0;
 }
 
-float GetMaterialMask(in float mask, in float materialID) {
+float GetMaterialMask(float mask, float materialID) {
 	return float(abs(materialID - mask) < 0.5);
 }
 
-Mask CalculateMasks(in float materialIDs) {
+Mask CalculateMasks(float materialIDs) {
 	Mask mask;
 	
 	mask.materialIDs = materialIDs;
