@@ -231,8 +231,6 @@ void main() {
 			viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
 			
 			alpha = texture2D(colortex2, refractedCoord).r;
-			
-	//		if (mask.water > 0.5) alpha = 1.0;
 		}
 	}
 	
@@ -260,10 +258,7 @@ void main() {
 	
 	color1 = texture2D(colortex1, refractedCoord).rgb;
 	
-	color0 = mix(color1, color0, mask.transparent);
-	color0 = mix(color0, vec3(0.0), mask.water);
-	
-//	if (mask.water > 0.5) color0 = waterFog(color1, normal, viewSpacePosition0, viewSpacePosition1);
+	color0 = mix(color1, color0, mask.transparent - mask.water);
 	
 	
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
