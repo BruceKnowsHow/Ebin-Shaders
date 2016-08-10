@@ -5,7 +5,7 @@
 #include "/lib/Syntax.glsl"
 
 
-/* DRAWBUFFERS:56 */
+/* DRAWBUFFERS:6 */
 
 const bool shadowtex1Mipmap    = true;
 const bool shadowcolor0Mipmap  = true;
@@ -17,6 +17,7 @@ const bool shadowcolor1Nearest = false;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex4;
+uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -108,7 +109,7 @@ void main() {
 	float smoothness  = buffer0.r;
 	float skyLightmap = buffer0.g;
 	
-	Mask mask = CalculateMasks(Decode16(texture2D(colortex4, texcoord).a).g);
+	Mask mask = CalculateMasks(Decode16(texture2D(colortex5, texcoord).r).g);
 	
 	if (depth0 != depth1) {
 		mask.transparent = 1.0;

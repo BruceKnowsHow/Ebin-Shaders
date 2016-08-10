@@ -13,6 +13,7 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
+uniform sampler2D colortex5;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -76,10 +77,6 @@ vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
 	vec4 screenSpace = gbufferProjection * viewSpacePosition;
 	
 	return (screenSpace.xyz / screenSpace.w) * 0.5 + 0.5;
-}
-
-vec3 GetNormal(vec2 coord) {
-	return DecodeNormal(texture2D(colortex4, coord).xy);
 }
 
 
@@ -222,7 +219,7 @@ void main() {
 	vec4  viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
 	
 	
-	vec2 encode = Decode16(texture2D(colortex4, texcoord).a);
+	vec2 encode = Decode16(texture2D(colortex5, texcoord).r);
 	float torchLightmap = encode.r;
 	Mask mask = CalculateMasks(encode.g);
 	

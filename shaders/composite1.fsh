@@ -4,10 +4,9 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:14 */
+/* DRAWBUFFERS:145 */
 
 const bool colortex5MipmapEnabled = true;
-const bool colortex6MipmapEnabled = true;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
@@ -71,10 +70,6 @@ vec4 CalculateViewSpacePosition(vec2 coord, float depth) {
 	return position;
 }
 
-vec3 GetNormal(vec2 coord) {
-	return DecodeNormal(texture2D(colortex4, coord).xy);
-}
-
 
 #include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 
@@ -96,8 +91,8 @@ void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float AO) {
 		for(float j = -range; j <= range; j++) {
 			vec2 offset = vec2(i, j) / vec2(viewWidth, viewHeight);
 			
-			float sampleDepth  = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x);
-			vec3  sampleNormal = GetNormal(texcoord + offset * 8.0);
+			float sampleDepth  = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x );
+			vec3  sampleNormal =     DecodeNormal(texture2D(colortex4, texcoord + offset * 8.0).xy);
 		
 		#ifdef GI_ENABLED
 			float weight  = 1.0 - abs(depth - sampleDepth);
@@ -105,7 +100,7 @@ void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float AO) {
 			      weight  = pow(weight, 32);
 			      weight  = max(1.0e-6, weight);
 			
-			GI += pow(texture2DLod(colortex5, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).rgb, vec3(2.2)) * weight;
+			GI += pow(texture2DLod(colortex6, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).rgb, vec3(2.2)) * weight;
 			
 			totalGIWeight += weight;
 		#endif
@@ -116,7 +111,7 @@ void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float AO) {
 			      AOWeight = pow(AOWeight, 32);
 			      AOWeight = max(1.0e-6, AOWeight);
 			
-			AO += texture2DLod(colortex5, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).a * AOWeight;
+			AO += texture2DLod(colortex6, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).a * AOWeight;
 			
 			totalAOWeight += AOWeight;
 		#endif
@@ -141,7 +136,7 @@ void main() {
 	
 	float depth1 = GetTransparentDepth(texcoord);
 	
-	vec4 encode1 = texture2D(colortex4, texcoord);
+	vec4 encode1 = vec4(texture2D(colortex4, texcoord).rgb, texture2D(colortex5, texcoord).r);
 	
 	vec3 normal = DecodeNormal(encode1.xy);
 	
@@ -174,7 +169,8 @@ void main() {
 	vec3 GI; float AO;
 	BilateralUpsample(normal, depth1, GI, AO);
 	
-	gl_FragData[1] = vec4(encode1);
+	gl_FragData[1] = vec4(encode1.rgb, 1.0);
+	gl_FragData[2] = vec4(encode1.a  , 0.0, 0.0, 1.0);
 	
 	
 	vec3 diffuse = GetDiffuse(texcoord);

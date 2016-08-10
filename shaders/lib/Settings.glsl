@@ -15,10 +15,11 @@ const int colortex2Format = R8;
 
 ** Flat Gbuffers **
 const int colortex1Format = R11F_G11F_B10F;
-const int colortex4Format = RGBA16;
+const int colortex4Format = RGB16;
+const int colortex5Format = R16;
 
 ** composite0 Buffer **
-const int colortex5Format = RGBA8;
+const int colortex6Format = RGBA8;
 
 
 const float eyeBrightnessHalflife = 1.5;
