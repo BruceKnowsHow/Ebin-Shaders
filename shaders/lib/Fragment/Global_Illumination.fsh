@@ -57,7 +57,7 @@ vec3 ComputeGlobalIllumination(vec4 position, vec3 normal, float skyLightmap, co
 		float viewNormalCoeff   = max0(dot(      normal, sampleDir));
 		float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
 		
-		viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
+		viewNormalCoeff = mix(viewNormalCoeff, 1.0, GI_TRANSLUCENCE);
 		
 		shadowNormalCoeff = sqrt(shadowNormalCoeff);
 		
@@ -132,7 +132,7 @@ vec3 ComputeGlobalIllumination(vec4 position, vec3 normal, float skyLightmap, co
 			float viewNormalCoeff   = max0(dot(      normal, sampleDir));
 			float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
 			
-			viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
+			viewNormalCoeff = mix(viewNormalCoeff, 1.0, GI_TRANSLUCENCE);
 			
 			vec3 flux = pow(texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
 			
@@ -200,7 +200,7 @@ vec3 ComputeGlobalIllumination(vec4 position, vec3 normal, float skyLightmap, co
 		float viewNormalCoeff   = max0(dot(normal, sampleDir));
 		float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
 		
-		viewNormalCoeff = viewNormalCoeff * (1.0 - GI_TRANSLUCENCE) + GI_TRANSLUCENCE;
+		viewNormalCoeff = mix(viewNormalCoeff, 1.0, GI_TRANSLUCENCE);
 		
 		vec3 flux = pow(texture2DLod(shadowcolor, mapPos, 2).rgb, vec3(2.2));
 		

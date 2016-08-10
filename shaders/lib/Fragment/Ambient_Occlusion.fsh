@@ -16,7 +16,7 @@ float CalculateSSAO(vec4 viewSpacePosition, vec3 normal) {
 
 	for(int i = 0; i < samples; i++) {
 		vec2 pixelOffset = texcoord + vec2(sampleStep * cos(randomAngle), sampleStep * sin(randomAngle));
-		vec3 offsetPosition = CalculateViewSpacePosition(pixelOffset, GetDepth(pixelOffset)).xyz;
+		vec3 offsetPosition = CalculateViewSpacePosition(pixelOffset, texture2D(depthtex1, pixelOffset).x).xyz;
 		
 		vec3 differential = offsetPosition - viewSpacePosition.xyz;
 		float diffLength = lengthSquared(differential);
@@ -62,7 +62,7 @@ float CalculateSSAO(vec4 viewSpacePosition, vec3 normal) {
 			vec2 sampleOffset = (j + noise.y) * sampleStep * sampleDir;
 			vec2 offsetCoord  = texcoord + sampleOffset;
 			
-			float offsetDepth = GetDepth(offsetCoord);
+			float offsetDepth = texture2D(depthtex1, offsetCoord).x;
 			
 			vec3 offsetViewSpace = CalculateViewSpacePosition(offsetCoord, offsetDepth).xyz;
 			vec3 differential    = offsetViewSpace - viewSpacePosition.xyz;

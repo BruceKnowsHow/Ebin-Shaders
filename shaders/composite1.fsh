@@ -127,6 +127,8 @@ void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float AO) {
 #endif
 }
 
+#include "lib/Fragment/WaterDepthFog.fsh"
+
 
 void main() {
 	float depth0 = GetDepth(texcoord);
@@ -165,19 +167,24 @@ void main() {
 		encode1 = vec4(encode0.rgb, Encode16(vec2(torchLightmap, mask.materialIDs)));
 	}
 	
+	gl_FragData[1] = vec4(encode1.rgb, 1.0);
+	gl_FragData[2] = vec4(encode1.a  , 0.0, 0.0, 1.0);
+	
+	if (depth1 >= 1.0) return;
+	
 	
 	vec3 GI; float AO;
 	BilateralUpsample(normal, depth1, GI, AO);
 	
-	gl_FragData[1] = vec4(encode1.rgb, 1.0);
-	gl_FragData[2] = vec4(encode1.a  , 0.0, 0.0, 1.0);
-	
 	
 	vec3 diffuse = GetDiffuse(texcoord);
+	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
 	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	vec3 composite  = CalculateShadedFragment(mask, torchLightmap, skyLightmap, GI, AO, normal, smoothness, viewSpacePosition1);
 	     composite *= pow(diffuse * 1.2, vec3(2.8));
+	
+	if (mask.water > 0.5 || isEyeInWater == 1) composite = waterFog(composite, viewSpacePosition0, viewSpacePosition1);
 	
 	gl_FragData[0] = vec4(composite, 1.0);
 	

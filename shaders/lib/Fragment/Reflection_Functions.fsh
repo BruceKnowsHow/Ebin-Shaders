@@ -1,5 +1,7 @@
 #ifndef PBR
 void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal, float smoothness, float skyLightmap, Mask mask) {
+	if (isEyeInWater == 1) return;
+	
 	if (mask.water < 0.5) smoothness = pow(smoothness, 2.0) * 0.85;
 	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
@@ -61,6 +63,8 @@ float noise(vec2 coord) {
 }
 
 void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal, float smoothness, float skyLightmap, Mask mask) {
+	if (isEyeInWater == 1) return;
+	
 	smoothness = pow2(smoothness);
 	
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));

@@ -90,7 +90,7 @@ bool ComputeRaytracedIntersection(vec3 startingViewPosition, vec3 rayDirection, 
 	
 	screenSpacePosition = ViewSpaceToScreenSpace(ray);
 	
-	float refinements = 0;
+	float refinements = 0.0;
 	float refinementCoeff = 1.0;
 	
 	cbool doRefinements = (maxRefinements > 0);
@@ -107,13 +107,14 @@ bool ComputeRaytracedIntersection(vec3 startingViewPosition, vec3 rayDirection, 
 		
 		float diff = viewSpacePosition.z - ray.z;
 		
-		if (diff >= 0) {
+		if (diff >= 0.0) {
 			if (doRefinements) {
 				float error = firstStepSize * pow(rayGrowth, i) * refinementCoeff;
 				
 				if(diff <= error * 2.0 && refinements <= maxRefinements) {
 					ray.xyz -= rayStep * refinementCoeff;
-					refinementCoeff = 1.0 / exp2(++refinements);
+					refinements += 1.0;
+					refinementCoeff = exp2(-refinements);
 				} else if (diff <= error * 4.0 && refinements > maxRefinements) {
 					screenSpacePosition.z = sampleDepth;
 					return true;
@@ -189,29 +190,7 @@ mat3 DecodeTBN(float tbnIndex) {
 	return mat3(tangent, binormal, normal);
 }
 
-vec3 waterFog(vec3 color, vec3 normal, vec4 viewSpacePosition0, vec4 viewSpacePosition1, float skyLightmap) {
-	cfloat wrap = 0.2;
-	cfloat scatterWidth = 0.5;
-	
-	float NdotL = dot(normal, lightVector);
-	float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
-	float scatter = smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
-	
-	float waterDepth = distance(viewSpacePosition1.xyz, viewSpacePosition0.xyz); //How far is the water.
-	
-	//Beer's Law is what I'm using to determine water color.
-	float fogAccum = 1.0 / exp(waterDepth * 0.3);
-	
-	vec3 waterDepthColors = vec3(0.0015, 0.004, 0.0098) * sunlightColor;
-	vec3 waterFogColor = vec3(0.1, 0.5, 0.8);
-	
-	waterFogColor = mix(waterFogColor, sunlightColor * waterFogColor, vec3(scatter));
-	
-	color *= pow(vec3(0.7, 0.88, 1.0), vec3(waterDepth));
-	color = mix(waterDepthColors, color, clamp01(fogAccum));
-
-	return color;
-}
+#include "lib/Fragment/WaterDepthFog.fsh"
 
 
 void main() {
@@ -252,11 +231,14 @@ void main() {
 			viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
 			
 			alpha = texture2D(colortex2, refractedCoord).r;
+			
 	//		if (mask.water > 0.5) alpha = 1.0;
 		}
 	}
 	
 	vec3 sky = CalculateSky(viewSpacePosition1, 1.0 - alpha, false);
+	
+	if (isEyeInWater == 1) sky = waterFog(sky, viewSpacePosition0, vec4(0.0));
 	
 	if (depth0 >= 1.0) { gl_FragData[0] = vec4(EncodeColor(sky.rgb), 1.0); exit(); return; }
 	
@@ -279,14 +261,17 @@ void main() {
 	color1 = texture2D(colortex1, refractedCoord).rgb;
 	
 	color0 = mix(color1, color0, mask.transparent);
+	color0 = mix(color0, vec3(0.0), mask.water);
 	
-//	if (mask.water > 0.5) color0 = waterFog(color1, normal, viewSpacePosition0, viewSpacePosition1, skyLightmap);
+//	if (mask.water > 0.5) color0 = waterFog(color1, normal, viewSpacePosition0, viewSpacePosition1);
 	
 	
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
 	
 	
-	if (depth1 >= 1.0) color0 = mix(sky.rgb, color0, alpha);
+	if (depth1 >= 1.0)
+		color0 = mix(sky.rgb, color0, mix(alpha, 0.0, isEyeInWater == 1));
+	
 	
 	color0 = mix(color0, sky.rgb, CalculateFogFactor(viewSpacePosition0, FOG_POWER));
 	color1 = mix(color1, sky.rgb, CalculateFogFactor(viewSpacePosition1, FOG_POWER));
