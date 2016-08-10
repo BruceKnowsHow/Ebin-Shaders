@@ -102,7 +102,7 @@ void main() {
 #endif
 	
 	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
-	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth0);
+	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
 	vec2  buffer0     = Decode16(texture2D(colortex4, texcoord).b);
@@ -119,7 +119,7 @@ void main() {
 	vec3 normal = DecodeNormal(texture2D(colortex4, texcoord).xy);
 	
 	
-	float AO = CalculateSSAO(viewSpacePosition0, normal);
+	float AO = CalculateSSAO(viewSpacePosition1, normal);
 	
 	
 	if (depth1 >= 1.0 || isEyeInWater != mask.water)

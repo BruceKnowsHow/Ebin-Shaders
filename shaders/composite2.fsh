@@ -189,7 +189,7 @@ mat3 DecodeTBN(float tbnIndex) {
 	return mat3(tangent, binormal, normal);
 }
 
-vec3 waterFog(vec3 color1, vec3 normal, vec4 viewSpacePosition0, vec4 viewSpacePosition1, float skyLightmap) {
+vec3 waterFog(vec3 color, vec3 normal, vec4 viewSpacePosition0, vec4 viewSpacePosition1, float skyLightmap) {
 	cfloat wrap = 0.2;
 	cfloat scatterWidth = 0.5;
 	
@@ -204,13 +204,13 @@ vec3 waterFog(vec3 color1, vec3 normal, vec4 viewSpacePosition0, vec4 viewSpaceP
 	
 	vec3 waterDepthColors = vec3(0.0015, 0.004, 0.0098) * sunlightColor;
 	vec3 waterFogColor = vec3(0.1, 0.5, 0.8);
-			 
+	
 	waterFogColor = mix(waterFogColor, sunlightColor * waterFogColor, vec3(scatter));
 	
-	color1 *= pow(vec3(0.7, 0.88, 1.0), vec3(waterDepth));
-	color1 = mix(waterDepthColors, color1, clamp01(fogAccum));
+	color *= pow(vec3(0.7, 0.88, 1.0), vec3(waterDepth));
+	color = mix(waterDepthColors, color, clamp01(fogAccum));
 
-	return color1;
+	return color;
 }
 
 
@@ -252,7 +252,7 @@ void main() {
 			viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
 			
 			alpha = texture2D(colortex2, refractedCoord).r;
-			if(mask.water > 0.5) alpha = 1.0;
+	//		if (mask.water > 0.5) alpha = 1.0;
 		}
 	}
 	
@@ -279,7 +279,8 @@ void main() {
 	color1 = texture2D(colortex1, refractedCoord).rgb;
 	
 	color0 = mix(color1, color0, mask.transparent);
-	if(mask.water > 0.5) color0 = waterFog(color1, normal, viewSpacePosition0, viewSpacePosition1, skyLightmap);
+	
+//	if (mask.water > 0.5) color0 = waterFog(color1, normal, viewSpacePosition0, viewSpacePosition1, skyLightmap);
 	
 	
 	ComputeReflectedLight(color0, viewSpacePosition0, normal, smoothness, skyLightmap, mask);
