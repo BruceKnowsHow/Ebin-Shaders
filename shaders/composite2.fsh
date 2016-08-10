@@ -13,7 +13,6 @@ uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
-uniform sampler2D colortex6;
 uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -81,14 +80,6 @@ vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
 
 vec3 GetNormal(vec2 coord) {
 	return DecodeNormal(texture2D(colortex4, coord).xy);
-}
-
-float GetVolumetricFog(vec2 coord) {
-#ifdef VOLUMETRIC_FOG
-	return texture2D(colortex6, coord).r;
-#else
-	return 1.0;
-#endif
 }
 
 

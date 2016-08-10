@@ -85,37 +85,6 @@ vec2 GetDitherred2DNoise(vec2 coord, float n) { // Returns a random noise patter
 
 #include "lib/Fragment/Ambient_Occlusion.fsh"
 
-#ifndef VOLUMETRIC_FOG
-	#define ComputeVolumetricFog(a) 1.0
-#else
-float ComputeVolumetricFog(vec4 viewSpacePosition) {
-	float fog    = 0.0;
-	float weight = 0.0;
-	
-	float rayIncrement = gl_Fog.start / 64.0;
-	vec3  rayStep      = normalize(viewSpacePosition.xyz);
-	vec4  ray          = vec4(rayStep * gl_Fog.start, 1.0);
-	
-	mat4 ViewSpaceToShadowSpace = shadowProjection * shadowModelView * gbufferModelViewInverse; // Compose matrices outside of the loop to save computations
-	
-	while (length(ray) < length(viewSpacePosition.xyz)) {
-		ray.xyz += rayStep * rayIncrement; // Increment raymarch
-		
-		vec3 samplePosition = BiasShadowProjection((ViewSpaceToShadowSpace * ray).xyz) * 0.5 + 0.5; // Convert ray to shadow-space, bias it, unsign it (reduce the range from [-1.0 to 1.0] to [0.0 to 1.0]) to convert it to lookup-coordinates
-		
-		fog += shadow2D(shadow, samplePosition).x * rayIncrement; // Increment fog
-		
-		weight += rayIncrement;
-		
-		rayIncrement *= 1.01; // Increase the step-size so that the sample-count decreases as the ray gets farther from the viewer
-	}
-	
-	fog /= max(weight, 1.0e-9);
-	fog  = pow(fog, VOLUMETRIC_FOG_POWER);
-	
-	return fog;
-}
-#endif
 
 void main() {
 	float depth0 = GetDepth(texcoord);
@@ -143,13 +112,12 @@ void main() {
 	
 	if (depth0 != depth1) {
 		mask.transparent = 1.0;
-		mask.water   = float(texture2D(colortex0, texcoord).r >= 0.5);
+		mask.water       = float(texture2D(colortex0, texcoord).r >= 0.5);
 	}
 	
 	vec3 normal = DecodeNormal(texture2D(colortex4, texcoord).xy);
 	
 	
-	float volFog = ComputeVolumetricFog(viewSpacePosition0);
 	float AO = CalculateSSAO(viewSpacePosition0, normal);
 	
 	
@@ -161,7 +129,6 @@ void main() {
 	
 	
 	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), AO);
-	gl_FragData[1] = vec4(volFog, 0.0, 0.0, 1.0);
 	
 	exit();
 }

@@ -105,7 +105,7 @@ option.PLAYER_SHADOW=Player Shadow
 option.PLAYER_SHADOW.comment=Whether or not the player casts a shadow
 
 
-screen.Composite0=GI, AO & Volumetric Fog
+screen.Composite0=GI & AO
 
 option.COMPOSITE0_SCALE=Resolution Coefficient
 option.COMPOSITE0_SCALE.comment=The resolution coefficient at which global illumination and volumetric fog are computed.
@@ -120,12 +120,6 @@ option.FOG_ENABLED=Fog Enabled
 
 option.FOG_POWER=Fog Power
 option.FOG_POWER.comment=Higher values make fog more subtle nearby, but more intense farther away
-
-option.VOLUMETRIC_FOG=Volumetric Fog
-option.VOLUMETRIC_FOG.comment=Casts shadows on fog volume. High performance cost!
-
-option.VOLUMETRIC_FOG_POWER=Volumetric Fog Power
-option.VOLUMETRIC_FOG_POWER.comment=Higher values make volumetric fog more visible, but also make artifacts more visible
 
 option.ATMOSPHERIC_SCATTERING_AMOUNT=Atmospheric Scattering Amount
 option.ATMOSPHERIC_SCATTERING_AMOUNT.comment=Blue-Purple "haze" effect. Independant of fog setting

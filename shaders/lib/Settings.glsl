@@ -8,19 +8,17 @@ const float wetnessHalflife          = 200.0;
 const float drynessHalflife          = 40.0;
 
 /*
-
-** ᴛʀᴀɴsᴘᴀʀᴇɴᴛ ɢʙᴜғғᴇʀs **
+** Transparent Gbuffers **
 const int colortex0Format = RGB16;
 const int colortex3Format = R11F_G11F_B10F;
 const int colortex2Format = R8;
 
-** ғʟᴀᴛ ɢʙᴜғғᴇʀs **
+** Flat Gbuffers **
 const int colortex1Format = R11F_G11F_B10F;
 const int colortex4Format = RGBA16;
 
-** ᴄᴏᴍᴘᴏsɪᴛᴇ0 ʙᴜғғᴇʀs **
+** composite0 Buffer **
 const int colortex5Format = RGBA8;
-const int colortex6Format = R8;
 
 
 const float eyeBrightnessHalflife = 1.5;
@@ -74,12 +72,7 @@ const int noiseTextureResolution = 64;
 
 #define FOG_ENABLED
 #define FOG_POWER 3.0                      // [1.0 2.0 3.0 4.0 6.0 8.0]
-#define VOLUMETRIC_FOG_POWER 2.0           // [1.0 2.0 3.0 4.0]
 #define ATMOSPHERIC_SCATTERING_AMOUNT 1.00 // [0.00 0.25 0.50 0.75 1.00 2.00 4.00]
-
-#if defined FOG_ENABLED && !defined low_profile
-	#define VOLUMETRIC_FOG
-#endif
 
 #if !defined low_profile
 	#define GI_ENABLED

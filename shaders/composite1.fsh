@@ -4,7 +4,7 @@
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
 
-/* DRAWBUFFERS:146 */
+/* DRAWBUFFERS:14 */
 
 const bool colortex5MipmapEnabled = true;
 const bool colortex6MipmapEnabled = true;
@@ -78,16 +78,14 @@ vec3 GetNormal(vec2 coord) {
 
 #include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 
-void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float volFog, out float AO) {
+void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float AO) {
 	GI = vec3(0.0);
-	volFog = 0.0;
 	AO = 0.0;
 	
-#if (defined GI_ENABLED || defined VOLUMETRIC_FOG || defined AO_ENABLED)
+#if defined GI_ENABLED || defined AO_ENABLED
 	depth = ExpToLinearDepth(depth);
 	
-	float totalWeights   = 0.0;
-	float totalFogWeight = 0.0;
+	float totalGIWeight = 0.0;
 	float totalAOWeight = 0.0;
 	
 	cfloat kernal = 2.0;
@@ -98,12 +96,10 @@ void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float volFog, 
 		for(float j = -range; j <= range; j++) {
 			vec2 offset = vec2(i, j) / vec2(viewWidth, viewHeight);
 			
-			float sampleDepth = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x);
-		
+			float sampleDepth  = ExpToLinearDepth(texture2D(gdepthtex, texcoord + offset * 8.0).x);
 			vec3  sampleNormal = GetNormal(texcoord + offset * 8.0);
 		
 		#ifdef GI_ENABLED
-			
 			float weight  = 1.0 - abs(depth - sampleDepth);
 			      weight *= dot(normal, sampleNormal);
 			      weight  = pow(weight, 32);
@@ -111,7 +107,7 @@ void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float volFog, 
 			
 			GI += pow(texture2DLod(colortex5, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).rgb, vec3(2.2)) * weight;
 			
-			totalWeights += weight;
+			totalGIWeight += weight;
 		#endif
 		
 		#ifdef AO_ENABLED
@@ -124,21 +120,10 @@ void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float volFog, 
 			
 			totalAOWeight += AOWeight;
 		#endif
-			
-		#ifdef VOLUMETRIC_FOG
-			float FogWeight = 1.0 - abs(depth - sampleDepth) * 10.0;
-			      FogWeight = pow(FogWeight, 32);
-			      FogWeight = max(0.1e-8, FogWeight);
-			
-			volFog += texture2DLod(colortex6, texcoord * COMPOSITE0_SCALE + offset * 2.0, 1).r * FogWeight;
-			
-			totalFogWeight += FogWeight;
-		#endif
 		}
 	}
 	
-	GI *= 5.0 / totalWeights;
-	volFog /= totalFogWeight;
+	GI *= 5.0 / totalGIWeight;
 	AO /= totalAOWeight;
 #endif
 	
@@ -186,11 +171,10 @@ void main() {
 	}
 	
 	
-	vec3 GI; float volFog; float AO;
-	BilateralUpsample(normal, depth1, GI, volFog, AO);
+	vec3 GI; float AO;
+	BilateralUpsample(normal, depth1, GI, AO);
 	
 	gl_FragData[1] = vec4(encode1);
-	gl_FragData[2] = vec4(volFog, 0.0, 0.0, 1.0);
 	
 	
 	vec3 diffuse = GetDiffuse(texcoord);
