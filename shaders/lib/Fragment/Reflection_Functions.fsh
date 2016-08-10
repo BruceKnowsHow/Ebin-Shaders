@@ -89,6 +89,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	//This breaks some things.
 	//if (length(alpha) < 0.01) return;
 	
+	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
