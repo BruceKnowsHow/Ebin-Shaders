@@ -1,12 +1,14 @@
 float GetShadowBias(vec2 shadowProjection) {
-	if (!biasShadowMap) return 1.0;
+	float scale = 100.0 / 100.0;
+	
+	if (!biasShadowMap) return 1.0 / scale;
 
 	#ifdef EXTENDED_SHADOW_DISTANCE
-		shadowProjection *= 1.165;
+		shadowProjection *= scale;
 		
-		return length8(shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
+		return mix(1.0, length8(shadowProjection), SHADOW_MAP_BIAS) / scale;
 	#else
-		return length (shadowProjection) * SHADOW_MAP_BIAS + (1.0 - SHADOW_MAP_BIAS);
+		return mix(1.0, length (shadowProjection), SHADOW_MAP_BIAS) / scale;
 	#endif
 }
 
