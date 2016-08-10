@@ -7,8 +7,8 @@
 
 uniform sampler2D colortex1;
 uniform sampler2D colortex3;
-uniform sampler2D gdepthtex;
 uniform sampler2D shadowcolor;
+uniform sampler2D gdepthtex;
 
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
@@ -145,7 +145,8 @@ void main() {
 	
 	color = SetSaturationLevel(color, SATURATION);
 	
-	gl_FragData[0] = vec4(texture2D(shadowcolor, texcoord).rgb, 1.0);
+	gl_FragData[0] = vec4(color, 1.0);
+//	gl_FragData[0] = vec4(texture2D(shadowcolor, texcoord).rgb, 1.0);
 	
 	exit();
 }

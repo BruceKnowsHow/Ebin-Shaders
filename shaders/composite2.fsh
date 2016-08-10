@@ -95,7 +95,7 @@ bool ComputeRaytracedIntersection(vec3 startingViewPosition, vec3 rayDirection, 
 	
 	cbool doRefinements = (maxRefinements > 0);
 	
-	float maxRayDepth = -(far * 1.6 + 16.0);
+	float maxRayDepth = -far * 1.875;
 	
 	for (int i = 0; i < maxSteps; i++) {
 		if (any(greaterThan(abs(screenSpacePosition.xyz - 0.5), vec3(0.5))) || ray.z < maxRayDepth)
