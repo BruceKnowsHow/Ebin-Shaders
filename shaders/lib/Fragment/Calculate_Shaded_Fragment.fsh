@@ -98,7 +98,7 @@ vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, 
 	
 	
 	return vec3(
-//	    lightmap.sunlight   * 6.0    * SUN_LIGHT_LEVEL
+	    lightmap.sunlight   * 6.0    * SUN_LIGHT_LEVEL
 	+   lightmap.skylight   * 0.7    * SKY_LIGHT_LEVEL
 	+   lightmap.GI         * 1.0
 	+   lightmap.ambient    * 0.0175 * AMBIENT_LIGHT_LEVEL

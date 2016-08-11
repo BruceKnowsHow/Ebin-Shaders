@@ -124,6 +124,8 @@ void main() {
 	
 	Mask mask;
 	
+	if (abs(mcID - 8.5) < 0.6) diffuse.a = 0.5; // Force water alpha
+	
 	vec3 composite  = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, vec3(0.0), 1.0, normal.xyz, specularity.r, viewSpacePosition);
 	     composite *= pow(diffuse.rgb, vec3(2.2));
 	
