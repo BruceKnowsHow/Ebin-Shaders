@@ -3,16 +3,14 @@
 
 #define TIME frameTimeCounter
 
-cvec3 swizzle = vec3(1.0, 0.0, -1.0);
+cvec4 swizzle = vec4(1.0, 0.0, -1.0, 0.5);
 
 cvec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 
 
 #include "/lib/Utility/smoothing.glsl"
 
-#include "/lib/Utility/lengthSquared.glsl"
-
-#include "/lib/Utility/evenPowRootLength.glsl"
+#include "/lib/Utility/length.glsl"
 
 #include "/lib/Utility/clamping.glsl"
 
@@ -22,6 +20,10 @@ cvec3 lumaCoeff = vec3(0.2125, 0.7154, 0.0721);
 
 #include "/lib/Utility/blending.glsl"
 
+
+float pow2(float x) {
+	return dot(x, x);
+}
 
 vec2 clampScreen(vec2 coord, vec2 pixel) {
 	return clamp(coord, pixel, 1.0 - pixel);

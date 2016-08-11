@@ -1,15 +1,16 @@
 float GetShadowBias(vec2 shadowProjection) {
-	float scale  = 140.0 / shadowDistance;
-	      scale *= min(far / 256.0, 1.0); // When the view-distance < 4, zoom in to improve shadow quality
+	float scale = clamp(far, 64.0, 140.0) / shadowDistance;
 	
 	if (!biasShadowMap) return scale;
 	
 	shadowProjection /= scale;
 	
 	#ifdef EXTENDED_SHADOW_DISTANCE
-		return mix(1.0, length8(shadowProjection * 1.165), SHADOW_MAP_BIAS) * scale;
+		float projScale = 1.165;
+		
+		return mix(1.0, length8(shadowProjection) * projScale, SHADOW_MAP_BIAS) * scale;
 	#else
-		return mix(1.0, length (shadowProjection), SHADOW_MAP_BIAS) * scale;
+		return mix(1.0, length (shadowProjection)            , SHADOW_MAP_BIAS) * scale;
 	#endif
 }
 
