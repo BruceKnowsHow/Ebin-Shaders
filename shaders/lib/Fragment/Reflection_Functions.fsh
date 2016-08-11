@@ -2,8 +2,6 @@
 void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal, float smoothness, float skyLightmap, Mask mask) {
 	if (isEyeInWater == 1) return;
 	
-	if (mask.water < 0.5) smoothness = pow(smoothness, 2.0) * 0.85;
-	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
@@ -94,9 +92,9 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
 	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
-	float diffuse = diffuse(R0, viewSpacePosition, normal, roughness);
 	
-	vec3 offscreen = (clamp01(reflectedSky * 0.4) * lightFresnel + specular * sunlightColor) / 2.0;
+	if(mask.water < 0.5) clamp01(reflectedSky * 0.4);
+	vec3 offscreen = (reflectedSky + specular * sunlightColor) / 2.0;
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
