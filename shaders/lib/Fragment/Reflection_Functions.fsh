@@ -90,7 +90,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
 	if(mask.water < 0.5) reflectedSky = clamp01(reflectedSky * R0);
-	vec3 offscreen = (reflectedSky + specular * sunlightColor) / 2.0;
+	vec3 offscreen = (reflectedSky + specular * sunlightColor * 0.25) / 2.0;
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
