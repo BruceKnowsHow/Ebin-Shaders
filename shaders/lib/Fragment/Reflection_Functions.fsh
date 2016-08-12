@@ -83,10 +83,6 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	float  reflectFresnel = Fresnel(R0, vdotn, mask.metallic);
 	float  lightFresnel = Fresnel(R0, vdoth, mask.metallic);
-
-	//This breaks some things.
-	//if (length(alpha) < 0.01) return;
-	
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
