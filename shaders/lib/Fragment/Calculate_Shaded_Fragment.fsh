@@ -64,6 +64,8 @@ vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, 
 	shading.sunlight *= pow2(skyLightmap);
 	shading.sunlight  = ComputeShadows(ViewSpacePosition, shading.sunlight);
 	
+//	show(ComputeShadows(ViewSpacePosition, 1.0));
+	
 	#if defined composite1
 		// Underwater light caustics
 	#endif

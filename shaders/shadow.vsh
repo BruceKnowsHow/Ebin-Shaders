@@ -59,6 +59,20 @@ vec4 BiasShadowProjection(vec4 position) {
 	position.z  += 0.000005 / (abs(position.x) + 1.0);
 	position.z  += 0.002 * pow(biasCoeff * 2.0, 2.0);
 	
+	/*
+	vec4 wlv = inverse(shadowView)[2];
+	
+	position = inverse(shadowView) * shadowProjectionInverse * position;
+	
+//	position.xyz -= 0.1974 * abs(wlv.yxy * vec3(1.0, 1.0, -1.0)) * sign(wlv.xyz) * 1024.0 / shadowMapResolution;
+	
+	position.xy -= 0.1974 * abs(wlv.yx) * sign(wlv.xy) * 1024.0 / shadowMapResolution; // time
+	position.yz -= 0.1974 * abs(wlv.zy) * sign(wlv.yz) * 1024.0 / shadowMapResolution; // rotation
+	position.xz -= 0.1974 * abs(wlv.zx) * sign(wlv.xz) * 1024.0 / shadowMapResolution; // rotation
+	
+	position = shadowProjection * shadowView * position;
+	*/
+	
 	position.z  /= 4.0; // Shrink the domain of the z-buffer. This counteracts the noticable issue where far terrain would not have shadows cast, especially when the sun was near the horizon
 	
 	return position;
