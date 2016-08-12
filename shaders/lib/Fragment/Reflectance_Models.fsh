@@ -348,7 +348,7 @@ float CalculateSpecularHighlight(
 
 vec3 BlendMaterial(vec3 color, vec3 specular, float R0, float smoothness) {
   float scRange = smoothstep(0.25, 0.45, R0);
-  vec3  dielectric = color + specular * smoothness * 0.5;
+  vec3  dielectric = color + specular * max(0.05, pow2(smoothness));
   vec3  metal = specular * color * 0.6;
 
   return mix(dielectric, metal, scRange);
