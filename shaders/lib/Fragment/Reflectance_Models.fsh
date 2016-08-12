@@ -332,8 +332,7 @@ float CalculateSpecularHighlight(
 	vec3 viewVector,
 	float roughness) {
 	
-	roughness = pow2(roughness * 0.5);
-	roughness = clamp01(roughness);
+	roughness = pow2(roughness);
 	
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
@@ -348,8 +347,8 @@ float CalculateSpecularHighlight(
 
 vec3 BlendMaterial(vec3 color, vec3 specular, float R0, float smoothness) {
   float scRange = smoothstep(0.25, 0.45, R0);
-  vec3  dielectric = color + specular * max(0.05, pow2(smoothness));
-  vec3  metal = specular * color * 0.6;
+  vec3  dielectric = color + specular;
+  vec3  metal = specular * color;
 
   return mix(dielectric, metal, scRange);
 }
