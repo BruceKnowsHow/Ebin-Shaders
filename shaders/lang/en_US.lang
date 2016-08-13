@@ -204,3 +204,6 @@ option.DEBUG_VIEW.comment=The shader stage you're debugging. -1: gbuffers_textur
 option.PHYSICAL_ATMOSPHERE=Physical Atmosphere
 option.ENABLE_CLOUDS=Enable Clouds
 option.CUSTOM_TIME_CYCLE=Custom Time Cycle
+
+option.FREEZE_TIME=Freeze Time
+option.FREEZE_TIME.comment=Disable animations and keep them in a static position. Helpful for screenshot comparisons

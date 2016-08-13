@@ -1,7 +1,11 @@
 #define  PI 3.1415926 // Pi
 #define RAD 0.0174533 // Degrees per radian
 
-#define TIME frameTimeCounter
+#ifdef FREEZE_TIME
+	#define TIME 0.0
+#else
+	#define TIME frameTimeCounter
+#endif
 
 cvec4 swizzle = vec4(1.0, 0.0, -1.0, 0.5);
 

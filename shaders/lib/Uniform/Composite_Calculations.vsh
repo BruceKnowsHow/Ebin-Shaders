@@ -1,11 +1,9 @@
 // {
 	float isNight = CalculateShadowView();
 	
-	vec3 sunVector = normalize((gbufferModelView * shadowViewInverse * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
+	lightVector = (gbufferModelView * shadowViewInverse[2]).xyz;
 	
-	lightVector = sunVector;
-	
-	sunVector *= 1.0 - isNight * 2.0;
+	vec3 sunVector = lightVector * (1.0 - isNight * 2.0);
 	
 	float LdotUp = dot(sunVector, normalize(upPosition));
 	

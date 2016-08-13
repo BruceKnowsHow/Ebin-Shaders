@@ -95,7 +95,8 @@ const int noiseTextureResolution = 64;
 
 #define REFLECTION_EDGE_FALLOFF
 
-#define WAVE_MULT 1.3
+#define WAVE_MULT 2.0
+#define WAVE_SPEED 0.5
 
 
 #define FRESNEL 4 // [1 2 3 4]
@@ -116,6 +117,7 @@ const int noiseTextureResolution = 64;
 //#define PHYSICAL_ATMOSPHERE
 //#define ENABLE_CLOUDS
 //#define CUSTOM_TIME_CYCLE
+//#define FREEZE_TIME
 
 
 #ifdef DEFAULT_TEXTURE_PACK
