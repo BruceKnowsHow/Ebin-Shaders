@@ -6,8 +6,7 @@ float GetShadowBias(vec2 shadowProjection) {
 	
 	shadowProjection /= scale;
 	
-//	float projScale = 1.165;
-	float projScale = 1.0;
+	float projScale = 1.165;
 	
 	return mix(1.0, length(shadowProjection) * projScale, SHADOW_MAP_BIAS) * scale;
 }

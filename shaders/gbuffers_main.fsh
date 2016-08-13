@@ -50,7 +50,7 @@ vec4 GetNormal() {
 	vec4 normal = vec4(0.5, 0.5, 1.0, 1.0);
 #endif
 	
-	normal.xyz = normalize((normal.xyz * 2.0 - 1.0) * tbnMatrix);
+	normal.xyz = normalize(tbnMatrix * (normal.xyz * 2.0 - 1.0));
 	
 	return normal;
 }

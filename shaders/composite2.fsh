@@ -167,22 +167,22 @@ mat3 DecodeTBN(float tbnIndex) {
 	
 	if (tbnIndex == 1.0) {
 		tangent  = vec3( 0.0,  0.0,  1.0);
-		binormal = -tangent.yzy;
+		binormal = vec3( 0.0, -1.0,  0.0);
 	} else if (tbnIndex == 2.0) {
 		tangent  = vec3( 0.0,  0.0,  1.0);
-		binormal =  tangent.yzy;
+		binormal = vec3( 0.0,  1.0,  0.0);
 	} else if (tbnIndex == 3.0) {
 		tangent  = vec3( 1.0,  0.0,  0.0);
-		binormal =  tangent.yxy;
+		binormal = vec3( 0.0,  1.0,  0.0);
 	} else if (tbnIndex == 4.0) {
 		tangent  = vec3( 1.0,  0.0,  0.0);
-		binormal = -tangent.yxy;
+		binormal = vec3( 0.0, -1.0,  0.0);
 	} else if (tbnIndex == 5.0) {
 		tangent  = vec3(-1.0,  0.0,  0.0);
-		binormal =  tangent.yyx;
+		binormal = vec3( 0.0,  0.0, -1.0);
 	} else {
 		tangent  = vec3( 1.0,  0.0,  0.0);
-		binormal = -tangent.yyx;
+		binormal = vec3( 0.0,  0.0, -1.0);
 	}
 	
 	vec3 normal = cross(tangent, binormal);
@@ -222,7 +222,7 @@ void main() {
 			
 			tangentNormal.z = sqrt(1.0 - lengthSquared(tangentNormal.xy)); // Solve the equation "length(normal.xyz) = 1.0" for normal.z
 			
-			normal = normalize((gbufferModelView * vec4(tangentNormal * transpose(tbnMatrix), 0.0)).xyz);
+			normal = normalize((gbufferModelView * vec4(tbnMatrix * tangentNormal, 0.0)).xyz);
 			
 			
 			refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
