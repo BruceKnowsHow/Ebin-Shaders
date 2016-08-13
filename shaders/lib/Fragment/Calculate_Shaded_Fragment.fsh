@@ -50,7 +50,6 @@ vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, 
 	  float  metal = max0(dot(normal, lightVector));
 
 		shading.normal = mix(dielectric, metal, scRange);
-		show(shading.normal);
 	#endif
 	
 	vec3 SubSurfaceColor = vec3(1.0);

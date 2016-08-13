@@ -99,7 +99,11 @@ const int noiseTextureResolution = 64;
 
 
 #define FRESNEL 4 // [1 2 3 4]
+<<<<<<< HEAD
 #define undefR0 0.10
+=======
+#define undefR0 0.02
+>>>>>>> 16a7baea55c2f7af42ec73403d14573111dc326a
 #define PBR_SKEW 3 // [1 2 3]
 #define PBR_RAYS 2 // [1 2 4 6 8 16 32]
 #define PBR_GEOMETRY_MODEL 5 // [1 2 3 4 5 6]
