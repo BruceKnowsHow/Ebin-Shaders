@@ -1,4 +1,5 @@
 varying mat4 shadowView;
+varying mat4 shadowViewInverse;
 #if defined fsh
 	#define shadowModelView shadowView
 #endif

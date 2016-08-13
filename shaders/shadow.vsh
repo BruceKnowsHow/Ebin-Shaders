@@ -21,6 +21,7 @@ uniform float sunAngle;
 uniform float frameTimeCounter;
 
 varying mat4 shadowView;
+varying mat4 shadowViewInverse;
 
 varying vec4 color;
 varying vec2 texcoord;
@@ -36,13 +37,6 @@ vec4 GetWorldSpacePositionShadow() {
 	return shadowModelViewInverse * shadowProjectionInverse * ftransform();
 }
 
-vec4 WorldSpaceToShadowProjection(vec4 worldSpacePosition) {
-	return shadowProjection * shadowModelView * worldSpacePosition;
-}
-
-vec4 WorldSpaceToShadowProjection1(vec4 worldSpacePosition) {
-	return shadowProjection * shadowView * worldSpacePosition;
-}
 
 #include "/lib/Vertex/Waving.vsh"
 #include "/lib/Vertex/Vertex_Displacements.vsh"
@@ -50,29 +44,19 @@ vec4 WorldSpaceToShadowProjection1(vec4 worldSpacePosition) {
 
 #include "/lib/Misc/Bias_Functions.glsl"
 
-vec4 BiasShadowProjection(vec4 position) {
-	float biasCoeff = GetShadowBias(position.xy);
+vec4 ProjectShadowMap(vec4 position) {
+	position = shadowProjection * shadowView * position;
 	
-	position.xy /= biasCoeff;
+	float biasCoeff = GetShadowBias(position.xy);
 	
 	position.z  += 0.001 * max(0.0, 1.0 - dot(vertNormal, vec3(0.0, 0.0, 1.0))); // Offset the z-coordinate to fix shadow acne
 	position.z  += 0.000005 / (abs(position.x) + 1.0);
 	position.z  += 0.002 * pow(biasCoeff * 2.0, 2.0);
 	
-	/*
-	vec4 wlv = inverse(shadowView)[2];
+//	vec4 wlv = shadowViewInverse[2];
+//	position.xyz -= 0.1974 * sin(acos(wlv.xyz)) * sign(wlv.xyz) * 1024.0 / shadowMapResolution;
 	
-	position = inverse(shadowView) * shadowProjectionInverse * position;
-	
-//	position.xyz -= 0.1974 * abs(wlv.yxy * vec3(1.0, 1.0, -1.0)) * sign(wlv.xyz) * 1024.0 / shadowMapResolution;
-	
-	position.xy -= 0.1974 * abs(wlv.yx) * sign(wlv.xy) * 1024.0 / shadowMapResolution; // time
-	position.yz -= 0.1974 * abs(wlv.zy) * sign(wlv.yz) * 1024.0 / shadowMapResolution; // rotation
-	position.xz -= 0.1974 * abs(wlv.zx) * sign(wlv.xz) * 1024.0 / shadowMapResolution; // rotation
-	
-	position = shadowProjection * shadowView * position;
-	*/
-	
+	position.xy /= biasCoeff;
 	position.z  /= 4.0; // Shrink the domain of the z-buffer. This counteracts the noticable issue where far terrain would not have shadows cast, especially when the sun was near the horizon
 	
 	return position;
@@ -95,7 +79,7 @@ void main() {
 	
 	position.xyz += CalculateVertexDisplacements(position.xyz, lightmapCoord.g);
 	
-	gl_Position = BiasShadowProjection(WorldSpaceToShadowProjection1(position));
+	gl_Position = ProjectShadowMap(position);
 	
 	
 	#ifndef PLAYER_SHADOW

@@ -1,7 +1,7 @@
 const int   shadowMapResolution      = 2048;  // [1024 2048 3072 4096]
 const float sunPathRotation          = -40.0;  // [-60.0 -50.0 -40.0 -30.0 -20.0 -10.0 0.0 10.0 20.0 30.0 40.0 50.0 60.0]
 const float shadowDistance           = 100.0;
-const float shadowIntervalSize       = 0.00001;
+const float shadowIntervalSize       = 4.0;
 const bool  shadowHardwareFiltering0 = true;
 
 const float wetnessHalflife          = 200.0;
@@ -99,7 +99,7 @@ const int noiseTextureResolution = 64;
 
 
 #define FRESNEL 4 // [1 2 3 4]
-#define undefR0 0.05
+#define undefR0 0.10
 #define PBR_SKEW 3 // [1 2 3]
 #define PBR_RAYS 2 // [1 2 4 6 8 16 32]
 #define PBR_GEOMETRY_MODEL 5 // [1 2 3 4 5 6]

@@ -1,6 +1,6 @@
 float GetShadowBias(vec2 shadowProjection) {
 //	float scale = min(far, 140.0) / shadowDistance;
-	float scale = 100.0 / shadowDistance;
+	float scale = 140.0 / shadowDistance;
 	
 	if (!biasShadowMap) return scale;
 	

@@ -6,6 +6,7 @@
 
 
 uniform mat4 shadowModelView;
+uniform mat4 shadowModelViewInverse;
 
 uniform vec3 upPosition;
 uniform vec3 previousCameraPosition;

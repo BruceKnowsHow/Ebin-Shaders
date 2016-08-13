@@ -48,5 +48,11 @@ float CalculateShadowView() {
 	 B*C*E + D*F,  -A*E,  B*D*E - C*F,  shadowModelView[2].w,
 	 shadowModelView[3]);
 	
+	shadowViewInverse = mat4(
+	 E*D + F*B*C,  -C*A,  F*D + E*B*C,  0.0,
+	        -F*A,    -B,         -E*A,  0.0,
+	 F*B*D + E*C,  -A*D,  E*B*D - F*C,  0.0,
+	         0.0,   0.0,          0.0,  1.0);
+	
 	return isNight;
 }
