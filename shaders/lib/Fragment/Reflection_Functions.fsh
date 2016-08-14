@@ -86,7 +86,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
-	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
+	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10)) * 0.5;
 	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
 	if(mask.water < 0.5) reflectedSky = clamp01(reflectedSky * R0);
