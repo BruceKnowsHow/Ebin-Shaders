@@ -96,7 +96,7 @@ option.SHADOW_MAP_BIAS=Shadow Map Bias
 option.SHADOW_MAP_BIAS.comment=Higher values make nearby shadows look better, at the cost of making farther off shadows look worse
 
 option.EXTENDED_SHADOW_DISTANCE=Extended Shadow Distance
-option.EXTENDED_SHADOW_DISTANCE.comment=Makes shadows visible at extremely far distances, accentuates shadow artifacts in some situations
+option.EXTENDED_SHADOW_DISTANCE.comment=Reduce shadow quality, when your view distance is >8, to keep shadows visible
 
 option.SHADOW_TYPE=Shadow Type
 option.SHADOW_TYPE.comment=1: Hard shadows. 2: Uniformly soft shadows. 3: Softness based on distance from shadow caster. Higher values have a medium performance cost!

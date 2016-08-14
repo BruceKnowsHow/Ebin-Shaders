@@ -63,7 +63,7 @@ const int noiseTextureResolution = 64;
 #define WAVING_WATER
 
 #define SHADOW_MAP_BIAS 0.80     // [0.00 0.60 0.70 0.80 0.85 0.90]
-#define EXTENDED_SHADOW_DISTANCE
+//#define EXTENDED_SHADOW_DISTANCE
 #define SHADOW_TYPE 2 // [1 2 3]
 #define PLAYER_SHADOW
 
@@ -136,5 +136,3 @@ const int noiseTextureResolution = 64;
 		#define PBR
 	#endif
 #endif
-
-cbool biasShadowMap = (SHADOW_MAP_BIAS != 0.0);
