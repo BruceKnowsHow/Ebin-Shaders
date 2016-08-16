@@ -72,12 +72,16 @@ float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, 
 	float Cosri = VoL - NoV * NoL;
 	float CosriT = Cosri >= 0.0 ? min(1.0, NoL / NoV) : 1.0;
 	
-	float Fdiff = diffuseFresnel(F0, NoL, NoV);
+	float Fdiff = 1.0;
+	
+	#if PBR_Diffuse == 4
+		Fdiff = diffuseFresnel(F0, NoL, NoV);
+	#endif
 	
 	float C1 = (1.0 / PI) * (1.0 - 0.5 * (alpha2 / (alpha2 + 0.33)) + 0.17 * albedo * (alpha2 / (alpha2 + 0.13)));
 	float C2 = (1.0 / PI) * (0.45 * (alpha2 / (alpha2 + 0.09)));
 
-	return albedo * (1.0 - F0) * NoL * Fdiff * (C1 + C2 * (Cosri / CosriT));
+	return albedo * (1.0 - F0) * NoL * (Fdiff * C1 + C2 * (Cosri / CosriT));
 }
 
 float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float F0) {
@@ -125,7 +129,7 @@ float diffuse;
 		diffuse = lambertDiffuse(viewSpacePosition, normal, roughness);
 	#elif PBR_Diffuse == 2
 		diffuse = GetBurleyDiffuse(viewSpacePosition, normal, roughness);
-	#elif PBR_Diffuse ==3
+	#elif PBR_Diffuse == 3 || 4
 		diffuse = GetOrenNayarDiffuse(viewSpacePosition, normal, roughness, F0);
 	#else
 		diffuse = GetGotandaDiffuse(viewSpacePosition, normal, roughness, F0);
