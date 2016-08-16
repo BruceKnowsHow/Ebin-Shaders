@@ -1,9 +1,3 @@
-// Noise Functions
-
-vec2 Hammersley(uint i, uint N) {
-	return vec2(float(i) / float(N), float(bitfieldReverse(i)) * 2.3283064365386963e-10);
-}
-
 float randAngle() {
 	uint x = uint(gl_FragCoord.x);
 	uint y = uint(gl_FragCoord.y);
@@ -122,104 +116,119 @@ float diffuse;
 
 /////////////////////////////////////////////////////////////////////////////
 
-float Fresnel(float F0, float vdoth, float metallic) {
+float schlickFresnel(float VoH, float F0) {
+	return F0 + (1.0 - F0) * max0(pow(1.0 - VoH, 5.0));
+}
+
+float schlickGaussianFresnel(float VoH, float F0) {
+	return F0 + (1 - F0) * pow(2, (-5.55473 * VoH - 6.98316) * VoH);
+}
+
+float cookTorranceFresnel(float VoH, float F0) {
+	float nFactor = (1.0 + sqrt(F0)) / (1.0 - sqrt(F0));
+	float gFactor = sqrt(pow2(nFactor) + pow2(VoH) - 1.0);
+	
+	float C1 = 0.5 * pow((gFactor - VoH) / (gFactor + VoH), 2.0);
+	float C2 = (1.0 + pow(((gFactor + VoH) * VoH - 1.0) / ((gFactor - VoH) * VoH + 1.0), 2.0));
+	
+	return C1 * C2;
+}
+
+float gotandaFresnel(float VoH, float F0) {
+	float sF0 = sqrt(F0);
+	float alpha = sqrt(1.0 - (pow2(sF0 - 1.0) * (1.0 - pow2(VoH))) / pow2(sF0 + 1.0));
+	
+	float C1 = pow2(((sF0 + 1.0) * VoH + (sF0 - 1.0) * alpha) / (((sF0 + 1.0) * VoH - (sF0 - 1.0) * alpha)));
+	float C2 = pow2(((sF0 - 1.0) * VoH + (sF0 + 1.0) * alpha) / (((sF0 - 1.0) * VoH - (sF0 + 1.0) * alpha)));
+	
+	return 0.5 * (C1 + C2);
+}
+
+float Fresnel(float F0, float VoH) {
 	float fresnel;
 	
 	#if FRESNEL == 1
-		fresnel = F0 + (1.0 - F0) * max0(pow(1.0 - vdoth, 5.0));
+		fresnel = schlickFresnel(VoH, F0);
 		
 	#elif FRESNEL == 2
-		fresnel = F0 + (1 - F0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
+		fresnel = schlickGaussianFresnel(VoH, F0);
 		
 	#elif FRESNEL == 3
-		float nFactor = (1.0 + sqrt(F0)) / (1.0 - sqrt(F0));
-		float gFactor = sqrt(pow2(nFactor) + pow2(vdoth) - 1.0);
-		fresnel = 0.5 * pow((gFactor - vdoth) / (gFactor + vdoth), 2.0) * (1.0 + pow(((gFactor + vdoth) * vdoth - 1.0) / ((gFactor - vdoth) * vdoth + 1.0), 2.0));
+		fresnel = cookTorranceFresnel(VoH, F0);
+		
 	#else //Real fresnel, no approximations made here.
-		float sF0 = sqrt(F0);
-		float alpha = sqrt(1.0 - (pow2(sF0 - 1.0) * (1.0 - pow2(vdoth))) / pow2(sF0 + 1.0));
+		fresnel = gotandaFresnel(VoH, F0);
 		
-		float C1 = pow2(((sF0 + 1.0) * vdoth + (sF0 - 1.0) * alpha) / (((sF0 + 1.0) * vdoth - (sF0 - 1.0) * alpha)));
-		float C2 = pow2(((sF0 - 1.0) * vdoth + (sF0 + 1.0) * alpha) / (((sF0 - 1.0) * vdoth - (sF0 + 1.0) * alpha)));
-		
-		fresnel = 0.5 * (C1 + C2);
 	#endif
 
   return fresnel;
 }
 
-float ImplictGeom(vec3 viewDirection, vec3 lightDirection, vec3 normal) {
-	float ndotl = max0(dot(normal, lightDirection));
-	float ndotv = max0(dot(normal, viewDirection));
+/////////////////////////////////////////////////////////////////////////////
+
+float ImplictGeom(float NoL, float NoV) {
+	NoL = max0(NoL);
+	NoV = max0(NoV);
 	
-	return ndotl * ndotv;
+	return NoL * NoV;
 }
 
-float NewmannGeom(vec3 viewDirection, vec3 lightDirection, vec3 normal) {
-	float ndotl = max0(dot(normal, lightDirection));
-	float ndotv = max0(dot(normal, viewDirection));
-	
-	return (ndotl * ndotv) / max(ndotl, ndotv);
+float NewmannGeom(float NoL, float NoV) {
+	return (NoL * NoV) / max(NoL, NoV);
 }
 
-float SmithGeom(vec3 viewDirection, vec3 normal, float alpha) {
-	float ndotv = max0(dot(normal, viewDirection));
+float SmithGeom(float NoV, float alpha) {
 	float alphaCoeff = sqrt((2.0 * pow2(alpha)) / PI);
 	
-	return ndotv / (ndotv * (1.0 - alphaCoeff) + alphaCoeff);
+	return NoV / (NoV * (1.0 - alphaCoeff) + alphaCoeff);
 }
 
-float cookTorranceGeom(vec3 viewDirection, vec3 lightDirection, vec3 halfVector, vec3 normal) {
-	float hdotn = max0(dot(halfVector, normal));
-	float vdoth = max0(dot(viewDirection, halfVector));
-	float ndotv = max0(dot(normal, viewDirection));
-	float ndotl = max0(dot(normal, lightDirection));
-	
+float cookTorranceGeom(float NoL, float NoV, float NoH, float VoH) {
 	// geometric attenuation
-	float NH2 =  2.0 * hdotn;
-	float g1  = (NH2 * ndotv) / vdoth;
-	float g2  = (NH2 * ndotl) / vdoth;
+	float NH2 =  2.0 * NoH;
+	float g1  = (NH2 * NoV) / VoH;
+	float g2  = (NH2 * NoL) / VoH;
 	
 	return min1(min(g1, g2));
 }
 
-float GGXSmithGeom(vec3 i, vec3 normal, float alpha) {
-	float idotn = max0(dot(normal, i));
-	float idotn2 = pow2(idotn);
+float GGXSmithGeom(float NoX, float alpha) {
+	float numerator = 2.0 * NoX;
+	float NoX2 = pow2(NoX);
+	float alpha2 = pow2(alpha);
+	float denominator = NoX + sqrt(NoX2 + alpha2 * (1.0 - NoX2));
 	
-	return 2.0 * idotn / (idotn + sqrt(idotn2 + pow(alpha, 2.0) * (1 - idotn2)));
+	return numerator / denominator;
 }
 
-float SchlickBeckmannGeom(vec3 i, vec3 normal, float alpha) {
-	float k = sqrt((2.0 * pow2(alpha)) / PI);
-	float idotn = max0(dot(normal, i));
-	
-	return idotn / (idotn * (1 - k) + k);
+float SchlickBeckmannGeom(float NoX, float alpha) {
+	float k = pow2(alpha) * PI;
+	return NoX / (NoX * (1.0 - k) + k);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-float GGXDistribution(vec3 halfVector, vec3 normal, float alpha) {
+float phongDistribution(float NoH, float alpha) {
 	float alpha2 = pow2(alpha);
-	float hdotn = max0(dot(halfVector, normal));
+	float alphap = (2.0 / alpha2) - 2.0;
 	
-	return alpha2 / (PI * pow2(1.0 + pow2(hdotn) * (alpha2 - 1.0)));
+	return clamp01(NoH) * ((alphap + 2.0) / pow2(PI)) * pow(NoH, alphap);
 }
 
-float BeckmannDistribution(vec3 halfVector, vec3 normal, float alpha) {
-	float hdotn = max0(dot(halfVector, normal));
+float BeckmannDistribution(float NoH, float alpha) {
 	float alpha2 = pow2(alpha);
+	float NoH2 = pow2(NoH);
 	
-	return (1.0 / (PI * alpha2 * pow(hdotn, 3.0))) * exp((pow2(hdotn) - 1.0) / (pow2(hdotn) * alpha2));
+	return exp((NoH2 - 1.0) / (NoH2 * alpha2)) / (PI * alpha2 * NoH * NoH2);
 }
 
-float phongDistribution(vec3 halfVector, vec3 normal, float alpha) {
-	float roughnessCoeff = 2.0 / pow2(alpha) - 2.0;
-	float hdotn = max0(dot(halfVector, normal));
-	float Xp = (hdotn <= 0.0 ? 0.0 : 1.0);
+float GGXDistribution(float NoH, float alpha) {
+	float alpha2 = pow2(alpha);
 	
-	return Xp * ((roughnessCoeff + 2.0) / (2.0 * PI)) * pow(hdotn, roughnessCoeff);
+	return alpha2 / (PI * pow2(1.0 + pow2(NoH) * (alpha2 - 1.0)));
 }
+
+/////////////////////////////////////////////////////////////////////////////
 
 vec3 phongSkew(vec2 epsilon, float roughness) {
 	// Uses the Phong sample skewing Functions
@@ -287,26 +296,26 @@ vec3 skew(vec2 epsilon, float roughness) {
  *
  * \return The geometry distribution of the given fragment
  */
-float CalculateGeometryDistribution(vec3 lightVector, vec3 viewVector, vec3 halfVector, vec3 normal, float alpha) {
+float CalculateGeometryDistribution(float NoL, float NoV, float NoH, float VoH, float alpha) {
 	float geometry;
 	
 	#if PBR_GEOMETRY_MODEL == 1
-		geometry = ImplictGeom(viewVector, lightVector, normal);
+		geometry = ImplictGeom(NoL, NoV);
 		
 	#elif PBR_GEOMETRY_MODEL == 2
-		geometry = NewmannGeom(viewVector, lightVector, normal);
+		geometry = NewmannGeom(NoL, NoV);
 		
 	#elif PBR_GEOMETRY_MODEL == 3
-		geometry = cookTorranceGeom(viewVector, lightVector, halfVector, normal);
+		geometry = cookTorranceGeom(NoL, NoV, NoH, VoH);
 	
 	#elif PBR_GEOMETRY_MODEL == 4
-		geometry = SmithGeom(viewVector, normal, alpha);
+		geometry = SmithGeom(NoV, alpha);
 	
 	#elif PBR_GEOMETRY_MODEL == 5
-		geometry = GGXSmithGeom(lightVector, halfVector, alpha) * GGXSmithGeom(viewVector, halfVector, alpha); //Physical
+		geometry = GGXSmithGeom(NoL, alpha) * GGXSmithGeom(NoV, alpha); //Physical
 		
 	#elif PBR_GEOMETRY_MODEL == 6
-		geometry = SchlickBeckmannGeom(lightVector, halfVector, alpha) * SchlickBeckmannGeom(viewVector, halfVector, alpha); //Phisical
+		geometry = SchlickBeckmannGeom(NoL, alpha) * SchlickBeckmannGeom(NoV, alpha); //Phisical
 		
 	#endif
 	
@@ -321,31 +330,30 @@ float CalculateGeometryDistribution(vec3 lightVector, vec3 viewVector, vec3 half
  *
  * \return The microfacet distribution for the current fragment
  */
-float CalculateMicrofacetDistribution(vec3 halfVector, vec3 normal, float alpha) {
+float CalculateMicrofacetDistribution(float NoH, float alpha) {
 	float distribution;
 		
 	#if PBR_DISTROBUTION_MODEL == 1	
-		distribution = phongDistribution(halfVector, normal, alpha);
+		distribution = clamp01(phongDistribution(NoH, alpha));
 		
 	#elif PBR_DISTROBUTION_MODEL == 2
-		distribution = BeckmannDistribution(halfVector, normal, alpha);
+		distribution = BeckmannDistribution(NoH, alpha);
 		
 	#elif PBR_DISTROBUTION_MODEL == 3
-		distribution = GGXDistribution(halfVector, normal, alpha);
+		distribution = GGXDistribution(NoH, alpha);
 		
 	#endif
 	
 	return distribution;
 }
 
-float CalculateNormalizationFactor(float alpha, vec3 viewVector, vec3 normal) {
-	float NoL = dot(normal, lightVector);
-	float NoV = dot(normal, viewVector);
+float CalculateNormalizationFactor(float NoL, float NoV, float alpha) {
 	float term;
 	
 	#if PBR_GEOMETRY_MODEL == 4 || 5
 		float G1 = NoL + sqrt(1.0 + pow2(alpha) * ((1.0 - pow2(NoL)) / pow2(NoL)));
 		float G2 = NoV + sqrt(1.0 + pow2(alpha) * ((1.0 - pow2(NoV)) / pow2(NoV)));
+		
 		term = G1 * G2;
 	#else
 		term = (4.0 * NoL * NoV);
@@ -376,13 +384,16 @@ float CalculateSpecularHighlight(
 	
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
-	float geometryFactor = CalculateGeometryDistribution(lightVector, viewVector, halfVector, normal, roughness);
-	float microfacetDistribution = CalculateMicrofacetDistribution(halfVector, normal, roughness);
-	float normalizationFactor = CalculateNormalizationFactor(roughness, viewVector, normal);
-
-	float NoL = max0(dot(lightVector, normal));
+	float NoL = dot(normal, lightVector);
+	float NoV = dot(normal, viewVector);
+	float NoH = dot(normal, halfVector);
+	float VoH = dot(viewVector, halfVector);
 	
-	return fresnel * geometryFactor * microfacetDistribution * NoL / normalizationFactor;
+	float geometryFactor = CalculateGeometryDistribution(NoL, NoV, NoH, VoH, roughness);
+	float microfacetDistribution = CalculateMicrofacetDistribution(NoH, roughness);
+	float normalizationFactor = CalculateNormalizationFactor(NoL, NoV, roughness);
+	
+	return fresnel * geometryFactor * microfacetDistribution * max0(NoL) / normalizationFactor;
 }
 
 vec3 BlendMaterial(vec3 color, vec3 specular, float F0, float smoothness) {
