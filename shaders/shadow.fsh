@@ -17,15 +17,10 @@ varying vec3 vertNormal;
 
 
 void main() {
-	vec4 diffuse  = color;
-	     diffuse *= texture2D(texture, texcoord);
+	vec4 diffuse = color * texture2D(texture, texcoord);
 	
-	float NdotL = max0(dot(vertNormal, vec3(0.0, 0.0, 1.0)));
-	
-	diffuse.rgb *= pow(NdotL, 1.0 / 2.2);
-	
-	vec3 shadowNormal = vertNormal;
+	diffuse.rgb *= pow(max0(vertNormal.z), 1.0 / 2.2);
 	
 	gl_FragData[0] = vec4(diffuse.rgb, diffuse.a);
-	gl_FragData[1] = vec4(shadowNormal.xy * 0.5 + 0.5, 0.0, 1.0);
+	gl_FragData[1] = vec4(vertNormal.xy * 0.5 + 0.5, 0.0, 1.0);
 }
