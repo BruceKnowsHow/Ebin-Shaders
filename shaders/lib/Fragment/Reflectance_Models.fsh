@@ -62,7 +62,7 @@ float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, 
 	float C1 = NoL * (1.0 - 0.5 * (alpha2 / (alpha2 + 0.65)));
 	float C2 = 0.25 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? clamp01(1.0 / max(NoL, NoV)) : 1.0);
 
-	return (1.5 / PI) * (C1 + C2) * (1.0 + roughness * 0.5);
+	return (2.0 / PI) * (C1 + C2) * (1.0 + roughness * 0.5);
 }
 
 
