@@ -74,7 +74,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	F0 = F0Calc(F0, mask.metallic);
 	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
-	vec3 halfVector = normalize(lightVector - viewVector);
+	vec3 halfVector = normalize(lightVector + viewVector);
 	
 	float vdotn   = clamp01(dot(viewVector, normal));
 	float vdoth   = clamp01(dot(viewVector, halfVector));
@@ -85,21 +85,26 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
-	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
+	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, viewVector, roughness) * sunlight;
 	
-	if(mask.water < 0.5) reflectedSky = clamp01(reflectedSky * F0);
-	vec3 offscreen = (reflectedSky + specular * sunlightColor * 0.25) / 2.0;
+	if(mask.water < 0.5) 
+		reflectedSky = clamp01(reflectedSky * F0) / 2.0;
+	else
+		reflectedSky = clamp01(reflectedSky / 6.0);
+		
+		
+	vec3 offscreen = (reflectedSky + specular * sunlightColor * 6.0);
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
-		vec3 BRDFSkew = skew(epsilon, pow2(roughness));
+		vec3 BRDFSkew = skew((epsilon), pow2(roughness));
 		
 		vec3 reflectDir  = normalize(BRDFSkew * roughness / 8.0 + normal);
 		     reflectDir *= sign(dot(normal, reflectDir));
 		
-		vec3 rayDirection = reflect(normalize(viewSpacePosition.xyz), reflectDir);
+		vec3 rayDirection = reflect(-viewVector, reflectDir);
 		
-		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.55, 30, 1, reflectedCoord, reflectedViewSpacePosition)) { //this is much faster I tested
+		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.55, 30, 1, reflectedCoord, reflectedViewSpacePosition)) {
 			reflection += offscreen;
 		} else {
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
@@ -115,17 +120,15 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 				colorSample      = mix(colorSample, reflectedSky, pow(1.0 - edge, 10.0));
 			#endif
 			
-			reflection += colorSample * reflectFresnel * pow(smoothness, 4.0);
+			reflection += colorSample * reflectFresnel * pow2(smoothness);
 		}
 	}
 	
 	reflection /= PBR_RAYS;
 	if(mask.metallic > 0.45) reflection += (1.0 - clamp01(pow(skyLightmap, 10))) * 0.25;
 	
-	reflection = BlendMaterial(color, reflection, F0, smoothness);
+	reflection = BlendMaterial(color, reflection, F0);
 	
-	reflection = max(reflection, 0.0);
-	
-	color = reflection;
+	color = max(reflection, 0.0);
 }
 #endif

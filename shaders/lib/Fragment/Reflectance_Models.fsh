@@ -396,7 +396,7 @@ float CalculateSpecularHighlight(
 	return fresnel * geometryFactor * microfacetDistribution * max0(NoL) / normalizationFactor;
 }
 
-vec3 BlendMaterial(vec3 color, vec3 specular, float F0, float smoothness) {
+vec3 BlendMaterial(vec3 color, vec3 specular, float F0) {
   float scRange = smoothstep(0.25, 0.45, F0);
   vec3  dielectric = color + specular;
   vec3  metal = specular * color;
