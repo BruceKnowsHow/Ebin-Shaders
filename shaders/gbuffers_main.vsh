@@ -12,6 +12,7 @@ varying vec3 color;
 varying vec2 texcoord;
 
 varying mat3 tbnMatrix;
+varying vec4 verts;
 varying vec2 vertLightmap;
 
 varying float mcID;
@@ -89,6 +90,7 @@ void main() {
 	
 	
 	CalculateTBN(position.xyz, tbnMatrix);
+	verts = gl_Vertex;
 	
 	viewSpacePosition = gbufferModelView * position;
 	worldPosition     = position.xyz + cameraPosition;

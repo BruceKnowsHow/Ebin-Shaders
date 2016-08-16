@@ -12,6 +12,7 @@ varying vec3 color;
 varying vec2 texcoord;
 
 varying mat3 tbnMatrix;
+varying vec4 verts;
 varying vec2 vertLightmap;
 
 varying float mcID;
@@ -35,17 +36,21 @@ varying float waterMask;
 #include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 #endif
 
+vec2 getParallaxCoord(vec2 coords, vec3 tangentVector) {
+	return coords;
+}
 
-vec4 GetDiffuse() {
+
+vec4 GetDiffuse(vec2 coord) {
 	vec4 diffuse  = vec4(color.rgb, 1.0);
-	     diffuse *= texture2D(texture, texcoord);
+	     diffuse *= texture2D(texture, coord);
 	
 	return diffuse;
 }
 
-vec4 GetNormal() {
+vec4 GetNormal(vec2 coord) {
 #ifdef NORMAL_MAPS
-	vec4 normal = texture2D(normals, texcoord);
+	vec4 normal = texture2D(normals, coord);
 #else
 	vec4 normal = vec4(0.5, 0.5, 1.0, 1.0);
 #endif
@@ -63,9 +68,9 @@ vec3 GetTangentNormal() {
 #endif
 }
 
-vec2 GetSpecularity(float height, float skyLightmap) {
+vec2 GetSpecularity(vec2 coord, float height, float skyLightmap) {
 #ifdef SPECULARITY_MAPS
-	vec2 specular = texture2D(specular, texcoord).rg;
+	vec2 specular = texture2D(specular, coord).rg;
 	
 	float smoothness = specular.r;
 	float metalness = specular.g;
@@ -97,11 +102,15 @@ vec2 EncodeNormalData(vec3 normalTexture, float tbnIndex) {
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
-	vec4 diffuse = GetDiffuse();
+	vec4 modelView = (gl_ModelViewMatrix * verts);
+	vec3 tangentVector = normalize(tbnMatrix * modelView.xyz);
+	vec2 coord = getParallaxCoord(texcoord, vec3(1.0));
+
+	vec4 diffuse = GetDiffuse(coord);
 	if (diffuse.a < 0.1000003) discard;
 	
-	vec4 normal = GetNormal();
-	vec2 specularity = GetSpecularity(normal.a, vertLightmap.t);	
+	vec4 normal = GetNormal(coord);
+	vec2 specularity = GetSpecularity(coord, normal.a, vertLightmap.t);	
 	
 	
 #if !defined gbuffers_water
