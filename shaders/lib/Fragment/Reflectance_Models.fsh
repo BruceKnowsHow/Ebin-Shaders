@@ -91,6 +91,20 @@ float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, fl
 	return 1.0 / PI * Lr;
 }
 
+float GetGGXSubsurfaceDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
+	cfloat wrap = 0.5;
+	
+	vec3 viewVector = normalize(viewSpacePosition.xyz);
+	float NoL = clamp01((dot(normal, lightVector) + wrap) / pow2(1.0 + wrap));
+	float VoL = clamp01(dot(viewVector, lightVector));
+	
+	float alpha2 = pow2(roughness);
+	float distrobution = (VoL * alpha2 - VoL) * VoL + 1.0;
+	float GGX = (alpha2 / PI) / pow2(distrobution);
+	
+	return NoL * GGX * 2.0;
+}
+
 float diffuse(float R0, vec4 viewSpacePosition, vec3 normal, float roughness) {
 float diffuse;
 	#if PBR_Diffuse == 1
@@ -366,7 +380,7 @@ float CalculateSpecularHighlight(
 	float microfacetDistribution = CalculateMicrofacetDistribution(halfVector, normal, roughness);
 	float normalizationFactor = CalculateNormalizationFactor(roughness, viewVector, normal);
 
-	float NoL = dot(lightVector, normal);
+	float NoL = max0(dot(lightVector, normal));
 	
 	return fresnel * geometryFactor * microfacetDistribution * NoL / normalizationFactor;
 }

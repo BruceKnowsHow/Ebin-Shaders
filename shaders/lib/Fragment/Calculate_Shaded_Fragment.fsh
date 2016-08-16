@@ -42,9 +42,6 @@ vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, 
 	#else
 		float diffuseLighting = diffuse(R0, ViewSpacePosition, normal, 1.0 - pow2(smoothness));
 		
-		diffuseLighting = diffuseLighting * (1.0 - mask.grass       ) + mask.grass  * 0.5;
-		diffuseLighting = diffuseLighting * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
-		
 		float scRange = smoothstep(0.25, 0.45, R0);
 		float  dielectric = diffuseLighting;
 	  float  metal = max0(dot(normal, lightVector));
@@ -54,9 +51,13 @@ vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, 
 	
 	vec3 SubSurfaceColor = vec3(1.0);
 	if(mask.leaves > 0.5 || mask.grass > 0.5) {
-		float SubSurfaceDiffusion = GetSubSurfaceDiffuse(ViewSpacePosition, normal);
-		SubSurfaceColor += SubSurfaceDiffusion * vec3(0.0, 0.2, 0.0);
-		shading.normal += SubSurfaceDiffusion;
+		float SubSurfaceDiffusion = GetGGXSubsurfaceDiffuse(ViewSpacePosition, normal, 1.0 - smoothness);
+		SubSurfaceDiffusion = SubSurfaceDiffusion * (1.0 - mask.grass       ) + mask.grass       ;
+		SubSurfaceDiffusion = SubSurfaceDiffusion * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
+		
+		show(SubSurfaceDiffusion);
+		SubSurfaceColor = SubSurfaceDiffusion * vec3(1.0, 1.2, 1.0);
+		shading.normal = SubSurfaceDiffusion;
 	}
 	
 	shading.sunlight  = shading.normal;
