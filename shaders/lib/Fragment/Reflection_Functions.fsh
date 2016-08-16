@@ -73,8 +73,6 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	float R0 = undefR0;
 	R0 = R0Calc(R0, mask.metallic);
 	
-	
-	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
 	

@@ -17,6 +17,15 @@ float R0Calc(float R0, float metallic) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+float diffuseFresnel(float F0, vec4 viewSpacePosition, vec3 normal) {
+	vec3 viewVector = normalize(-viewSpacePosition.xyz);
+	
+	float NoL = dot(lightVector, normal);
+	float NoV = dot(normal, viewVector);
+	
+	return clamp01((21.0 / 20.0) * (1.0 - F0) * (1.0 - pow(1.0 - NoL, 5.0)) * (1.0 - pow(1.0 - NoV, 5.0)));
+}
+
 
 float lambertDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 	return 2.0 / PI * dot(normal, lightVector);
@@ -24,7 +33,7 @@ float lambertDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 
 float GetBurleyDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
-	vec3 halfVector = normalize(lightVector - viewVector);
+	vec3 halfVector = normalize(viewVector - lightVector);
 	
 	float VoH = dot(viewVector, halfVector); 
 	float NoV = dot(normal, viewVector);
@@ -50,11 +59,12 @@ float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, 
 	float alpha2 = pow2(alpha);
 	float Cosri = VoL - NoV * NoL;
 	
-	float C1 = NoL * (1.0 - R0) * (1.0 - 0.5 * alpha2 / (alpha2 + 0.65));
+	float C1 = NoL * (1.0 - 0.5 * (alpha2 / (alpha2 + 0.65)));
 	float C2 = 0.25 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? clamp01(1.0 / max(NoL, NoV)) : 1.0);
 
-	return 2.0 / PI * (C1 + C2) * (1.0 + roughness * 0.5);
+	return (1.5 / PI) * (C1 + C2) * (1.0 + roughness * 0.5);
 }
+
 
 float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float R0) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
@@ -314,6 +324,22 @@ float CalculateMicrofacetDistribution(vec3 halfVector, vec3 normal, float alpha)
 	return distribution;
 }
 
+float CalculateNormalizationFactor(float alpha, vec3 viewVector, vec3 normal) {
+	float NoL = dot(normal, lightVector);
+	float NoV = dot(normal, viewVector);
+	float term;
+	
+	#if PBR_GEOMETRY_MODEL == 4 || 5
+		float G1 = NoL + sqrt(1.0 + pow2(alpha) * ((1.0 - pow2(NoL)) / pow2(NoL)));
+		float G2 = NoV + sqrt(1.0 + pow2(alpha) * ((1.0 - pow2(NoV)) / pow2(NoV)));
+		term = G1 * G2;
+	#else
+		term = (4.0 * NoL * NoV);
+	#endif
+	
+	return term;
+}
+
 /*!
  * \brief Calculates a specular highlight for a given light
  *
@@ -338,11 +364,11 @@ float CalculateSpecularHighlight(
 	
 	float geometryFactor = CalculateGeometryDistribution(lightVector, viewVector, halfVector, normal, roughness);
 	float microfacetDistribution = CalculateMicrofacetDistribution(halfVector, normal, roughness);
+	float normalizationFactor = CalculateNormalizationFactor(roughness, viewVector, normal);
+
+	float NoL = dot(lightVector, normal);
 	
-	float ldotn = max(0.01, dot(lightVector, normal));
-	float vdotn = max(0.01, dot(viewVector, normal));
-	
-	return fresnel * geometryFactor * microfacetDistribution * ldotn / (4.0 * ldotn * vdotn);
+	return fresnel * geometryFactor * microfacetDistribution * NoL / normalizationFactor;
 }
 
 vec3 BlendMaterial(vec3 color, vec3 specular, float R0, float smoothness) {
