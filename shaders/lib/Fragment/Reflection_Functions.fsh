@@ -84,10 +84,10 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
-	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10)) * 0.5;
+	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
 	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
-	if(mask.water < 0.5) reflectedSky = clamp01(reflectedSky * R0 * 2);
+	if(mask.water < 0.5) reflectedSky = clamp01(reflectedSky * R0);
 	vec3 offscreen = (reflectedSky + specular * sunlightColor * 0.25) / 2.0;
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
