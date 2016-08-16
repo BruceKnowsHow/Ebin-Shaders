@@ -11,7 +11,7 @@ float GetShadowScale() {
 float GetShadowBias(vec2 shadowProjection) {
 	float scale = GetShadowScale();
 	
-	return mix(1.0, length(shadowProjection) / scale * 1.11, SHADOW_MAP_BIAS) * scale;
+	return mix(1.0, length(shadowProjection) / scale * 1.15, SHADOW_MAP_BIAS) * scale;
 }
 
 vec2 BiasShadowMap(vec2 shadowProjection, out float biasCoeff) {
