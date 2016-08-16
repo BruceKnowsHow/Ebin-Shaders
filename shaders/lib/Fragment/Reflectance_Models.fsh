@@ -11,9 +11,9 @@ float randAngle() {
 	return float(30u * pow(x, y) + 10u * x * y);
 }
 
-float R0Calc(float R0, float metallic) {
-	if(metallic > 0.01) R0 = metallic;
-	return R0 = clamp(R0, 0.02, 0.99);
+float F0Calc(float F0, float metallic) {
+	if(metallic > 0.01) F0 = metallic;
+	return F0 = clamp(F0, 0.02, 0.99);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ float GetBurleyDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 	return (1.0 / PI) * FdV * FdL;
 }
 
-float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float R0) {
+float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float F0) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
@@ -66,7 +66,7 @@ float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, 
 }
 
 
-float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float R0) {
+float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float F0) {
 	vec3 viewVector = normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
@@ -86,7 +86,7 @@ float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, fl
 	float Lm = (max0(1.0 - 2.0 * alpha) * (1.0 - pow(1.0 - NoL, 5.0)) + min(2.0 * alpha, 1.0)) * ((1.0 - 0.5 * alpha) * NoL + 0.5 * alpha * pow2(NoL));
 	float Vd = (alpha2 / ((alpha2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (1.0 - pow(1.0 - NoL, (1 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
 	float Bp = Cosri < 0.0 ? 1.4 * NoV * NoL * Cosri : Cosri;
-	float Lr = (21.0 / 20.0 * PI) * (1.0 - R0) * (Fr * Lm + Vd * Bp);
+	float Lr = (21.0 / 20.0 * PI) * (1.0 - F0) * (Fr * Lm + Vd * Bp);
 
 	return 1.0 / PI * Lr;
 }
@@ -105,16 +105,16 @@ float GetGGXSubsurfaceDiffuse(vec4 viewSpacePosition, vec3 normal, float roughne
 	return NoL * GGX * 2.0;
 }
 
-float diffuse(float R0, vec4 viewSpacePosition, vec3 normal, float roughness) {
+float diffuse(float F0, vec4 viewSpacePosition, vec3 normal, float roughness) {
 float diffuse;
 	#if PBR_Diffuse == 1
 		diffuse = lambertDiffuse(viewSpacePosition, normal, roughness);
 	#elif PBR_Diffuse == 2
 		diffuse = GetBurleyDiffuse(viewSpacePosition, normal, roughness);
 	#elif PBR_Diffuse ==3
-		diffuse = GetOrenNayarDiffuse(viewSpacePosition, normal, roughness, R0);
+		diffuse = GetOrenNayarDiffuse(viewSpacePosition, normal, roughness, F0);
 	#else
-		diffuse = GetGotandaDiffuse(viewSpacePosition, normal, roughness, R0);
+		diffuse = GetGotandaDiffuse(viewSpacePosition, normal, roughness, F0);
 	#endif
 	
 	return diffuse;
@@ -122,21 +122,21 @@ float diffuse;
 
 /////////////////////////////////////////////////////////////////////////////
 
-float Fresnel(float R0, float vdoth, float metallic) {
+float Fresnel(float F0, float vdoth, float metallic) {
 	float fresnel;
 	
 	#if FRESNEL == 1
-		fresnel = R0 + (1.0 - R0) * max0(pow(1.0 - vdoth, 5.0));
+		fresnel = F0 + (1.0 - F0) * max0(pow(1.0 - vdoth, 5.0));
 		
 	#elif FRESNEL == 2
-		fresnel = R0 + (1 - R0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
+		fresnel = F0 + (1 - F0) * pow(2, (-5.55473 * vdoth - 6.98316) * vdoth);
 		
 	#elif FRESNEL == 3
-		float nFactor = (1.0 + sqrt(R0)) / (1.0 - sqrt(R0));
+		float nFactor = (1.0 + sqrt(F0)) / (1.0 - sqrt(F0));
 		float gFactor = sqrt(pow2(nFactor) + pow2(vdoth) - 1.0);
 		fresnel = 0.5 * pow((gFactor - vdoth) / (gFactor + vdoth), 2.0) * (1.0 + pow(((gFactor + vdoth) * vdoth - 1.0) / ((gFactor - vdoth) * vdoth + 1.0), 2.0));
 	#else //Real fresnel, no approximations made here.
-		float sF0 = sqrt(R0);
+		float sF0 = sqrt(F0);
 		float alpha = sqrt(1.0 - (pow2(sF0 - 1.0) * (1.0 - pow2(vdoth))) / pow2(sF0 + 1.0));
 		
 		float C1 = pow2(((sF0 + 1.0) * vdoth + (sF0 - 1.0) * alpha) / (((sF0 + 1.0) * vdoth - (sF0 - 1.0) * alpha)));
@@ -385,8 +385,8 @@ float CalculateSpecularHighlight(
 	return fresnel * geometryFactor * microfacetDistribution * NoL / normalizationFactor;
 }
 
-vec3 BlendMaterial(vec3 color, vec3 specular, float R0, float smoothness) {
-  float scRange = smoothstep(0.25, 0.45, R0);
+vec3 BlendMaterial(vec3 color, vec3 specular, float F0, float smoothness) {
+  float scRange = smoothstep(0.25, 0.45, F0);
   vec3  dielectric = color + specular;
   vec3  metal = specular * color;
 

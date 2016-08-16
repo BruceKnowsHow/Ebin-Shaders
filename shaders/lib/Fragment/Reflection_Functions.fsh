@@ -70,8 +70,8 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	float roughness = 1.0 - smoothness;
 	
-	float R0 = undefR0;
-	R0 = R0Calc(R0, mask.metallic);
+	float F0 = undefF0;
+	F0 = F0Calc(F0, mask.metallic);
 	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector - viewVector);
@@ -79,15 +79,15 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	float vdotn   = clamp01(dot(viewVector, normal));
 	float vdoth   = clamp01(dot(viewVector, halfVector));
 	
-	float  reflectFresnel = Fresnel(R0, vdotn, mask.metallic);
-	float  lightFresnel = Fresnel(R0, vdoth, mask.metallic);
+	float  reflectFresnel = Fresnel(F0, vdotn, mask.metallic);
+	float  lightFresnel = Fresnel(F0, vdoth, mask.metallic);
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
 	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
-	if(mask.water < 0.5) reflectedSky = clamp01(reflectedSky * R0);
+	if(mask.water < 0.5) reflectedSky = clamp01(reflectedSky * F0);
 	vec3 offscreen = (reflectedSky + specular * sunlightColor * 0.25) / 2.0;
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
@@ -122,7 +122,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	reflection /= PBR_RAYS;
 	if(mask.metallic > 0.45) reflection += (1.0 - clamp01(pow(skyLightmap, 10))) * 0.25;
 	
-	reflection = BlendMaterial(color, reflection, R0, smoothness);
+	reflection = BlendMaterial(color, reflection, F0, smoothness);
 	
 	reflection = max(reflection, 0.0);
 	

@@ -28,10 +28,9 @@ void OldNorth() { // Makes the sun and moon rise in the north, instead of the ea
 }
 
 void UserRotation() {
-//	timeAngle = 45.0;
+	timeAngle = 30;
 	
 //	OldNorth();
 }
- 
 
 // End of #include "/UserProgram/CustomTimeCycle.vsh"
