@@ -92,7 +92,6 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	else
 		reflectedSky = clamp01(reflectedSky / 6.0);
 		
-		
 	vec3 offscreen = (reflectedSky + specular * sunlightColor * 6.0);
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
