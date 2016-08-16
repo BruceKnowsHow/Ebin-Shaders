@@ -28,7 +28,9 @@ void OldNorth() { // Makes the sun and moon rise in the north, instead of the ea
 }
 
 void UserRotation() {
-	timeAngle = 30;
+	timeAngle = time * 20;
+	//pathRotationAngle = 0.0;
+	//twistAngle = position.z * 20;
 	
 //	OldNorth();
 }

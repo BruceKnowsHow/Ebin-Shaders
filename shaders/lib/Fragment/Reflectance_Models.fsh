@@ -11,12 +11,7 @@ float F0Calc(float F0, float metallic) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-float diffuseFresnel(float F0, vec4 viewSpacePosition, vec3 normal) {
-	vec3 viewVector = normalize(-viewSpacePosition.xyz);
-	
-	float NoL = dot(lightVector, normal);
-	float NoV = dot(normal, viewVector);
-	
+float diffuseFresnel(float F0, float NoL, float NoV) {	
 	return clamp01((21.0 / 20.0) * (1.0 - F0) * (1.0 - pow(1.0 - NoL, 5.0)) * (1.0 - pow(1.0 - NoV, 5.0)));
 }
 
@@ -26,8 +21,8 @@ float lambertDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 }
 
 float GetBurleyDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
-	vec3 viewVector = normalize(viewSpacePosition.xyz);
-	vec3 halfVector = normalize(viewVector - lightVector);
+	vec3 viewVector = -normalize(viewSpacePosition.xyz);
+	vec3 halfVector = normalize(viewVector + lightVector);
 	
 	float VoH = dot(viewVector, halfVector); 
 	float NoV = dot(normal, viewVector);
@@ -39,9 +34,9 @@ float GetBurleyDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 	
 	return (1.0 / PI) * FdV * FdL;
 }
-
+/*
 float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float F0) {
-	vec3 viewVector = normalize(viewSpacePosition.xyz);
+	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector + viewVector);
 	
 	float VoH = dot(viewVector, halfVector); 
@@ -53,16 +48,41 @@ float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, 
 	float alpha2 = pow2(alpha);
 	float Cosri = VoL - NoV * NoL;
 	
-	float C1 = NoL * (1.0 - 0.5 * (alpha2 / (alpha2 + 0.65)));
-	float C2 = 0.25 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? clamp01(1.0 / max(NoL, NoV)) : 1.0);
+	float Fdiff = diffuseFresnel(F0, NoL, NoV);
+	
+	float C1 = 1.0 - 0.5 * (alpha2 / (alpha2 + 0.33));
+	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? min(1.0, NoL / NoV) : 1.0);
 
-	return (2.0 / PI) * (C1 + C2) * (1.0 + roughness * 0.5);
+	return (2.0 / PI) * (1.0 - F0) * Fdiff * NoL * (C1 + C2) * (1.0 + roughness * 0.5);
+}
+*/
+
+float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float F0) {
+	vec3 viewVector = -normalize(viewSpacePosition.xyz);
+	vec3 halfVector = normalize(lightVector + viewVector);
+	cfloat albedo = 3.0;
+	
+	float VoH = dot(viewVector, halfVector); 
+	float NoV = dot(normal, viewVector);
+	float NoL = dot(normal, lightVector);
+	float VoL = dot(viewVector, lightVector);
+	
+	float alpha = pow2(roughness);
+	float alpha2 = pow2(alpha);
+	float Cosri = VoL - NoV * NoL;
+	float CosriT = Cosri >= 0.0 ? min(1.0, NoL / NoV) : 1.0;
+	
+	float Fdiff = diffuseFresnel(F0, NoL, NoV);
+	
+	float C1 = (1.0 / PI) * (1.0 - 0.5 * (alpha2 / (alpha2 + 0.33)) + 0.17 * albedo * (alpha2 / (alpha2 + 0.13)));
+	float C2 = (1.0 / PI) * (0.45 * (alpha2 / (alpha2 + 0.09)));
+
+	return albedo * (1.0 - F0) * NoL * Fdiff * (C1 + C2 * (Cosri / CosriT));
 }
 
-
 float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float F0) {
-	vec3 viewVector = normalize(viewSpacePosition.xyz);
-	vec3 halfVector = normalize(lightVector + viewVector);
+	vec3 viewVector = -normalize(viewSpacePosition.xyz);
+	vec3 halfVector = normalize(viewVector + lightVector);
 	
 	float VoH = dot(viewVector, halfVector); 
 	float NoV = dot(normal, viewVector);
@@ -75,14 +95,14 @@ float GetGotandaDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, fl
 	
 	float alpha213 = alpha2 + 1.36053;
 	float Fr = (1.0 - (0.542026 * alpha2 + 0.303573 * alpha) / alpha213) * (1.0 - pow(1.0 - NoV, 5.0 - 4.0 * alpha2) / alpha213) *
-	          ((-0.733996 * alpha2 * alpha + 1.50912 * alpha2 - 1.16402 * alpha) * pow(1.0 - NoV, 1.0 + (1.0 / 39 * alpha2 * alpha2 + 1.0)) + 1.0);
+	          ((-0.733996 * alpha2 * alpha + 1.50912 * alpha2 - 1.16402 * alpha) * pow(1.0 - NoV, 1.0 + (1.0 / (39.0 * alpha2 * alpha2 + 1.0))) + 1.0);
 	
 	float Lm = (max0(1.0 - 2.0 * alpha) * (1.0 - pow(1.0 - NoL, 5.0)) + min(2.0 * alpha, 1.0)) * ((1.0 - 0.5 * alpha) * NoL + 0.5 * alpha * pow2(NoL));
-	float Vd = (alpha2 / ((alpha2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (1.0 - pow(1.0 - NoL, (1 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
+	float Vd = (alpha2 / ((alpha2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (1.0 - pow(1.0 - NoL, (1.0 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
 	float Bp = Cosri < 0.0 ? 1.4 * NoV * NoL * Cosri : Cosri;
-	float Lr = (21.0 / 20.0 * PI) * (1.0 - F0) * (Fr * Lm + Vd * Bp);
+	float Lr = (21.0 / (20.0 * PI)) * (1.0 - F0) * (Fr * Lm + Vd * Bp);
 
-	return 1.0 / PI * Lr;
+	return 2.0 * Lr;
 }
 
 float GetGGXSubsurfaceDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
