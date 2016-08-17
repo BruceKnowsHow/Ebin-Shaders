@@ -39,7 +39,7 @@ vec3 ComputeGlobalIllumination(vec4 position, vec3 normal, float skyLightmap, co
 		vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
 		
 		samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
-		samplePos.z = samplePos.z * 8.0 - 4.0;    // Convert range from unsigned to signed and undo z-shrinking
+		samplePos.z = samplePos.z * 12.0 - 6.0;    // Convert range from unsigned to signed and undo z-shrinking
 		
 		samplePos = shadowProjectionInverse * samplePos; // Convert sample position to shadow-view-space for a linear comparison against the pixel's position
 		
@@ -115,7 +115,7 @@ vec3 ComputeGlobalIllumination(vec4 position, vec3 normal, float skyLightmap, co
 			vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
 			
 			samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
-			samplePos.z = samplePos.z * 8.0 - 4.0; // Convert range from unsigned to signed and undo z-shrinking
+			samplePos.z = samplePos.z * 12.0 - 6.0; // Convert range from unsigned to signed and undo z-shrinking
 			
 			samplePos = shadowProjectionInverse * samplePos; // Convert sample position to shadow-view-space for a linear comparison against the pixel's position
 			
@@ -184,7 +184,7 @@ vec3 ComputeGlobalIllumination(vec4 position, vec3 normal, float skyLightmap, co
 		vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
 		
 		samplePos.z = texture2DLod(shadowtex1, mapPos, 0.0).x;
-		samplePos.z = samplePos.z * 8.0 - 4.0;    // Convert range from unsigned to signed and undo z-shrinking
+		samplePos.z = samplePos.z * 12.0 - 6.0;    // Convert range from unsigned to signed and undo z-shrinking
 		
 		vec3 sampleDiff = position.xyz - samplePos.xyz;
 		
