@@ -31,7 +31,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb;
 	     reflectedSky *= 1.0;
 	
-	float reflectedSunspot = CalculateSpecularHighlight(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
+	float reflectedSunspot = specularBRDF(lightVector, normal, lightFresnel, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
 	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 10.0;
 	
@@ -75,17 +75,14 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	vec3 halfVector = normalize(lightVector + viewVector);
+	float vdoth = dot(viewVector, halfVector);
 	
-	float vdotn   = clamp01(dot(viewVector, normal));
-	float vdoth   = clamp01(dot(viewVector, halfVector));
-	
-	float  reflectFresnel = Fresnel(F0, vdotn);
 	float  lightFresnel = Fresnel(F0, vdoth);
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
-	float specular = CalculateSpecularHighlight(lightVector, normal, lightFresnel, viewVector, roughness) * sunlight;
+	float specular = specularBRDF(lightVector, normal, lightFresnel, viewVector, roughness) * sunlight;
 	
 	if(mask.water < 0.5) 
 		reflectedSky = clamp01(reflectedSky * F0) / 2.0;
@@ -103,6 +100,15 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
 		
+		vec3 rayHalfVector = (viewVector + rayDirection) / length(viewVector + rayDirection);
+		
+		float rayVoH = dot(viewVector, rayHalfVector);
+		float rayNoH = dot(normal, rayHalfVector);
+
+		float rayFresnel = Fresnel(F0, rayVoH);
+		
+		float raySpecular = specularBRDF(rayDirection, normal, rayFresnel, viewVector, sqrt(roughness));
+
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.55, 30, 1, reflectedCoord, reflectedViewSpacePosition)) {
 			reflection += offscreen;
 		} else {
@@ -119,7 +125,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 				colorSample      = mix(colorSample, reflectedSky, pow(1.0 - edge, 10.0));
 			#endif
 			
-			reflection += colorSample * reflectFresnel * pow2(smoothness);
+			reflection += colorSample * raySpecular;
 		}
 	}
 	

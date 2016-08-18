@@ -78,8 +78,8 @@ float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, 
 		Fdiff = diffuseFresnel(F0, NoL, NoV);
 	#endif
 	
-	float C1 = (1.0 / PI) * (1.0 - 0.5 * (alpha2 / (alpha2 + 0.33)) + 0.17 * albedo * (alpha2 / (alpha2 + 0.13)));
-	float C2 = (1.0 / PI) * (0.45 * (alpha2 / (alpha2 + 0.09)));
+	float C1 = (1.0 - 0.5 * (alpha2 / (alpha2 + 0.33)) + 0.17 * albedo * (alpha2 / (alpha2 + 0.13))) / PI;
+	float C2 = 0.45 * (alpha2 / (alpha2 + 0.09)) / PI;
 
 	return albedo * (1.0 - F0) * NoL * (Fdiff * C1 + C2 * (Cosri / CosriT));
 }
@@ -397,7 +397,7 @@ float CalculateNormalizationFactor(float NoL, float NoV, float alpha) {
  *
  * \return The color of the specular highlight at the current fragment
  */
-float CalculateSpecularHighlight(
+float specularBRDF(
 	vec3 lightVector,
 	vec3 normal,
 	float fresnel,
@@ -406,7 +406,7 @@ float CalculateSpecularHighlight(
 	
 	roughness = pow2(roughness);
 	
-	vec3 halfVector = normalize(lightVector + viewVector);
+	vec3 halfVector = (viewVector + lightVector) / length(viewVector + lightVector);
 	
 	float NoL = dot(normal, lightVector);
 	float NoV = dot(normal, viewVector);
@@ -423,7 +423,6 @@ float CalculateSpecularHighlight(
 vec3 BlendMaterial(vec3 color, vec3 specular, float F0) {
   float scRange = smoothstep(0.25, 0.45, F0);
   vec3  dielectric = color + specular;
-  vec3  metal = specular * color;
-
+  vec3  metal = specular * color * 0.45;
   return mix(dielectric, metal, scRange);
 }
