@@ -7,7 +7,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
-	float VoH
+	float VoH;
 	
 	float roughness = 1.0 - smoothness;
 	
