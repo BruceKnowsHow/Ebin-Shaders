@@ -282,6 +282,7 @@ vec3 beckmannSkew(vec2 epsilon, float roughness) {
 
 vec3 ggxSkew(vec2 epsilon, float roughness) {
 	// Uses the GGX sample skewing Functions
+	roughness = pow2(roughness);
 	float theta = atan(sqrt(roughness * roughness * epsilon.x / (1.0 - epsilon.x)));
 	float phi = 2.0 * PI * epsilon.y;
 	

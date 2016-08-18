@@ -89,9 +89,12 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
 		vec3 BRDFSkew = skew((epsilon), pow2(roughness));
+
+		vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+		vec3 tanX = normalize(cross(upVector, normal));
+		vec3 tanY = cross(normal, tanX);
 		
-		vec3 reflectDir  = normalize(BRDFSkew * roughness / 8.0 + normal);
-		     reflectDir *= sign(dot(normal, reflectDir));
+		vec3 reflectDir = normalize(BRDFSkew.x * tanX + BRDFSkew.y * tanY + BRDFSkew.z * normal); //Reproject normal in spherical coords
 		
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
 		float raySpecular = specularBRDF(rayDirection, normal, F0, viewVector, roughness);
@@ -101,7 +104,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		} else {
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, 2) * 1.2;
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 0) * 1.2;
 			
 			colorSample = mix(colorSample, reflectedSky, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			
@@ -121,7 +124,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	if(mask.metallic > 0.45) reflection += (1.0 - clamp01(pow(skyLightmap, 10))) * 0.25;
 	
 	reflection = BlendMaterial(color, reflection, F0);
-	
+
 	color = max0(reflection);
 }
 #endif
