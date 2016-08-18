@@ -381,18 +381,7 @@ float CalculateMicrofacetDistribution(float NoH, float alpha) {
 }
 
 float CalculateNormalizationFactor(float NoL, float NoV, float alpha) {
-	float term;
-	
-	#if PBR_GEOMETRY_MODEL == 4 || 5
-		float G1 = NoL + sqrt(1.0 + pow2(alpha) * ((1.0 - pow2(NoL)) / pow2(NoL)));
-		float G2 = NoV + sqrt(1.0 + pow2(alpha) * ((1.0 - pow2(NoV)) / pow2(NoV)));
-		
-		term = G1 * G2;
-	#else
-		term = (4.0 * NoL * NoV);
-	#endif
-	
-	return term;
+	return (4.0 * NoL * NoV);
 }
 
 /*!

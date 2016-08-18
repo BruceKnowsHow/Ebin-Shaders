@@ -74,15 +74,9 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	const uint NUM_SAMPLES = PBR_RAYS;
 	
-	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 4));
 	float specular = specularBRDF(lightVector, normal, F0, viewVector, pow2(roughness)) * sunlight;
-	
-	if(mask.water < 0.5) 
-		reflectedSky = reflectedSky * F0 / 4.0;
-	else
-		reflectedSky = reflectedSky / 6.0;
 		
-	vec3 offscreen = (reflectedSky + specular * sunlightColor * 6.0);
+	vec3 offscreen = (specular * sunlightColor * 6.0);
 	
 	vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
 	vec3 tanX = normalize(cross(upVector, normal));
@@ -97,13 +91,15 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
 		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, roughness);
+		
+		vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, microFacetNormal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 4)) * 0.5;
 
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.55, 30, 1, reflectedCoord, reflectedViewSpacePosition)) {
-			reflection += offscreen;
+			reflection += offscreen + reflectedSky * raySpecular;
 		} else {
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, 2) * 1.2;
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 0) * 1.2;
 			
 			colorSample = mix(colorSample, reflectedSky, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			

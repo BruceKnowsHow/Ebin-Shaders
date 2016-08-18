@@ -28,7 +28,7 @@ void OldNorth() { // Makes the sun and moon rise in the north, instead of the ea
 }
 
 void UserRotation() {
-	//timeAngle = 30;
+	timeAngle = 15;
 	
 //	OldNorth();
 }
