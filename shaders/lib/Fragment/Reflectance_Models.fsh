@@ -419,10 +419,10 @@ float specularBRDF(
 }
 
 #if ShaderStage == 2
-float computeLod(float NoH, uint numSamples, float alpha) {
-  float dist = CalculateMicrofacetDistribution(NoH, pow2(alpha));
-  return 0.5 * (log2(float(viewWidth * viewHeight) / numSamples) - log2(dist));
-}
+  float computeLod(float NoH, uint numSamples, float alpha) {
+    float dist = CalculateMicrofacetDistribution(NoH, pow2(alpha));
+    return 0.25 * (log2(float(viewWidth * viewHeight) / numSamples) - log2(dist));
+  }
 #endif
 
 void blendRain(inout vec3 color, in float wetLevel, in float roughness) {
