@@ -1,8 +1,17 @@
+float noise(vec2 coord) {
+    return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+vec2 Hammersley(uint i, uint N) {
+  return vec2(float(i) / float(N), float(bitfieldReverse(i)) * 2.3283064365386963e-10);
+}
+
+
 float randAngle() {
 	uint x = uint(gl_FragCoord.x);
 	uint y = uint(gl_FragCoord.y);
-	
-	return float(30u * pow(x, y) + 10u * x * y);
+	//return 1.0;
+	return (30u * x ^ y + 10u * x * y);
 }
 
 float F0Calc(float F0, float metallic) {
@@ -256,6 +265,7 @@ vec3 phongSkew(vec2 epsilon, float roughness) {
 	float Ap = (2.0 / roughness);
 	float theta = acos(pow(epsilon.x, 2.0 / Ap)) / (4.0 * PI * PI);
 	float phi = 2.0 * PI * epsilon.y;
+	phi += randAngle();
 	
 	float sin_theta = sin(theta);
 	
@@ -270,6 +280,7 @@ vec3 beckmannSkew(vec2 epsilon, float roughness) {
 	// Uses the Beckman sample skewing Functions
 	float theta = atan(sqrt(-pow2(roughness) * log(1.0 - epsilon.x)));
 	float phi = 2.0 * PI * epsilon.y;
+	phi += randAngle();
 	
 	float sin_theta = sin(theta);
 	
@@ -284,6 +295,7 @@ vec3 ggxSkew(vec2 epsilon, float roughness) {
 	// Uses the GGX sample skewing Functions
 	float theta = atan(sqrt(roughness * roughness * epsilon.x / (1.0 - epsilon.x)));
 	float phi = 2.0 * PI * epsilon.y;
+	phi += randAngle();
 	
 	float sin_theta = sin(theta);
 	
@@ -419,6 +431,6 @@ float specularBRDF(
 vec3 BlendMaterial(vec3 color, vec3 specular, float F0) {
   float scRange = smoothstep(0.25, 0.45, F0);
   vec3  dielectric = color + specular;
-  vec3  metal = specular * color * 0.45;
+  vec3  metal = specular * color;
   return mix(dielectric, metal, scRange);
 }

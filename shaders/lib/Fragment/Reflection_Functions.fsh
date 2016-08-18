@@ -55,9 +55,6 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 }
 
 #else
-float noise(vec2 coord) {
-    return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
-}
 
 void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal, float smoothness, float skyLightmap, Mask mask) {
 	if (isEyeInWater == 1) return;
@@ -75,6 +72,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
+	const uint NUM_SAMPLES = PBR_RAYS;
 	
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 4));
 	float specular = specularBRDF(lightVector, normal, F0, viewVector, pow2(roughness)) * sunlight;
@@ -86,13 +84,13 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		
 	vec3 offscreen = (reflectedSky + specular * sunlightColor * 6.0);
 	
-	for (uint i = 1; i <= PBR_RAYS; i++) {
-		vec2 epsilon = vec2(noise(vec2(texcoord.s + i, texcoord.t - i)), noise(vec2(texcoord.s + i * 3, texcoord.t - i * 3)));
-		vec3 BRDFSkew = skew((epsilon), pow(roughness, 4.0));
-
-		vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
-		vec3 tanX = normalize(cross(upVector, normal));
-		vec3 tanY = cross(normal, tanX);
+	vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+	vec3 tanX = normalize(cross(upVector, normal));
+	vec3 tanY = cross(normal, tanX);
+	
+	for (uint i = 1; i <= NUM_SAMPLES; i++) {
+		vec2 epsilon = Hammersley(i, NUM_SAMPLES);
+		vec3 BRDFSkew = skew(epsilon, pow(roughness, 4.0));
 		
 		vec3 reflectDir = normalize(BRDFSkew.x * tanX + BRDFSkew.y * tanY + BRDFSkew.z * normal); //Reproject normal in spherical coords
 		
