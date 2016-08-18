@@ -92,10 +92,11 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		vec2 epsilon = Hammersley(i, NUM_SAMPLES);
 		vec3 BRDFSkew = skew(epsilon, pow(roughness, 4.0));
 		
-		vec3 reflectDir = normalize(BRDFSkew.x * tanX + BRDFSkew.y * tanY + BRDFSkew.z * normal); //Reproject normal in spherical coords
-		
+		vec3 microFacetNormal = BRDFSkew.x * tanX + BRDFSkew.y * tanY + BRDFSkew.z * normal;
+		vec3 reflectDir = normalize(microFacetNormal); //Reproject normal in spherical coords
+
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
-		float raySpecular = specularBRDF(rayDirection, normal, F0, viewVector, roughness);
+		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, roughness);
 
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.55, 30, 1, reflectedCoord, reflectedViewSpacePosition)) {
 			reflection += offscreen;
