@@ -2,18 +2,18 @@
 #define jSteps 1
 
 cfloat     planetRadius = 6371.0e3;
-cfloat atmosphereRadius = 6471.0e3;
+cfloat atmosphereRadius = 6471.0e3 * 1.2;
 
 cfloat atmosphereHeight = atmosphereRadius - planetRadius;
 
 cvec2 radiiSquared = pow(vec2(planetRadius, atmosphereRadius), vec2(2.0));
 
-cvec3  rayleighCoeff = vec3(5.8e-6, 1.35e-5, 3.31e-5);
+cvec3  rayleighCoeff = vec3(5.8e-6, 1.35e-5, 3.31e-5) * 0.4;
 cfloat      mieCoeff = 21e-6;
 
 cfloat g = 0.9;
-cfloat rayleighHeight = 8.0e3;
-cfloat      mieHeight = 1.2e3 * 1.5;
+cfloat rayleighHeight = 8.0e3 * 2.0;
+cfloat      mieHeight = 1.2e3 * 3.0;
 
 cvec2 invScatterHeight = -1.0 / vec2(rayleighHeight, mieHeight); // Optical step constant to save computations inside the loop
 
