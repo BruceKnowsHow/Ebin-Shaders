@@ -121,6 +121,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 
 	if(mask.metallic > 0.45) reflection += (1.0 - clamp01(pow(skyLightmap, 10))) * 0.25;
 	
+	blendRain(color, rainStrength, roughness);
 	reflection = BlendMaterial(color, reflection, F0);
 
 	color = max0(reflection);

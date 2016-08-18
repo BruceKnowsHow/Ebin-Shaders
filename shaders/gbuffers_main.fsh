@@ -75,13 +75,10 @@ vec2 GetSpecularity(vec2 coord, float height, float skyLightmap) {
 	float smoothness = specular.r;
 	float metalness = specular.g;
 	
-	float wetfactor = wetness * pow(skyLightmap, 10.0);
+	float wetfactor = wetness * height * pow(skyLightmap, 10.0);
 	
-	smoothness *= 1.0 + wetfactor;
-	smoothness += (wetfactor - 0.5) * wetfactor;
-	smoothness += (1.0 - height) * 0.5 * wetfactor;
-	
-	smoothness = clamp01(smoothness);
+	smoothness = mix(1.0, smoothness, mix(1.0, pow2(smoothness), wetfactor));
+	smoothness = clamp(smoothness, 0.01, 0.99);
 	
 	return vec2(smoothness, metalness);
 #else
