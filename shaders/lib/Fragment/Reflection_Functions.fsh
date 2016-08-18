@@ -92,7 +92,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		vec3 reflectDir = normalize(microFacetNormal); //Reproject normal in spherical coords
 
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
-		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, roughness, NoH);
+		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, sqrt(roughness), NoH);
 		
 		vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, microFacetNormal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 4)) * 0.5;
 
