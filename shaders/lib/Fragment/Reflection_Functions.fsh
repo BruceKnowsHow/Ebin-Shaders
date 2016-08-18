@@ -103,7 +103,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		} else {
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, 0) * 1.2;
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 2) * 1.2;
 			
 			colorSample = mix(colorSample, reflectedSky, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			
