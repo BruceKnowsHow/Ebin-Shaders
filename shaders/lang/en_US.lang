@@ -169,7 +169,7 @@ option.PBR_SKEW=PBR Ray Skew
 option.PBR_SKEW.comment=Ray Skewing adds microfacets so the SSR. This will be higher quality the more rays you send. 1: Phong. 2: Beckmann. 3: GGX.
 
 option.FRESNEL=Fresnel
-option.FRESNEL.comment=How much more reflectance at grazing angles. we give an option on which algorithm you can use. 1: Schlick. 2: Spherical Gaussian. 3: Cook Torrance. 3: No Approximation, Slowest but most accurate.
+option.FRESNEL.comment=How much more reflectance at grazing angles. we give an option on which algorithm you can use. 1: Schlick. 2: Spherical Gaussian. 3: Cook Torrance. 4: No Approximation, Slowest but most accurate.
 
 option.PBR_RAYS=PBR Rays
 option.PBR_RAYS.comment=The number of rays that are sent per pixel, the more rays the higher quality.
