@@ -191,9 +191,6 @@ float Fresnel(float F0, float VoH) {
 /////////////////////////////////////////////////////////////////////////////
 
 float ImplictGeom(float NoL, float NoV) {
-	NoL = max0(NoL);
-	NoV = max0(NoV);
-	
 	return NoL * NoV;
 }
 
@@ -402,9 +399,7 @@ float specularBRDF(
 	vec3 normal,
 	float F0,
 	vec3 viewVector,
-	float roughness) {
-	
-	roughness = pow2(roughness);
+	float alpha) {
 	
 	vec3 halfVector = (viewVector + inVector) / length(viewVector + inVector);
 	
@@ -414,9 +409,9 @@ float specularBRDF(
 	float VoH = dot(viewVector, halfVector);
 	
 	float fresnel = Fresnel(F0, VoH);
-	float geometryFactor = CalculateGeometryDistribution(NoL, NoV, NoH, VoH, roughness);
-	float microfacetDistribution = CalculateMicrofacetDistribution(NoH, roughness);
-	float normalizationFactor = CalculateNormalizationFactor(NoL, NoV, roughness);
+	float geometryFactor = CalculateGeometryDistribution(NoL, NoV, NoH, VoH, alpha);
+	float microfacetDistribution = CalculateMicrofacetDistribution(NoH, alpha);
+	float normalizationFactor = CalculateNormalizationFactor(NoL, NoV, alpha);
 	
 	return fresnel * geometryFactor * microfacetDistribution * max0(NoL) / normalizationFactor;
 }

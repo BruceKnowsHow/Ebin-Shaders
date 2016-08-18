@@ -18,7 +18,6 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	cfloat F0 = 0.15; //To be replaced with metalloic
 	
-	float  reflectFresnel = Fresnel(F0, vdotn);
 	float  lightFresnel = Fresnel(F0, vdoth);
 	
 	vec3 alpha = vec3(lightFresnel * smoothness);
@@ -77,13 +76,13 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	
-	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 10));
-	float specular = specularBRDF(lightVector, normal, F0, viewVector, roughness) * sunlight;
+	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 4));
+	float specular = specularBRDF(lightVector, normal, F0, viewVector, pow2(roughness)) * sunlight;
 	
 	if(mask.water < 0.5) 
-		reflectedSky = clamp01(reflectedSky * F0) / 2.0;
+		reflectedSky = reflectedSky * F0 / 4.0;
 	else
-		reflectedSky = clamp01(reflectedSky / 6.0);
+		reflectedSky = reflectedSky / 6.0;
 		
 	vec3 offscreen = (reflectedSky + specular * sunlightColor * 6.0);
 	
@@ -95,15 +94,14 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		     reflectDir *= sign(dot(normal, reflectDir));
 		
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
-		
-		float raySpecular = specularBRDF(rayDirection, normal, F0, viewVector, sqrt(roughness));
+		float raySpecular = specularBRDF(rayDirection, normal, F0, viewVector, roughness);
 
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.55, 30, 1, reflectedCoord, reflectedViewSpacePosition)) {
 			reflection += offscreen;
 		} else {
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, 2);
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 2) * 1.2;
 			
 			colorSample = mix(colorSample, reflectedSky, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			
@@ -119,10 +117,11 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	}
 	
 	reflection /= PBR_RAYS;
+	
 	if(mask.metallic > 0.45) reflection += (1.0 - clamp01(pow(skyLightmap, 10))) * 0.25;
 	
 	reflection = BlendMaterial(color, reflection, F0);
 	
-	color = max(reflection, 0.0);
+	color = max0(reflection);
 }
 #endif
