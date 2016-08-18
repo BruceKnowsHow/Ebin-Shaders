@@ -7,6 +7,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
+	float VoH
 	
 	float roughness = 1.0 - smoothness;
 	
@@ -30,7 +31,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb;
 	     reflectedSky *= 1.0;
 	
-	float reflectedSunspot = specularBRDF(lightVector, normal, F0, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
+	float reflectedSunspot = specularBRDF(lightVector, normal, F0, -normalize(viewSpacePosition.xyz), roughness, VoH) * sunlight;
 	
 	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 10.0;
 	
@@ -63,6 +64,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
+	float NoH;
 	
 	float roughness = 1.0 - smoothness;
 	
@@ -74,7 +76,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	const uint NUM_SAMPLES = PBR_RAYS;
 	
-	float specular = specularBRDF(lightVector, normal, F0, viewVector, pow2(roughness)) * sunlight;
+	float specular = specularBRDF(lightVector, normal, F0, viewVector, pow2(roughness), NoH) * sunlight;
 		
 	vec3 offscreen = (specular * sunlightColor * 6.0);
 	
@@ -90,17 +92,18 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		vec3 reflectDir = normalize(microFacetNormal); //Reproject normal in spherical coords
 
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
-		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, roughness);
+		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, roughness, NoH);
 		
 		vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, microFacetNormal), 1.0), 1.0, true).rgb * clamp01(pow(skyLightmap, 4)) * 0.5;
 
-		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.55, 30, 1, reflectedCoord, reflectedViewSpacePosition)) {
+		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.25, 35, 1, reflectedCoord, reflectedViewSpacePosition)) {
 			reflection += offscreen + reflectedSky * raySpecular;
 		} else {
 			// Maybe give previous reflection Intersection to make sure we dont compute rays in the same pixel twice.
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, 0) * 1.2;
-			
+			float lod = computeLod(NoH, NUM_SAMPLES, pow2(roughness));
+			vec3 colorSample = GetColorLod(reflectedCoord.st, lod * 0.5) * 1.2;
+
 			colorSample = mix(colorSample, reflectedSky, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			
 			#ifdef REFLECTION_EDGE_FALLOFF
@@ -109,17 +112,18 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 				float edge       = clamp(1.0 - pow2(dist * 2.0 * angleCoeff), 0.0, 1.0);
 				colorSample      = mix(colorSample, reflectedSky, pow(1.0 - edge, 10.0));
 			#endif
-			
+
 			reflection += colorSample * raySpecular;
 		}
 	}
 	
 	reflection /= PBR_RAYS;
-	
+
 	if(mask.metallic > 0.45) reflection += (1.0 - clamp01(pow(skyLightmap, 10))) * 0.25;
 	
 	reflection = BlendMaterial(color, reflection, F0);
 
 	color = max0(reflection);
+
 }
 #endif
