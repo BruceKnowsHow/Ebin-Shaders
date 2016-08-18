@@ -253,9 +253,9 @@ float GGXDistribution(float NoH, float alpha) {
 
 vec3 phongSkew(vec2 epsilon, float roughness) {
 	// Uses the Phong sample skewing Functions
-	float Ap = (2.0 / pow2(roughness)) - 2.0;
-	float theta = acos(pow(epsilon.x, (2.0 / Ap + 2.0)));
-	float phi = 2.0 * PI * epsilon.y + randAngle();
+	float Ap = (2.0 / roughness);
+	float theta = acos(pow(epsilon.x, 2.0 / Ap)) / (4.0 * PI * PI);
+	float phi = 2.0 * PI * epsilon.y;
 	
 	float sin_theta = sin(theta);
 	
@@ -282,7 +282,6 @@ vec3 beckmannSkew(vec2 epsilon, float roughness) {
 
 vec3 ggxSkew(vec2 epsilon, float roughness) {
 	// Uses the GGX sample skewing Functions
-	roughness = pow2(roughness);
 	float theta = atan(sqrt(roughness * roughness * epsilon.x / (1.0 - epsilon.x)));
 	float phi = 2.0 * PI * epsilon.y;
 	

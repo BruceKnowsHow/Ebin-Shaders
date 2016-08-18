@@ -88,7 +88,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = vec2(noise(texcoord * (i + 1)), noise(texcoord * (i + 1) * 3));
-		vec3 BRDFSkew = skew((epsilon), pow2(roughness));
+		vec3 BRDFSkew = skew((epsilon), pow(roughness, 4.0));
 
 		vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
 		vec3 tanX = normalize(cross(upVector, normal));
