@@ -398,21 +398,22 @@ float CalculateNormalizationFactor(float NoL, float NoV, float alpha) {
  * \return The color of the specular highlight at the current fragment
  */
 float specularBRDF(
-	vec3 lightVector,
+	vec3 inVector,
 	vec3 normal,
-	float fresnel,
+	float F0,
 	vec3 viewVector,
 	float roughness) {
 	
 	roughness = pow2(roughness);
 	
-	vec3 halfVector = (viewVector + lightVector) / length(viewVector + lightVector);
+	vec3 halfVector = (viewVector + inVector) / length(viewVector + inVector);
 	
-	float NoL = dot(normal, lightVector);
+	float NoL = dot(normal, inVector);
 	float NoV = dot(normal, viewVector);
 	float NoH = dot(normal, halfVector);
 	float VoH = dot(viewVector, halfVector);
 	
+	float fresnel = Fresnel(F0, VoH);
 	float geometryFactor = CalculateGeometryDistribution(NoL, NoV, NoH, VoH, roughness);
 	float microfacetDistribution = CalculateMicrofacetDistribution(NoH, roughness);
 	float normalizationFactor = CalculateNormalizationFactor(NoL, NoV, roughness);
