@@ -50,7 +50,7 @@ varying vec2 texcoord;
 #line 51 
 
 vec3 GetDiffuse(vec2 coord) {
-	return texture2D(colortex1d, coord).rgb;
+	return texture2D(colortex1, coord).rgb;
 }
 
 float GetDepth(vec2 coord) {
