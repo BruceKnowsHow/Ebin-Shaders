@@ -3,7 +3,6 @@
 #define vsh
 #define ShaderStage 10
 #include "/lib/Syntax.glsl"
-#line 7
 
 uniform mat4 gbufferModelView;
 uniform mat4 shadowModelView;
@@ -22,7 +21,6 @@ varying vec2 texcoord;
 #include "/lib/Utility.glsl"
 #include "/lib/Uniform/Global_Composite_Variables.glsl"
 #include "/lib/Uniform/ShadowViewMatrix.vsh"
-#line 25
 
 void main() {
 #if defined GI_ENABLED || defined AO_ENABLED
@@ -33,7 +31,6 @@ void main() {
 	
 	
 	#include "/lib/Uniform/Composite_Calculations.vsh"
-	#line 37
 #else
 	gl_Position = vec4(-1.0);
 #endif

@@ -55,7 +55,6 @@ vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, 
 		SubSurfaceDiffusion = SubSurfaceDiffusion * (1.0 - mask.grass       ) + mask.grass       ;
 		SubSurfaceDiffusion = SubSurfaceDiffusion * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
 		
-		show(SubSurfaceDiffusion);
 		SubSurfaceColor = SubSurfaceDiffusion * vec3(1.0, 1.2, 1.0);
 		shading.normal = SubSurfaceDiffusion;
 	}

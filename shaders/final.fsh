@@ -3,7 +3,6 @@
 #define fsh
 #define ShaderStage 7
 #include "/lib/Syntax.glsl"
-#line 7
 
 uniform sampler2D colortex1;
 uniform sampler2D colortex3;
@@ -24,7 +23,6 @@ varying vec2 pixelSize;
 #include "/lib/Utility.glsl"
 #include "/lib/Debug.glsl"
 #include "/lib/Fragment/Masks.fsh"
-#line 28
 
 vec3 GetColor(vec2 coord) {
 	return DecodeColor(texture2D(colortex3, coord).rgb);

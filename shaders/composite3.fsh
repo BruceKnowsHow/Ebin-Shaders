@@ -3,7 +3,6 @@
 #define fsh
 #define ShaderStage 3
 #include "/lib/Syntax.glsl"
-#line 7
 
 /* DRAWBUFFERS:1 */
 
@@ -17,7 +16,6 @@ varying vec2 pixelSize;
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/Debug.glsl"
-#line 21
 
 vec3 ComputeBloomTile(cfloat scale, vec2 offset) { // Computes a single bloom tile, the tile's blur level is inversely proportional to its size
 	// Each bloom tile uses (1.0 / scale + pixelSize * 2.0) texcoord-units of the screen

@@ -3,7 +3,6 @@
 #define fsh
 #define ShaderStage 2
 #include "/lib/Syntax.glsl"
-#line 7
 
 /* DRAWBUFFERS:3 */
 
@@ -48,7 +47,6 @@ varying vec2 pixelSize;
 #include "/lib/Fragment/Masks.fsh"
 #include "/lib/Misc/Calculate_Fogfactor.glsl"
 #include "/lib/Fragment/Reflectance_Models.fsh"
-#line 52
 
 vec3 GetColor(vec2 coord) {
 	return texture2D(colortex1, coord).rgb;
@@ -82,7 +80,6 @@ vec3 ViewSpaceToScreenSpace(vec4 viewSpacePosition) {
 
 #include "/lib/Fragment/Water_Waves.fsh"
 #include "/lib/Fragment/Sky.fsh"
-#line 86
 
 bool ComputeRaytracedIntersection(vec3 startingViewPosition, vec3 rayDirection, float firstStepSize, cfloat rayGrowth, cint maxSteps, cint maxRefinements, out vec3 screenSpacePosition, out vec4 viewSpacePosition) {
 	vec3 rayStep = rayDirection * firstStepSize;
@@ -137,7 +134,6 @@ bool ComputeRaytracedIntersection(vec3 startingViewPosition, vec3 rayDirection, 
 #include "/lib/Misc/Bias_Functions.glsl"
 #include "/lib/Fragment/Sunlight/ComputeUniformlySoftShadows.fsh"
 #include "/lib/Fragment/Reflection_Functions.fsh"
-#line 141
 
 vec2 GetRefractedCoord(vec2 coord, vec4 viewSpacePosition, vec3 tangentNormal) {
 	vec4 screenSpacePosition = gbufferProjection * viewSpacePosition;
@@ -189,7 +185,6 @@ mat3 DecodeTBN(float tbnIndex) {
 }
 
 #include "lib/Fragment/WaterDepthFog.fsh"
-#line 193
 
 void main() {
 	float depth0 = GetDepth(texcoord);

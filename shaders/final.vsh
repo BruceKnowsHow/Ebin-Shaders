@@ -3,7 +3,6 @@
 #define vsh
 #define ShaderStage 10
 #include "/lib/Syntax.glsl"
-#line 7
 
 uniform float viewWidth;
 uniform float viewHeight;
