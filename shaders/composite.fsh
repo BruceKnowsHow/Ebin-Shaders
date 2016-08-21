@@ -3,7 +3,7 @@
 #define fsh
 #define ShaderStage 0
 #include "/lib/Syntax.glsl"
-
+#line 7
 
 /* DRAWBUFFERS:6 */
 
@@ -47,7 +47,7 @@ varying vec2 texcoord;
 #include "/lib/Debug.glsl"
 #include "/lib/Uniform/Global_Composite_Variables.glsl"
 #include "/lib/Fragment/Masks.fsh"
-
+#line 51
 
 #define texture2DRaw(x, y) texelFetch(x, ivec2(y * vec2(viewWidth, viewHeight)), 0) // texture2DRaw bypasses downscaled interpolation, which causes issues with encoded buffers
 
@@ -85,7 +85,7 @@ vec2 GetDitherred2DNoise(vec2 coord, float n) { // Returns a random noise patter
 #include "/lib/Fragment/Global_Illumination.fsh"
 
 #include "lib/Fragment/Ambient_Occlusion.fsh"
-
+#line 89
 
 void main() {
 	float depth0 = GetDepth(texcoord);

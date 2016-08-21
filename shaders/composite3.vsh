@@ -3,7 +3,7 @@
 #define vsh
 #define ShaderStage 10
 #include "/lib/Syntax.glsl"
-
+#line 7
 
 uniform float viewWidth;
 uniform float viewHeight;
@@ -14,6 +14,7 @@ varying vec2 pixelSize;
 #include "/lib/Settings.glsl"
 #include "/lib/Utility.glsl"
 #include "/lib/Debug.glsl"
+#line 18
 
 
 void main() {

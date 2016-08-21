@@ -3,6 +3,7 @@
 #define fsh
 #define ShaderStage 1
 #include "/lib/Syntax.glsl"
+#line 7
 
 /* DRAWBUFFERS:145 */
 
@@ -46,10 +47,10 @@ varying vec2 texcoord;
 #include "/lib/Uniform/Global_Composite_Variables.glsl"
 #include "/lib/Fragment/Masks.fsh"
 #include "/lib/Misc/Calculate_Fogfactor.glsl"
-
+#line 51 
 
 vec3 GetDiffuse(vec2 coord) {
-	return texture2D(colortex1, coord).rgb;
+	return texture2D(colortex1d, coord).rgb;
 }
 
 float GetDepth(vec2 coord) {
@@ -73,6 +74,7 @@ vec4 CalculateViewSpacePosition(vec2 coord, float depth) {
 
 
 #include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
+#line 78
 
 void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float AO) {
 	GI = vec3(0.0);
@@ -129,7 +131,7 @@ void BilateralUpsample(vec3 normal, float depth, out vec3 GI, out float AO) {
 }
 
 #include "lib/Fragment/WaterDepthFog.fsh"
-
+#line 135
 
 void main() {
 	float depth0 = GetDepth(texcoord);
