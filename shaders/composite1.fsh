@@ -139,8 +139,6 @@ void main() {
 	if (depth0 >= 1.0) { discard; }
 	
 	
-	float depth1 = GetTransparentDepth(texcoord);
-	
 	vec4 encode1 = vec4(texture2D(colortex4, texcoord).rgb, texture2D(colortex5, texcoord).r);
 	
 	vec3 normal = DecodeNormal(encode1.xy);
@@ -153,6 +151,8 @@ void main() {
 	Mask  mask;
 	Decode16(encode1.a, torchLightmap, mask.materialIDs);
 	mask = CalculateMasks(mask.materialIDs);
+	
+	float depth1 = (mask.hand > 0.5 ? depth0 : GetTransparentDepth(texcoord));
 	
 	if (depth0 != depth1) {
 		vec3 encode0 = texture2D(colortex0, texcoord).rgb;
@@ -186,11 +186,10 @@ void main() {
 	
 	vec3 composite  = CalculateShadedFragment(mask, torchLightmap, skyLightmap, GI, AO, normal, smoothness, viewSpacePosition1);
 	     composite *= pow(diffuse * 1.2, vec3(2.8));
-			 composite = max0(composite);
 			 
 	if (mask.water > 0.5 || isEyeInWater == 1) composite = waterFog(composite, viewSpacePosition0, viewSpacePosition1);
 	
-	gl_FragData[0] = vec4(composite, 1.0);
+	gl_FragData[0] = vec4(max0(composite), 1.0);
 	
 	exit();
 }

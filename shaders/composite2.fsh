@@ -225,7 +225,7 @@ void main() {
 			
 			refractedCoord = GetRefractedCoord(texcoord, viewSpacePosition0, tangentNormal);
 			
-			depth1 = GetTransparentDepth(refractedCoord);
+			depth1 = (mask.hand > 0.5 ? depth0 : GetTransparentDepth(refractedCoord));
 			viewSpacePosition1 = CalculateViewSpacePosition(refractedCoord, depth1);
 			
 			alpha = texture2D(colortex2, refractedCoord).r;

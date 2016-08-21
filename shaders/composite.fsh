@@ -93,16 +93,11 @@ void main() {
 	if (depth0 >= 1.0) { discard; }
 	
 	
-	float depth1 = texture2DRaw(depthtex1, texcoord).x;
-	
 #ifdef COMPOSITE0_NOISE
 	vec2 noise2D = GetDitherred2DNoise(texcoord * COMPOSITE0_SCALE, 4.0) * 2.0 - 1.0;
 #else
 	vec2 noise2D = vec2(0.0);
 #endif
-	
-	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
-	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	
 	vec2  buffer0     = Decode16(texture2D(colortex4, texcoord).b);
@@ -110,6 +105,11 @@ void main() {
 	float skyLightmap = buffer0.g;
 	
 	Mask mask = CalculateMasks(Decode16(texture2D(colortex5, texcoord).r).g);
+	
+	float depth1 = (mask.hand > 0.5 ? depth0 : texture2DRaw(depthtex1, texcoord).x);
+	
+	vec4 viewSpacePosition0 = CalculateViewSpacePosition(texcoord, depth0);
+	vec4 viewSpacePosition1 = CalculateViewSpacePosition(texcoord, depth1);
 	
 	if (depth0 != depth1) {
 		mask.transparent = 1.0;
