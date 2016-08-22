@@ -84,7 +84,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3 tanX = normalize(cross(upVector, normal));
 	vec3 tanY = cross(normal, tanX);
 	
-	for (uint i = 1; i < PBR_RAYS; i++) {
+	for (uint i = 1; i <= PBR_RAYS; i++) {
 		vec2 epsilon = Hammersley(i, PBR_RAYS);
 		vec3 BRDFSkew = skew(epsilon, alpha2);
 		

@@ -10,7 +10,7 @@ vec2 Hammersley(uint i, uint N) {
 float randAngle() {
 	uint x = uint(gl_FragCoord.x);
 	uint y = uint(gl_FragCoord.y);
-	//return 1.0;
+
 	return (30u * x ^ y + 10u * x * y);
 }
 
