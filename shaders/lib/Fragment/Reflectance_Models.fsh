@@ -43,28 +43,6 @@ float GetBurleyDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness) {
 	
 	return (1.0 / PI) * FdV * FdL;
 }
-/*
-float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float F0) {
-	vec3 viewVector = -normalize(viewSpacePosition.xyz);
-	vec3 halfVector = normalize(lightVector + viewVector);
-	
-	float VoH = dot(viewVector, halfVector); 
-	float NoV = dot(normal, viewVector);
-	float NoL = dot(normal, lightVector);
-	float VoL = dot(viewVector, lightVector);
-	
-	float alpha = pow2(roughness);
-	float alpha2 = pow2(alpha);
-	float Cosri = VoL - NoV * NoL;
-	
-	float Fdiff = diffuseFresnel(F0, NoL, NoV);
-	
-	float C1 = 1.0 - 0.5 * (alpha2 / (alpha2 + 0.33));
-	float C2 = 0.45 * alpha2 / (alpha2 + 0.09) * Cosri * (Cosri >= 0.0 ? min(1.0, NoL / NoV) : 1.0);
-
-	return (2.0 / PI) * (1.0 - F0) * Fdiff * NoL * (C1 + C2) * (1.0 + roughness * 0.5);
-}
-*/
 
 float GetOrenNayarDiffuse(vec4 viewSpacePosition, vec3 normal, float roughness, float F0) {
 	vec3 viewVector = -normalize(viewSpacePosition.xyz);
