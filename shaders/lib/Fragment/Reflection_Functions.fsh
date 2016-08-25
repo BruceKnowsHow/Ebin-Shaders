@@ -19,11 +19,11 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	cfloat F0 = 0.15; //To be replaced with metalloic
 	
-	float  lightFresnel = Fresnel(F0, vdoth);
+	float lightFresnel = Fresnel(F0, vdoth);
 	
-	vec3 alpha = vec3(lightFresnel * smoothness);
+	vec3 alpha = vec3(lightFresnel * smoothness) * 0.25;
 	
-	if (length(alpha) < 0.001) return;
+	if (length(alpha) < 0.005) return;
 	
 	
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
@@ -52,7 +52,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	reflection = max(reflection, 0.0);
 	
-	color = mix(color, reflection, alpha * 0.25);
+	color = mix(color, reflection, alpha);
 }
 
 #else
