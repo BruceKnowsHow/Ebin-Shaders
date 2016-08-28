@@ -2,8 +2,17 @@ float noise(vec2 coord) {
     return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
+float radicalInverse_VdC(uint bits) {
+     bits = (bits << 16u) | (bits >> 16u);
+     bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+     bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+     return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+ }
+
 vec2 Hammersley(uint i, uint N) {
-  return vec2(float(i) / float(N), float(bitfieldReverse(i)) * 2.3283064365386963e-10);
+  return vec2(float(i) / float(N), radicalInverse_VdC(i));
 }
 
 
@@ -237,51 +246,36 @@ float GGXDistribution(float NoH, float alpha) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+vec3 MakeSample(float Theta, float Phi) {
+  Phi += randAngle();
+  float SineTheta = sin(Theta);
+
+  float x = cos(Phi) * SineTheta;
+  float y = sin(Phi) * SineTheta;
+  float z = cos(Theta);
+
+  return vec3(x, y, z);
+}
 
 vec3 phongSkew(vec2 epsilon, float roughness) {
-	// Uses the Phong sample skewing Functions
-	float Ap = (2.0 / roughness);
-	float theta = acos(pow(epsilon.x, 2.0 / Ap)) / (4.0 * PI * PI);
-	float phi = 2.0 * PI * epsilon.y;
-	phi += randAngle();
-	
-	float sin_theta = sin(theta);
-	
-	float x = cos(phi) * sin_theta;
-	float y = sin(phi) * sin_theta;
-	float z = cos(theta);
-	
-	return vec3(x, y, z);
+  float ap = (2.0 / roughness);
+  float Theta = acos(pow(epsilon.x, 2.0 / ap)) / (PI * PI * 4.0);
+  float Phi = PI * 2.0 * epsilon.y;
+  return MakeSample(Theta, Phi);
 }
 
 vec3 beckmannSkew(vec2 epsilon, float roughness) {
-	// Uses the Beckman sample skewing Functions
-	float theta = atan(sqrt(-pow2(roughness) * log(1.0 - epsilon.x)));
-	float phi = 2.0 * PI * epsilon.y;
-	phi += randAngle();
-	
-	float sin_theta = sin(theta);
-	
-	float x = cos(phi) * sin_theta;
-	float y = sin(phi) * sin_theta;
-	float z = cos(theta);
-	
-	return vec3(x, y, z);
+  float a = roughness * roughness;
+  float Theta = atan(sqrt(-a * log(1.0 - epsilon.x)));
+  float Phi = PI * 2.0 * epsilon.y;
+  return MakeSample(Theta, Phi);
 }
 
 vec3 ggxSkew(vec2 epsilon, float roughness) {
-	// Uses the GGX sample skewing Functions
-	float theta = atan(sqrt(roughness * roughness * epsilon.x / (1.0 - epsilon.x)));
-	float phi = 2.0 * PI * epsilon.y;
-	phi += randAngle();
-	
-	float sin_theta = sin(theta);
-	
-	float x = cos(phi) * sin_theta;
-	float y = sin(phi) * sin_theta;
-	float z = cos(theta);
-	
-	return vec3(x, y, z);
+  float a = roughness * roughness;
+  float Theta = atan(sqrt((a * epsilon.x) / (1.0 - epsilon.x)));
+  float Phi = PI * 2.0 * epsilon.y;
+  return MakeSample(Theta, Phi);
 }
 
 vec3 skew(vec2 epsilon, float roughness) {

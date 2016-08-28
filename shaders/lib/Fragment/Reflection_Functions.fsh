@@ -83,15 +83,15 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
 	vec3 tanX = normalize(cross(upVector, normal));
 	vec3 tanY = cross(normal, tanX);
-	
-	for (uint i = 1; i <= PBR_RAYS; i++) {
+
+	for (uint i = 0u; i < PBR_RAYS; i++) {
 		vec2 epsilon = Hammersley(i, PBR_RAYS);
-		vec3 BRDFSkew = skew(epsilon, alpha2);
-		
+		vec3 BRDFSkew = skew(epsilon, alpha);
+		show(epsilon.y);
 		vec3 microFacetNormal = BRDFSkew.x * tanX + BRDFSkew.y * tanY + BRDFSkew.z * normal;
 		vec3 reflectDir = normalize(microFacetNormal); //Reproject normal in spherical coords
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
-		
+
 		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, sqrt(roughness), NoH);
 		vec3 reflectedAmbient = CalculateSky(vec4(reflect(viewSpacePosition.xyz, microFacetNormal), 1.0), 1.0, true).rgb * skyLightmap * raySpecular * 0.5;
 		reflectedAmbient += mask.metallic * (1.0 - skyLightmap) * 0.15;
@@ -101,7 +101,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		} else {
 			float lod = computeLod(NoH, PBR_RAYS, alpha);
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, lod);
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 0);
 			colorSample = mix(colorSample, reflectedAmbient, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			//Edge falloff was doing nothing and taking 1 fps so rip
 
@@ -109,7 +109,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		}
 	}
 	
-	reflection /= PBR_RAYS;
+	reflection /= float(PBR_RAYS);
 	
 	blendRain(color, rainStrength, roughness);
 	reflection = BlendMaterial(color, reflection, F0);
