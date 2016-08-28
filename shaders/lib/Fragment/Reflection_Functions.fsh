@@ -111,7 +111,6 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	
 	reflection /= float(PBR_RAYS);
 	
-	blendRain(color, rainStrength, roughness);
 	reflection = BlendMaterial(color, reflection, F0);
 
 	color = max0(reflection);

@@ -397,11 +397,6 @@ float specularBRDF(
   }
 #endif
 
-void blendRain(inout vec3 color, in float wetLevel, in float roughness) {
-  float smoothness = pow2(1.0 - roughness);
-  color *= mix(1.0, smoothness, wetLevel);
-}
-
 vec3 BlendMaterial(vec3 color, vec3 specular, float F0) {
   float scRange = smoothstep(0.25, 0.45, F0);
   vec3  dielectric = color + specular;

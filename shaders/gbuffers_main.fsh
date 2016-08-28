@@ -68,18 +68,22 @@ vec3 GetTangentNormal() {
 #endif
 }
 
-vec2 GetSpecularity(vec2 coord, float height, float skyLightmap) {
+float rainAlpha(float height, float skyLightmap) {
+  float randWaterSpot = 1.0;
+  float heightOffset = (1.0 - height) * 0.2 + randWaterSpot;
+  
+	float wetFactor = wetness * pow2(skyLightmap) * 2.0;
+  float finalAlpha = clamp01(wetFactor - heightOffset);
+  
+  return finalAlpha;
+}
+
+vec2 GetSpecularity(vec2 coord, float finalAlpha, float skyLightmap) {
 #ifdef SPECULARITY_MAPS
 	vec2 specular = texture2D(specular, coord).rg;
 	
 	float smoothness = specular.r;
 	float F0 = specular.g;
-	
-  float randWaterSpot = 1.0;
-  float heightOffset = (1.0 - height) * 0.2 + randWaterSpot;
-	float wetFactor = wetness * pow2(skyLightmap) * 2.0;
-  
-  float finalAlpha = clamp01(wetFactor - heightOffset);
 
 	smoothness = mix(smoothness, 0.98, finalAlpha);
 	
@@ -106,12 +110,15 @@ void main() {
 	vec4 modelView = (gl_ModelViewMatrix * verts);
 	vec3 tangentVector = normalize(tbnMatrix * modelView.xyz);
 	vec2 coord = getParallaxCoord(texcoord, vec3(1.0));
-
+  
 	vec4 diffuse = GetDiffuse(coord);
 	if (diffuse.a < 0.1000003) discard;
 	
 	vec4 normal = GetNormal(coord);
-	vec2 specularity = GetSpecularity(coord, normal.a, vertLightmap.t);	
+  
+  float wetnessAlpha = rainAlpha(normal.a, vertLightmap.t);
+  diffuse = mix(diffuse, diffuse * 0.74, wetnessAlpha);
+	vec2 specularity = GetSpecularity(coord, wetnessAlpha, vertLightmap.t);	
 	
 	
 #if !defined gbuffers_water
