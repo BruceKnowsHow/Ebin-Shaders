@@ -73,14 +73,18 @@ vec2 GetSpecularity(vec2 coord, float height, float skyLightmap) {
 	vec2 specular = texture2D(specular, coord).rg;
 	
 	float smoothness = specular.r;
-	float metalness = specular.g;
+	float F0 = specular.g;
 	
-	float wetfactor = wetness * height * pow(skyLightmap, 10.0);
+  float randWaterSpot = 1.0;
+  float heightOffset = (1.0 - height) * 0.2 + randWaterSpot;
+	float wetFactor = wetness * pow2(skyLightmap) * 2.0;
+  
+  float finalAlpha = clamp01(wetFactor - heightOffset);
+
+	smoothness = mix(smoothness, 0.98, finalAlpha);
 	
-	smoothness = mix(1.0, smoothness, mix(1.0, pow2(smoothness), wetfactor));
-	smoothness = clamp01(smoothness);
-	
-	return vec2(smoothness, metalness);
+  
+	return vec2(smoothness, F0);
 #else
 	return vec2(0.0);
 #endif
