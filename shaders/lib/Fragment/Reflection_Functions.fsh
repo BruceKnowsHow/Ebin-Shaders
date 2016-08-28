@@ -78,7 +78,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	skyLightmap = clamp01(pow(skyLightmap, 4));
 	
-	vec3 specular = specularBRDF(lightVector, normal, F0, viewVector, alpha, NoH) * sunlight * sunlightColor * 6.0;
+	vec3 specular = max0(specularBRDF(lightVector, normal, F0, viewVector, alpha, NoH)) * sunlight * sunlightColor * 6.0;
 	
 	vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
 	vec3 tanX = normalize(cross(upVector, normal));
@@ -87,7 +87,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	for (uint i = 0u; i < PBR_RAYS; i++) {
 		vec2 epsilon = Hammersley(i, PBR_RAYS);
 		vec3 BRDFSkew = skew(epsilon, alpha);
-		show(epsilon.y);
+
 		vec3 microFacetNormal = BRDFSkew.x * tanX + BRDFSkew.y * tanY + BRDFSkew.z * normal;
 		vec3 reflectDir = normalize(microFacetNormal); //Reproject normal in spherical coords
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
