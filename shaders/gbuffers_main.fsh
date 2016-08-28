@@ -78,7 +78,7 @@ vec2 GetSpecularity(vec2 coord, float height, float skyLightmap) {
 	float wetfactor = wetness * height * pow(skyLightmap, 10.0);
 	
 	smoothness = mix(1.0, smoothness, mix(1.0, pow2(smoothness), wetfactor));
-	smoothness = clamp(smoothness, 0.01, 0.99);
+	smoothness = clamp01(smoothness);
 	
 	return vec2(smoothness, metalness);
 #else
@@ -122,8 +122,6 @@ void main() {
 	gl_FragData[4] = vec4(EncodeNormal(normal.xyz), encode.r, 1.0);
 	gl_FragData[5] = vec4(encode.g, 0.0, 0.0, 1.0);
 #else
-	specularity.r = mix(specularity.r, 0.85, waterMask);
-	
 	float encode = Encode16(vec2(specularity.r, vertLightmap.g));
 	
 	vec2 encodedNormal = EncodeNormalData(GetTangentNormal(), tbnIndex);
