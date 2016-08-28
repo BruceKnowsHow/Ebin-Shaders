@@ -324,7 +324,7 @@ float CalculateGeometryDistribution(float NoL, float NoV, float NoH, float VoH, 
 		
 	#endif
 	
-	return clamp(geometry, -1.0, 1.0);
+	return geometry;
 }
 
 /*!
@@ -349,7 +349,7 @@ float CalculateMicrofacetDistribution(float NoH, float alpha) {
 		
 	#endif
 	
-	return clamp(distribution, -10.0, 10.0);
+	return distribution;
 }
 
 float CalculateNormalizationFactor(float NoL, float NoV, float alpha) {
@@ -386,7 +386,7 @@ float specularBRDF(
 	float geometryFactor = CalculateGeometryDistribution(NoL, NoV, NoH, VoH, alpha);
 	float microfacetDistribution = CalculateMicrofacetDistribution(NoH, alpha);
 	float normalizationFactor = CalculateNormalizationFactor(NoL, NoV, alpha);
-	show(microfacetDistribution - 10);
+	
 	return fresnel * geometryFactor * microfacetDistribution * max0(NoL) / normalizationFactor;
 }
 
