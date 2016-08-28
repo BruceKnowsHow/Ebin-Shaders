@@ -101,7 +101,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		} else {
 			float lod = computeLod(NoH, PBR_RAYS, alpha);
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, 0);
+			vec3 colorSample = GetColorLod(reflectedCoord.st, 2);
 			colorSample = mix(colorSample, reflectedAmbient, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			//Edge falloff was doing nothing and taking 1 fps so rip
 

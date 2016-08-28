@@ -3,6 +3,7 @@
 uniform sampler2D texture;
 uniform sampler2D normals;
 uniform sampler2D specular;
+uniform sampler2D noisetex;
 
 uniform float frameTimeCounter;
 uniform float far;
@@ -68,9 +69,26 @@ vec3 GetTangentNormal() {
 #endif
 }
 
+float Get3DNoise(vec3 pos) {
+	vec3 part  = floor(pos);
+	vec3 whole = fract(pos);
+
+	cvec2 zscale = vec2(17.0, 0.0);
+
+	vec4 coord = part.xyxy + whole.xyxy + part.z * zscale.x + zscale.yyxx + 0.5;
+	     coord /= noiseTextureResolution;
+
+	float Noise1 = texture2D(noisetex, coord.xy).x;
+	float Noise2 = texture2D(noisetex, coord.zw).x;
+
+	return mix(Noise1, Noise2, whole.z);
+}
+
 float rainAlpha(float height, float skyLightmap) {
-  float randWaterSpot = 1.0;
-  float heightOffset = (1.0 - height) * 0.2 + randWaterSpot;
+  float randWaterSpot  = Get3DNoise(worldPosition);
+        randWaterSpot += Get3DNoise(worldPosition / 4.0) * 2.0;
+        
+  float heightOffset = (1.0 - height) * 0.2 + randWaterSpot * 0.8;
   
 	float wetFactor = wetness * pow2(skyLightmap) * 2.0;
   float finalAlpha = clamp01(wetFactor - heightOffset);
