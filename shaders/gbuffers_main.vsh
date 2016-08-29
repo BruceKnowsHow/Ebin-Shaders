@@ -21,6 +21,7 @@ varying float materialIDs;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
+varying vec3 worldNormal;
 varying float tbnIndex;
 varying float waterMask;
 
@@ -57,18 +58,18 @@ vec4 WorldSpaceToProjectedSpace(vec4 worldSpacePosition) {
 #include "/lib/Vertex/CalculateTBN.vsh"
 
 
-float EncodePlanarTBN(vec3 worldNormal) { // Encode the TBN matrix into a 3-bit float
+float EncodePlanarTBN(vec3 worldSpaceNormal) { // Encode the TBN matrix into a 3-bit float
 	// Only valid for axis-oriented TBN matrices
 	
 	float tbnIndex = 6.0; // Default is 5.0, which corresponds to an upward facing block, such as ocean
 	
 	cfloat sqrt2 = sqrt(2.0) * 0.5;
 	
-	if      (worldNormal.x >  sqrt2) tbnIndex = 1.0;
-	else if (worldNormal.x < -sqrt2) tbnIndex = 2.0;
-	else if (worldNormal.z >  sqrt2) tbnIndex = 3.0;
-	else if (worldNormal.z < -sqrt2) tbnIndex = 4.0;
-	else if (worldNormal.y < -sqrt2) tbnIndex = 5.0;
+	if      (worldSpaceNormal.x >  sqrt2) tbnIndex = 1.0;
+	else if (worldSpaceNormal.x < -sqrt2) tbnIndex = 2.0;
+	else if (worldSpaceNormal.z >  sqrt2) tbnIndex = 3.0;
+	else if (worldSpaceNormal.z < -sqrt2) tbnIndex = 4.0;
+	else if (worldSpaceNormal.y < -sqrt2) tbnIndex = 5.0;
 	
 	return tbnIndex;
 }
@@ -91,6 +92,7 @@ void main() {
 	
 	CalculateTBN(position.xyz, tbnMatrix);
 	verts = gl_Vertex;
+	worldNormal = gl_Normal;
 	
 	viewSpacePosition = gbufferModelView * position;
 	worldPosition     = position.xyz + cameraPosition;

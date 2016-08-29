@@ -22,6 +22,7 @@ varying float materialIDs;
 varying vec4 viewSpacePosition;
 varying vec3 worldPosition;
 
+varying vec3 worldNormal;
 varying float tbnIndex;
 varying float waterMask;
 
@@ -88,12 +89,12 @@ float rainAlpha(float height, float skyLightmap) {
   float randWaterSpot  = Get3DNoise(worldPosition);
         randWaterSpot += Get3DNoise(worldPosition / 4.0) * 2.0;
         
-  float heightOffset = (1.0 - height) * 0.2 + randWaterSpot * 0.8;
+  float heightOffset = max(0.25, (1.0 - height) * 0.2 + randWaterSpot * 0.8);
   
 	float wetFactor = wetness * pow2(skyLightmap) * 2.0;
   float finalAlpha = clamp01(wetFactor - heightOffset);
   
-  return finalAlpha;
+  return clamp01(finalAlpha);
 }
 
 vec2 GetSpecularity(vec2 coord, float finalAlpha, float skyLightmap) {
@@ -133,9 +134,12 @@ void main() {
 	if (diffuse.a < 0.1000003) discard;
 	
 	vec4 normal = GetNormal(coord);
-  
+	
   float wetnessAlpha = rainAlpha(normal.a, vertLightmap.t);
-  diffuse = mix(diffuse, diffuse * 0.74, wetnessAlpha);
+	
+  diffuse = mix(diffuse, diffuse * vec4(1.0, 0.970588, 0.8745098, 1.0) * 0.74, wetnessAlpha);
+	normal = mix(normal, vec4(normalize(tbnMatrix * (vec3(0.5, 0.5, 1.0) * 2.0 - 1.0)), 1.0), wetnessAlpha * worldNormal.y);
+	
 	vec2 specularity = GetSpecularity(coord, wetnessAlpha, vertLightmap.t);	
 	
 	
