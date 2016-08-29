@@ -103,9 +103,8 @@ vec2 GetSpecularity(vec2 coord, float finalAlpha, float skyLightmap) {
 	
 	float smoothness = specular.r;
 	float F0 = specular.g;
-
-	smoothness = mix(smoothness, 0.98, finalAlpha);
 	
+	smoothness = mix(smoothness, 0.98, finalAlpha);
   
 	return vec2(smoothness, F0);
 #else
