@@ -237,7 +237,7 @@ void main() {
 	float smoothness;
 	float skyLightmap;
 	Decode16(texture2D(colortex4, texcoord).b, smoothness, skyLightmap);
-	smoothness = mix(smoothness, 0.85, mask.water);
+	smoothness = mix(smoothness, 0.90, mask.water);
 	
 	vec3 color0 = vec3(0.0);
 	vec3 color1 = vec3(0.0);
