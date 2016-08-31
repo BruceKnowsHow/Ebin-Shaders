@@ -162,8 +162,11 @@ void main() {
 	
 	vec3 tangentVector = normalize(tbnMatrix * normalize(viewSpacePosition.xyz));
 	float textureHeight;
-
-	vec2 coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
+	
+	vec2 coord = texcoord;
+	
+	if(length(viewSpacePosition.xyz) < 30.0)
+		coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
   
 	vec4 diffuse = GetDiffuse(coord);
 	if (diffuse.a < 0.1000003) discard;
