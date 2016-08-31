@@ -1,7 +1,3 @@
-float noise(vec2 coord) {
-    return fract(sin(dot(coord, vec2(12.9898, 4.1414))) * 43758.5453);
-}
-
 float radicalInverse_VdC(uint bits) {
      bits = (bits << 16u) | (bits >> 16u);
      bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
@@ -12,7 +8,7 @@ float radicalInverse_VdC(uint bits) {
  }
 
 vec2 Hammersley(uint i, uint N) {
-  return vec2(float(i) / float(N), radicalInverse_VdC(i));
+  return vec2(float(i) / float(N), float(bitfieldReverse(i)) * 2.3283064365386963e-10);
 }
 
 
