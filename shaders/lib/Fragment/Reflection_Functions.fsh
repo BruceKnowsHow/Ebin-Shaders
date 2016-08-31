@@ -64,7 +64,6 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
-	float NoH;
 	
 	float roughness = 1.0 - smoothness;
 	float alpha = pow2(roughness);
@@ -78,7 +77,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	float sunlight = ComputeShadows(viewSpacePosition, 1.0);
 	skyLightmap = clamp01(pow(skyLightmap, 4));
 	
-	vec3 specular = specularBRDF(lightVector, normal, F0, viewVector, clamp(alpha, 0.04, 1.0), NoH) * sunlight * sunlightColor * 6.0;
+	vec3 specular = specularBRDF(lightVector, normal, F0, viewVector, clamp(alpha, 0.04, 1.0)) * sunlight * sunlightColor * 6.0;
 	reflection += specular * PBR_RAYS;
 	
 	vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
@@ -93,19 +92,15 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		vec3 reflectDir = normalize(microFacetNormal); //Reproject normal in spherical coords
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
 
-		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, sqrt(roughness), NoH);
+		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, sqrt(roughness));
 		vec3 reflectedAmbient = CalculateSky(vec4(reflect(viewSpacePosition.xyz, microFacetNormal), 1.0), 1.0, true).rgb * skyLightmap * raySpecular * 0.5;
 		reflectedAmbient += mask.metallic * (1.0 - skyLightmap) * 0.15;
 		
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.25, 25, 1, reflectedCoord, reflectedViewSpacePosition)) {
 			reflection += reflectedAmbient;
 		} else {
-			float lod = computeLod(NoH, PBR_RAYS, alpha);
-			
 			vec3 colorSample = GetColorLod(reflectedCoord.st, roughness * 4.0);
-
 			colorSample = mix(colorSample, reflectedAmbient, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
-			//Edge falloff was doing nothing and taking 1 fps so rip
 
 			reflection += colorSample * raySpecular;
 		}

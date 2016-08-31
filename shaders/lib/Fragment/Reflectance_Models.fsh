@@ -372,14 +372,13 @@ float specularBRDF(
 	vec3 normal,
 	float F0,
 	vec3 viewVector,
-	float alpha,
-  out float NoH) {
+	float alpha) {
 	
 	vec3 halfVector = (viewVector + inVector) / length(viewVector + inVector);
 	
 	float NoL = dot(normal, inVector);
 	float NoV = dot(normal, viewVector);
-	NoH = dot(normal, halfVector);
+	float NoH = dot(normal, halfVector);
 	float VoH = dot(viewVector, halfVector);
 	
 	float fresnel = Fresnel(F0, VoH);
@@ -389,13 +388,6 @@ float specularBRDF(
 	
 	return fresnel * geometryFactor * microfacetDistribution * max0(NoL) / normalizationFactor;
 }
-
-#if ShaderStage == 2
-  float computeLod(float NoH, uint numSamples, float alpha) {
-    float dist = CalculateMicrofacetDistribution(NoH, pow2(alpha));
-    return 0.25 * (log2(float(viewWidth * viewHeight) / numSamples) - log2(dist));
-  }
-#endif
 
 vec3 BlendMaterial(vec3 color, vec3 specular, float F0) {
   float scRange = smoothstep(0.25, 0.45, F0);
