@@ -8,21 +8,37 @@ float GetLambertianShading(vec3 normal, Mask mask) {
 
 #include "/lib/Fragment/Reflectance_Models.fsh"
 
-float GetSubSurfaceDiffuse(vec4 viewSpacePosition, vec3 normal) { // This is a crude
-	cfloat wrap = 0.6;
-	cfloat scatterWidth = 0.4;
+#ifndef composite0
+void GetNormalShading(inout Shading shading, Mask mask, vec4 viewSpacePosition, vec3 normal, float roughness) {
+	float directDiffuse;
+	float lambert = max0(dot(normal, lightVector));
 	
-	vec3 viewVector = -normalize(viewSpacePosition.xyz);
-	vec3 halfVector = normalize(lightVector - viewVector);
+	#ifndef PBR
+		directDiffuse = lambert;
+	#else
+		bool isSS = mask.grass > 0.5 || mask.leaves > 0.5;
+		
+		if(isSS) {
+			directDiffuse = GetGGXSubsurfaceDiffuse(viewSpacePosition, normal, roughness);
+		} else {
+			float F0 = undefF0; //Grab the default F0
+			      F0 = F0Calc(F0, mask.metallic); //Apply F0 transformation to correct it for metals
+						
+			directDiffuse = diffuse(F0, viewSpacePosition, normal, roughness);
+						
+			float scRange = smoothstep(0.25, 0.45, F0); //Apply a blend for materials to remove diffuse from metals
+			float  dielectric = directDiffuse;
+			float  metal = lambert;
+			
+			directDiffuse = mix(dielectric, metal, scRange);
+		}
+	#endif
 	
-	float NdotH = dot(normal, halfVector);
-	float NdotL = dot(normal, lightVector);
-	float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
+	directDiffuse = directDiffuse * (1.0 - mask.grass       ) + mask.grass       ;
+	directDiffuse = directDiffuse * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
 	
-	float diffuse = max0(NdotLWrap);
-	float scatter = smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
-
-	return diffuse + scatter;
+	shading.normal = directDiffuse;
 }
+#endif
 
 #define GetDiffuseShading(a, b, c, d) GetLambertianShading(b, d)

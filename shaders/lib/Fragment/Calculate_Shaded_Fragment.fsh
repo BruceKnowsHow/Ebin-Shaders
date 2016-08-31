@@ -31,37 +31,15 @@ struct Lightmap {    // Contains vector light levels with color
 // Underwater light caustics
 #endif
 
-vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, vec3 GI, float AO, vec3 normal, float smoothness, vec4 ViewSpacePosition) {
+vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, vec3 GI, float AO, vec3 normal, float smoothness, vec4 viewSpacePosition) {
 	Shading shading;
 	
-	float F0 = undefF0;
-	F0 = F0Calc(F0, mask.metallic);
-	
-	#ifndef PBR
-		shading.normal = GetDiffuseShading(ViewSpacePosition, normal, 1.0 - smoothness, mask);
-	#else
-		float diffuseLighting = diffuse(F0, ViewSpacePosition, normal, 1.0 - pow2(smoothness));
-		
-		float scRange = smoothstep(0.25, 0.45, F0);
-		float  dielectric = diffuseLighting;
-	  float  metal = max0(dot(normal, lightVector));
-
-		shading.normal = mix(dielectric, metal, scRange);
-	#endif
-	
-	vec3 SubSurfaceColor = vec3(1.0);
-	if(mask.leaves > 0.5 || mask.grass > 0.5) {
-		float SubSurfaceDiffusion = GetGGXSubsurfaceDiffuse(ViewSpacePosition, normal, 1.0 - smoothness);
-		SubSurfaceDiffusion = SubSurfaceDiffusion * (1.0 - mask.grass       ) + mask.grass       ;
-		SubSurfaceDiffusion = SubSurfaceDiffusion * (1.0 - mask.leaves * 0.5) + mask.leaves * 0.5;
-		
-		SubSurfaceColor = SubSurfaceDiffusion * vec3(1.0, 1.2, 1.0);
-		shading.normal = SubSurfaceDiffusion;
-	}
+	shading.normal = 1.0;
+	GetNormalShading(shading, mask, viewSpacePosition, normal, 1.0 - smoothness);
 	
 	shading.sunlight  = shading.normal;
 	shading.sunlight *= pow2(skyLightmap);
-	shading.sunlight  = ComputeShadows(ViewSpacePosition, shading.sunlight);
+	shading.sunlight  = ComputeShadows(viewSpacePosition, shading.sunlight);
 	
 	#if defined composite1
 		// Underwater light caustics
@@ -83,7 +61,7 @@ vec3 CalculateShadedFragment(Mask mask, float torchLightmap, float skyLightmap, 
 	
 	Lightmap lightmap;
 	
-	lightmap.sunlight = shading.sunlight * sunlightColor * SubSurfaceColor * pow(AO, 0.7);
+	lightmap.sunlight = shading.sunlight * sunlightColor * pow(AO, 0.7);
 	
 	lightmap.skylight = shading.skylight * pow(skylightColor, vec3(0.5)) * AO;
 	
