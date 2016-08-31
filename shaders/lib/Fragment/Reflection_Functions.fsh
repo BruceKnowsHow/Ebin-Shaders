@@ -81,8 +81,6 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3 specular = specularBRDF(lightVector, normal, F0, viewVector, clamp(alpha, 0.04, 1.0), NoH) * sunlight * sunlightColor * 6.0;
 	reflection += specular * PBR_RAYS;
 	
-	vec3 reflectedAmbient = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb * skyLightmap;
-	
 	vec3 upVector = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
 	vec3 tanX = normalize(cross(upVector, normal));
 	vec3 tanY = cross(normal, tanX);
@@ -96,7 +94,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		vec3 rayDirection = reflect(-viewVector, reflectDir);
 
 		float raySpecular = specularBRDF(rayDirection, microFacetNormal, F0, viewVector, sqrt(roughness), NoH);
-		reflectedAmbient = reflectedAmbient * raySpecular * 0.5;
+		vec3 reflectedAmbient = CalculateSky(vec4(reflect(viewSpacePosition.xyz, microFacetNormal), 1.0), 1.0, true).rgb * skyLightmap * raySpecular * 0.5;
 		reflectedAmbient += mask.metallic * (1.0 - skyLightmap) * 0.15;
 		
 		if (!ComputeRaytracedIntersection(viewSpacePosition.xyz, rayDirection, firstStepSize, 1.25, 25, 1, reflectedCoord, reflectedViewSpacePosition)) {
@@ -104,7 +102,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 		} else {
 			float lod = computeLod(NoH, PBR_RAYS, alpha);
 			
-			vec3 colorSample = GetColorLod(reflectedCoord.st, lod);
+			vec3 colorSample = GetColorLod(reflectedCoord.st, roughness * 4.0);
 
 			colorSample = mix(colorSample, reflectedAmbient, CalculateFogFactor(reflectedViewSpacePosition, FOG_POWER));
 			//Edge falloff was doing nothing and taking 1 fps so rip
