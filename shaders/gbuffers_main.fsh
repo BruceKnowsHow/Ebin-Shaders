@@ -8,6 +8,7 @@ uniform sampler2D noisetex;
 uniform float frameTimeCounter;
 uniform float far;
 uniform float wetness;
+uniform ivec2 atlasSize;
 
 varying vec3 color;
 varying vec2 texcoord;
@@ -38,8 +39,42 @@ varying float waterMask;
 #include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 #endif
 
-vec2 getParallaxCoord(vec2 coords, vec3 tangentVector) {
-	return coords;
+vec4 tileCoordinate(vec2 coord) {
+	ivec2 atlasTiles = atlasSize / TEXTURE_PACK_RESOLUTION;
+	vec2 tcoord = coord * atlasTiles;
+
+	return vec4(fract(tcoord), floor(tcoord));
+}
+
+vec2 normalCoord(vec4 tileCoord) {
+	ivec2 atlasTiles = atlasSize / TEXTURE_PACK_RESOLUTION;
+
+	return (tileCoord.zw + fract(tileCoord.xy)) / atlasTiles;
+}
+
+vec2 getParallaxCoord(in vec2 coord, in vec3 direction, out float endHeight) {
+	const vec3 stepSize = vec3(0.75, 0.75, 1.0) * 4.0 / TEXTURE_PACK_RESOLUTION;
+
+	vec3 interval = direction * stepSize;
+
+	vec4 tileCoord = tileCoordinate(coord);
+
+	// Start state
+	float foundHeight = textureLod(normals, coord, 0).a;
+	vec3  offset = vec3(0.0, 0.0, 1.0);
+
+	for(int i = 0; offset.z > foundHeight + 0.01 && i < 255; i++)
+	{
+		offset += mix(vec3(0.0), interval, pow(offset.z - foundHeight, 0.8));
+
+		foundHeight = textureLod(normals, normalCoord(vec4(tileCoord.xy + offset.xy, tileCoord.zw)), 0).a;
+	}
+
+	endHeight = offset.z;
+
+	tileCoord.xy += offset.xy;
+
+	return normalCoord(tileCoord);
 }
 
 
@@ -125,9 +160,10 @@ vec2 EncodeNormalData(vec3 normalTexture, float tbnIndex) {
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
-	vec4 modelView = (gl_ModelViewMatrix * verts);
-	vec3 tangentVector = normalize(tbnMatrix * modelView.xyz);
-	vec2 coord = getParallaxCoord(texcoord, vec3(1.0));
+	vec3 tangentVector = normalize(tbnMatrix * normalize(viewSpacePosition.xyz));
+	float textureHeight;
+
+	vec2 coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
   
 	vec4 diffuse = GetDiffuse(coord);
 	if (diffuse.a < 0.1000003) discard;
