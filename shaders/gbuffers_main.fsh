@@ -52,7 +52,7 @@ vec2 normalCoord(vec4 tileCoord) {
 }
 
 vec2 getParallaxCoord(in vec2 coord, in vec3 direction, out float textureHeight) {
-	cvec3 stepSize = vec3(1.0, 1.0, 1.0) * 16.0 / TEXTURE_PACK_RESOLUTION;
+	cvec3 stepSize = vec3(0.2, 0.2, 1.0) * 4.0 / TEXTURE_PACK_RESOLUTION;
 
 	vec3 interval = direction * stepSize;
 	vec4 tileCoord = tileCoordinate(coord);
@@ -61,7 +61,7 @@ vec2 getParallaxCoord(in vec2 coord, in vec3 direction, out float textureHeight)
 	float currentHeight = texture2D(normals, coord).a;
 	vec3  offset = vec3(0.0, 0.0, 1.0);
 
-	for(int i = 0; offset.z > currentHeight + 0.01 && i <= 16; i++) {
+	for(int i = 0; offset.z > currentHeight + 0.01 && i < 255; i++) {
 		offset += mix(vec3(0.0), interval, pow(offset.z - currentHeight, 0.8));
 
 		currentHeight = texture2D(normals, normalCoord(vec4(tileCoord.xy + offset.xy, tileCoord.zw))).a;
