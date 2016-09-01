@@ -23,7 +23,7 @@ varying vec2 texcoord;
 #include "/lib/Uniform/ShadowViewMatrix.vsh"
 
 void main() {
-#if defined GI_ENABLED || defined AO_ENABLED
+#if defined GI_ENABLED
 	texcoord    = gl_MultiTexCoord0.st;
 	gl_Position = ftransform();
 	

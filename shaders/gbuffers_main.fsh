@@ -158,13 +158,12 @@ void main() {
 	
 	vec3 tangentVector = normalize(normalize(viewSpacePosition.xyz) * tbnMatrix);
 	float textureHeight;
-	show(tangentVector);
 	vec2 coord = texcoord;
 	
-	#ifdef gbuffers_textured
+#if defined gbuffers_textured && 0
 	if(length(viewSpacePosition.xyz) < 15.0)
 		coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
-  #endif
+#endif
 	
 	vec4 diffuse = GetDiffuse(coord);
 	if (diffuse.a < 0.1000003) discard;
@@ -199,7 +198,7 @@ void main() {
 	
 	if (abs(mcID - 8.5) < 0.6) diffuse.a = 0.5; // Force water alpha
 	
-	vec3 composite  = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, vec3(0.0), 1.0, normal.xyz, specularity.r, viewSpacePosition);
+	vec3 composite  = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, vec3(0.0), normal.xyz, specularity.r, viewSpacePosition);
 	     composite *= pow(diffuse.rgb, vec3(2.2));
 	
 	gl_FragData[0] = vec4(encodedNormal, encode, 1.0);

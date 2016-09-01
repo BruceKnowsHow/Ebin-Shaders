@@ -102,7 +102,7 @@ option.PLAYER_SHADOW=Player Shadow
 option.PLAYER_SHADOW.comment=Whether or not the player casts a shadow
 
 
-screen.Composite0=GI & AO
+screen.Composite0=GI
 
 option.COMPOSITE0_SCALE=Resolution Coefficient
 option.COMPOSITE0_SCALE.comment=The resolution coefficient at which global illumination and volumetric fog are computed.
@@ -145,37 +145,6 @@ option.GI_TRANSLUCENCE=GI Translucence
 option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "bounce through" surfaces, similar to subsurface scattering
 
 option.GI_BRIGHTNESS=GI Brightness
-
-option.AO_ENABLED=Ambient Occlusion
-option.AO_ENABLED.comment=Ambient Occlusion darkens corners semi naturally to give the effect of depth and changes in geometry.
-
-option.AO_MODE=Ambient Occlusion Mode
-option.AO_MODE.comment=1: AlchemyAO. 2: HBAO
-
-
-option.PBR=Physically Based Rendering
-option.PBR.comment=Physically Based Rendering or PBR is an effect that defines how light interacts with different materials. Needs a supported PBR resource pack!
-
-option.PBR_Diffuse=Diffuse Rendering
-option.PBR_Diffuse.comment=The way light diffuses into and off of the surface to your eye. 1: Lambertian. 2:Burley, Physical. 3: Oren Nayar, Physical. 4: Oren Nayar Fresnel, Physical. 5: Gotanda, Physical.
-
-option.IOR=IOR
-option.IOR.comment=Changes how much light is allowed to reflect. If the game seems too shiny lower the number.
-
-option.PBR_SKEW=PBR Ray Skew
-option.PBR_SKEW.comment=Ray Skewing adds microfacets so the SSR. This will be higher quality the more rays you send. 1: Phong. 2: Beckmann. 3: GGX.
-
-option.FRESNEL=Fresnel
-option.FRESNEL.comment=How much more reflectance at grazing angles. we give an option on which algorithm you can use. 1: Schlick. 2: Spherical Gaussian. 3: Cook Torrance. 4: No Approximation, Slowest but most accurate.
-
-option.PBR_RAYS=PBR Rays
-option.PBR_RAYS.comment=The number of rays that are sent per pixel, the more rays the higher quality.
-
-option.PBR_GEOMETRY_MODEL=PBR Geometry Model
-option.PBR_GEOMETRY_MODEL.comment=This is an advanced option! Different geometry models interact with direct light differently. 1: Implict. 2: Newmann. 3: Cook Torrance. 4: Smith. 5: GGX - PBR. 6: Schlick Beckmann - PBR.
-
-option.PBR_DISTROBUTION_MODEL=PBR Microfacet distribution
-option.PBR_DISTROBUTION_MODEL.comment=This is an advanced option! This option determines how direct light spreads across a surface based on roughness. 1: Phong. 2: Beckmann. 3: GGX.
 
 
 
