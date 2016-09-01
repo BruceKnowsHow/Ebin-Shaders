@@ -147,6 +147,9 @@ option.GI_TRANSLUCENCE.comment=Higher values make global illumination seem to "b
 option.GI_BRIGHTNESS=GI Brightness
 
 
+option.TERRAIN_PARALLAX=Terrain Parallax
+
+
 
 option.CUSTOM_HORIZON_HEIGHT=Custom Horizon Height
 

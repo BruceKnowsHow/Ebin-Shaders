@@ -39,19 +39,19 @@ varying float waterMask;
 #include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 #endif
 
-vec4 tileCoordinate(vec2 coord) {
+vec4 TileCoordinate(vec2 coord) {
 	ivec2 atlasTiles = atlasSize / TEXTURE_PACK_RESOLUTION;
 	vec2 tcoord = coord * atlasTiles;
 
 	return vec4(fract(tcoord), floor(tcoord));
 }
 
-vec2 normalCoord(vec4 tileCoord) {
+vec2 NormalCoord(vec4 tileCoord) {
 	ivec2 atlasTiles = atlasSize / TEXTURE_PACK_RESOLUTION;
 	return (tileCoord.zw + fract(tileCoord.xy)) / atlasTiles;
 }
 
-vec2 GetParallaxCoord(in vec2 coord) {
+vec2 GetParallaxCoord(vec2 coord) {
 	if (length(viewSpacePosition.xyz) > 15.0) return coord;
 	
 	vec3 direction = normalize(normalize(viewSpacePosition.xyz) * tbnMatrix);
@@ -59,7 +59,7 @@ vec2 GetParallaxCoord(in vec2 coord) {
 	cvec3 stepSize = vec3(0.2, 0.2, 1.0) * 32.0 / TEXTURE_PACK_RESOLUTION;
 
 	vec3 interval = direction * stepSize;
-	vec4 tileCoord = tileCoordinate(coord);
+	vec4 tileCoord = TileCoordinate(coord);
 
 	// Start state
 	float currentHeight = texture2D(normals, coord).a;
@@ -68,12 +68,12 @@ vec2 GetParallaxCoord(in vec2 coord) {
 	for(int i = 0; offset.z > currentHeight + 0.01 && i < 32; i++) {
 		offset += mix(vec3(0.0), interval, pow(offset.z - currentHeight, 0.8));
 
-		currentHeight = texture2D(normals, normalCoord(vec4(tileCoord.xy + offset.xy, tileCoord.zw))).a;
+		currentHeight = texture2D(normals, NormalCoord(vec4(tileCoord.xy + offset.xy, tileCoord.zw))).a;
 	}
 
 	tileCoord.xy += offset.xy;
 
-	return normalCoord(tileCoord);
+	return NormalCoord(tileCoord);
 }
 
 
@@ -159,7 +159,7 @@ void main() {
 	
 	vec2 coord = texcoord;
 	
-#if defined gbuffers_textured && 0
+#if defined gbuffers_terrain && defined TERRAIN_PARALLAX
 	coord = GetParallaxCoord(coord);
 #endif
 	

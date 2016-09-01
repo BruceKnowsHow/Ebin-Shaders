@@ -86,6 +86,8 @@ const int noiseTextureResolution = 64;
 #define GI_TRANSLUCENCE 0.2  // [0.0 0.2 0.4 0.6 0.8 1.0]
 #define GI_BRIGHTNESS   1.00 // [0.25 0.50 0.75 1.00 2.00 4.00]
 
+#define TERRAIN_PARALLAX
+
 #define REFLECTION_EDGE_FALLOFF
 
 #define WAVE_MULT 2.0
