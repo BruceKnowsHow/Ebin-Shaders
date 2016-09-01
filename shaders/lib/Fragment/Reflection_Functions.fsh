@@ -1,13 +1,12 @@
 #ifndef PBR
 void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal, float smoothness, float skyLightmap, Mask mask) {
-	if (isEyeInWater == 1) return;
+	if (isEyeInWater == 1 || mask.water < 0.5) return;
 	
 	vec3  rayDirection  = normalize(reflect(viewSpacePosition.xyz, normal));
 	float firstStepSize = mix(1.0, 30.0, pow2(length((gbufferModelViewInverse * viewSpacePosition).xz) / 144.0));
 	vec3  reflectedCoord;
 	vec4  reflectedViewSpacePosition;
 	vec3  reflection;
-	float VoH;
 	
 	float roughness = 1.0 - smoothness;
 	
@@ -31,7 +30,7 @@ void ComputeReflectedLight(inout vec3 color, vec4 viewSpacePosition, vec3 normal
 	vec3 reflectedSky  = CalculateSky(vec4(reflect(viewSpacePosition.xyz, normal), 1.0), 1.0, true).rgb;
 	     reflectedSky *= 1.0;
 	
-	float reflectedSunspot = specularBRDF(lightVector, normal, F0, -normalize(viewSpacePosition.xyz), roughness, VoH) * sunlight;
+	float reflectedSunspot = specularBRDF(lightVector, normal, F0, -normalize(viewSpacePosition.xyz), roughness) * sunlight;
 	
 	vec3 offscreen = reflectedSky + reflectedSunspot * sunlightColor * 10.0;
 	

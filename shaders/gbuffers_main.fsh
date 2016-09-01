@@ -162,7 +162,7 @@ void main() {
 	vec2 coord = texcoord;
 	
 	#ifdef gbuffers_textured
-	if(length(viewSpacePosition.xyz) < 30.0)
+	if(length(viewSpacePosition.xyz) < 15.0)
 		coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
   #endif
 	
