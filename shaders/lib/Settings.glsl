@@ -118,6 +118,9 @@ const int noiseTextureResolution = 64;
 //#define CUSTOM_TIME_CYCLE
 //#define FREEZE_TIME
 
+//#define PARALAX
+#ifdef PARALAX 
+#endif
 
 #ifdef DEFAULT_TEXTURE_PACK
 	#define TEXTURE_PACK_RESOLUTION 16

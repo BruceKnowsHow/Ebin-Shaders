@@ -51,14 +51,22 @@ vec2 normalCoord(vec4 tileCoord) {
 	return (tileCoord.zw + fract(tileCoord.xy)) / atlasTiles;
 }
 
-vec2 getParallaxCoord(in vec2 coord, in vec3 direction, out float textureHeight) {
+vec2 getParallaxCoord(in vec2 coord, in vec3 direction) {
+	if(length(viewSpacePosition.xyz) > 10.0) return coord;
+	
+	#ifndef PARALAX
+		return coord;
+	#endif
+	
+	float currentHeight = texture2D(normals, coord).a;
+	if(currentHeight == 0.0) return coord;
+	
 	cvec3 stepSize = vec3(0.2, 0.2, 1.0) * 32.0 / TEXTURE_PACK_RESOLUTION;
 
 	vec3 interval = direction * stepSize;
 	vec4 tileCoord = tileCoordinate(coord);
 
 	// Start state
-	float currentHeight = texture2D(normals, coord).a;
 	vec3  offset = vec3(0.0, 0.0, 1.0);
 
 	for(int i = 0; offset.z > currentHeight + 0.01 && i < 32; i++) {
@@ -67,9 +75,7 @@ vec2 getParallaxCoord(in vec2 coord, in vec3 direction, out float textureHeight)
 		currentHeight = texture2D(normals, normalCoord(vec4(tileCoord.xy + offset.xy, tileCoord.zw))).a;
 	}
 
-	textureHeight = offset.z;
 	tileCoord.xy += offset.xy;
-
 	return normalCoord(tileCoord);
 }
 
@@ -157,13 +163,10 @@ void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
 	vec3 tangentVector = normalize(normalize(viewSpacePosition.xyz) * tbnMatrix);
-	float textureHeight;
-	show(tangentVector);
 	vec2 coord = texcoord;
 	
 	#ifdef gbuffers_terrain
-	if(length(viewSpacePosition.xyz) < 15.0)
-		coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
+		coord = getParallaxCoord(texcoord, tangentVector);
   #endif
 	
 	vec4 diffuse = GetDiffuse(coord);
