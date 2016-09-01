@@ -161,7 +161,7 @@ void main() {
 	show(tangentVector);
 	vec2 coord = texcoord;
 	
-	#ifdef gbuffers_textured
+	#ifdef gbuffers_terrain
 	if(length(viewSpacePosition.xyz) < 15.0)
 		coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
   #endif
