@@ -80,79 +80,9 @@ vec2 GetDitherred2DNoise(vec2 coord, float n) { // Returns a random noise patter
 #include "/lib/Fragment/Sunlight/GetSunlightShading.fsh"
 #include "/lib/Fragment/Sunlight/ComputeHardShadows.fsh"
 
-#ifndef GI_ENABLED
-	#define ComputeGlobalIllumination(a, b, c, d, e, f) vec3(0.0)
-#elif GI_MODE == 1
-vec3 ComputeGlobalIllumination(vec4 position, vec3 normal, float skyLightmap, const float radius, vec2 noise, Mask mask) {
-	float lightMult = skyLightmap;
-	
-	#ifdef GI_BOOST
-		float sunlight  = GetLambertianShading(normal, mask);
-		      sunlight *= skyLightmap;
-		      sunlight  = ComputeHardShadows(position, sunlight);
-		
-		lightMult = 1.0 - sunlight * 4.0;
-	#endif
-	
-	if (lightMult < 0.05) return vec3(0.0);
-	
-	float LodCoeff = clamp(1.0 - length(position.xyz) / shadowDistance, 0.0, 1.0);
-	
-	float depthLOD	= 2.0 * LodCoeff;
-	float sampleLOD	= 5.0 * LodCoeff;
-	
-	vec4 shadowViewPosition = shadowModelView * gbufferModelViewInverse * position;    // For linear comparisons (GI_MODE = 1)
-	
-	position = shadowProjection * shadowViewPosition; // "position" now represents shadow-projection-space position. Position can also be used for exponential comparisons (GI_MODE = 2)
-	normal   = -(shadowModelView * gbufferModelViewInverse * vec4(normal, 0.0)).xyz; // Convert the normal so it can be compared with the shadow normal samples
-	
-	float  brightness = 12.5 * pow(radius, 2) * GI_BRIGHTNESS * SUN_LIGHT_LEVEL;
-	cfloat scale      = radius / 256.0;
-	
-	vec3 GI = vec3(0.0);
-	
-	#include "/lib/Samples/GI.glsl"
-	
-	for (int i = 0; i < GI_SAMPLE_COUNT; i++) {
-		vec2 offset = samples[i] * scale;
-		
-		vec4 samplePos = vec4(position.xy + offset, 0.0, 1.0);
-		
-		vec2 mapPos = BiasShadowMap(samplePos.xy) * 0.5 + 0.5;
-		
-		samplePos.z = texture2DLod(shadowtex1, mapPos, depthLOD).x;
-		samplePos.z = samplePos.z * 8.0 - 4.0;    // Convert range from unsigned to signed and undo z-shrinking
-		
-		samplePos = shadowProjectionInverse * samplePos; // Convert sample position to shadow-view-space for a linear comparison against the pixel's position
-		
-		vec3 sampleDiff = shadowViewPosition.xyz - samplePos.xyz;
-		
-		float distanceCoeff = lengthSquared(sampleDiff); // Inverse-square law
-		      distanceCoeff = 1.0 / max(distanceCoeff, pow(radius, 2));
-		
-		vec3 sampleDir = normalize(sampleDiff);
-		
-		vec3 shadowNormal;
-		     shadowNormal.xy = texture2DLod(shadowcolor1, mapPos, sampleLOD).xy * 2.0 - 1.0;
-		     shadowNormal.z  = sqrt(1.0 - lengthSquared(shadowNormal.xy));
-		
-		float viewNormalCoeff   = max0(dot(      normal, sampleDir));
-		float shadowNormalCoeff = max0(dot(shadowNormal, sampleDir));
-		
-		viewNormalCoeff = mix(viewNormalCoeff, 1.0, GI_TRANSLUCENCE);
-		
-		shadowNormalCoeff = sqrt(shadowNormalCoeff);
-		
-		vec3 flux = pow(texture2DLod(shadowcolor, mapPos, sampleLOD).rgb, vec3(2.2));
-		
-		GI += flux * viewNormalCoeff * shadowNormalCoeff * distanceCoeff;
-	}
-	
-	GI /= GI_SAMPLE_COUNT;
-	
-	return GI * lightMult * brightness; // brightness is constant for all pixels for all samples. lightMult is not constant over all pixels, but is constant over each pixels' samples.
-}
-#endif
+#include "/lib/Fragment/Global_Illumination.fsh"
+
+#include "lib/Fragment/Ambient_Occlusion.fsh"
 
 void main() {
 	float depth0 = GetDepth(texcoord);
@@ -186,14 +116,17 @@ void main() {
 	vec3 normal = DecodeNormal(texture2D(colortex4, texcoord).xy);
 	
 	
+	float AO = CalculateSSAO(viewSpacePosition1, normal);
+	
+	
 	if (depth1 >= 1.0 || isEyeInWater != mask.water)
-		{ gl_FragData[0] = vec4(vec3(0.0), 1.0); exit(); return; }
+		{ gl_FragData[0] = vec4(vec3(0.0), AO); exit(); return; }
 	
 	
 	vec3 GI = ComputeGlobalIllumination(viewSpacePosition1, normal, skyLightmap, GI_RADIUS * 2.0, noise2D, mask);
 	
 	
-	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), 1.0);
+	gl_FragData[0] = vec4(pow(GI * 0.2, vec3(1.0 / 2.2)), AO);
 	
 	exit();
 }

@@ -39,27 +39,23 @@ varying float waterMask;
 #include "/lib/Fragment/Calculate_Shaded_Fragment.fsh"
 #endif
 
-vec4 TileCoordinate(vec2 coord) {
+vec4 tileCoordinate(vec2 coord) {
 	ivec2 atlasTiles = atlasSize / TEXTURE_PACK_RESOLUTION;
 	vec2 tcoord = coord * atlasTiles;
 
 	return vec4(fract(tcoord), floor(tcoord));
 }
 
-vec2 NormalCoord(vec4 tileCoord) {
+vec2 normalCoord(vec4 tileCoord) {
 	ivec2 atlasTiles = atlasSize / TEXTURE_PACK_RESOLUTION;
 	return (tileCoord.zw + fract(tileCoord.xy)) / atlasTiles;
 }
 
-vec2 GetParallaxCoord(vec2 coord) {
-	if (length(viewSpacePosition.xyz) > 15.0) return coord;
-	
-	vec3 direction = normalize(normalize(viewSpacePosition.xyz) * tbnMatrix);
-	
+vec2 getParallaxCoord(in vec2 coord, in vec3 direction, out float textureHeight) {
 	cvec3 stepSize = vec3(0.2, 0.2, 1.0) * 32.0 / TEXTURE_PACK_RESOLUTION;
 
 	vec3 interval = direction * stepSize;
-	vec4 tileCoord = TileCoordinate(coord);
+	vec4 tileCoord = tileCoordinate(coord);
 
 	// Start state
 	float currentHeight = texture2D(normals, coord).a;
@@ -68,12 +64,13 @@ vec2 GetParallaxCoord(vec2 coord) {
 	for(int i = 0; offset.z > currentHeight + 0.01 && i < 32; i++) {
 		offset += mix(vec3(0.0), interval, pow(offset.z - currentHeight, 0.8));
 
-		currentHeight = texture2D(normals, NormalCoord(vec4(tileCoord.xy + offset.xy, tileCoord.zw))).a;
+		currentHeight = texture2D(normals, normalCoord(vec4(tileCoord.xy + offset.xy, tileCoord.zw))).a;
 	}
 
+	textureHeight = offset.z;
 	tileCoord.xy += offset.xy;
 
-	return NormalCoord(tileCoord);
+	return normalCoord(tileCoord);
 }
 
 
@@ -107,40 +104,43 @@ vec3 GetTangentNormal() {
 float Get3DNoise(vec3 pos) {
 	vec3 part  = floor(pos);
 	vec3 whole = fract(pos);
-	
+
 	cvec2 zscale = vec2(17.0, 0.0);
-	
-	vec4 coord  = part.xyxy + whole.xyxy + part.z * zscale.x + zscale.yyxx + 0.5;
+
+	vec4 coord = part.xyxy + whole.xyxy + part.z * zscale.x + zscale.yyxx + 0.5;
 	     coord /= noiseTextureResolution;
-	
+
 	float Noise1 = texture2D(noisetex, coord.xy).x;
 	float Noise2 = texture2D(noisetex, coord.zw).x;
-	
+
 	return mix(Noise1, Noise2, whole.z);
 }
 
-float GetRainAlpha(float height, float skyLightmap) {
-	float randWaterSpot  = Get3DNoise(worldPosition);
-	      randWaterSpot += Get3DNoise(worldPosition / 4.0) * 2.0;
-	
-	float heightOffset = max(0.25, (1.0 - height) * 0.2 + randWaterSpot * 0.8);
-	
-	float wetFactor  = wetness * pow2(skyLightmap) * 2.0;
-	float finalAlpha = clamp01(wetFactor - heightOffset);
-	
-	return clamp01(finalAlpha);
+float rainAlpha(float height, float skyLightmap) {
+  float randWaterSpot  = Get3DNoise(worldPosition);
+        randWaterSpot += Get3DNoise(worldPosition / 4.0) * 2.0;
+        
+  float heightOffset = max(0.25, (1.0 - height) * 0.2 + randWaterSpot * 0.8);
+  
+	float wetFactor = wetness * pow2(skyLightmap) * 2.0;
+  float finalAlpha = clamp01(wetFactor - heightOffset);
+  
+  return clamp01(finalAlpha);
 }
 
-vec2 GetSpecularity(vec2 coord, float wetnessAlpha) {
+vec2 GetSpecularity(vec2 coord, float finalAlpha, float skyLightmap) {
 #ifdef SPECULARITY_MAPS
 	vec2 specular = texture2D(specular, coord).rg;
+	
+	float smoothness = specular.r;
+	float F0 = specular.g;
+	
+	smoothness = mix(smoothness, 0.98, finalAlpha);
+  
+	return vec2(smoothness, F0);
 #else
-	vec2 specular = vec2(0.0);
+	return vec2(0.0);
 #endif
-	
-	specular.r = mix(specular.r, 0.4, wetnessAlpha);
-	
-	return specular;
 }
 
 vec2 EncodeNormalData(vec3 normalTexture, float tbnIndex) {
@@ -156,24 +156,27 @@ vec2 EncodeNormalData(vec3 normalTexture, float tbnIndex) {
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
-	
+	vec3 tangentVector = normalize(normalize(viewSpacePosition.xyz) * tbnMatrix);
+	float textureHeight;
+	show(tangentVector);
 	vec2 coord = texcoord;
 	
-#if defined gbuffers_terrain && defined TERRAIN_PARALLAX
-	coord = GetParallaxCoord(coord);
-#endif
+	#ifdef gbuffers_textured
+	if(length(viewSpacePosition.xyz) < 15.0)
+		coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
+  #endif
 	
 	vec4 diffuse = GetDiffuse(coord);
 	if (diffuse.a < 0.1000003) discard;
 	
 	vec4 normal = GetNormal(coord);
 	
-	float wetnessAlpha = GetRainAlpha(normal.a, vertLightmap.t);
+  float wetnessAlpha = rainAlpha(normal.a, vertLightmap.t);
 	
-	diffuse.rgb *= mix(vec3(1.0), vec3(0.74, 0.71, 0.87), wetnessAlpha);
-	normal       = mix(normal, vec4(normalize(tbnMatrix * (vec3(0.5, 0.5, 1.0) * 2.0 - 1.0)), 1.0), wetnessAlpha * worldNormal.y);
+  diffuse = mix(diffuse, diffuse * vec4(1.0, 0.970588, 0.8745098, 1.0) * 0.74, wetnessAlpha);
+	normal = mix(normal, vec4(normalize(tbnMatrix * (vec3(0.5, 0.5, 1.0) * 2.0 - 1.0)), 1.0), wetnessAlpha * worldNormal.y);
 	
-	vec2 specularity = GetSpecularity(coord, wetnessAlpha);	
+	vec2 specularity = GetSpecularity(coord, wetnessAlpha, vertLightmap.t);	
 	
 	
 #if !defined gbuffers_water
@@ -196,7 +199,7 @@ void main() {
 	
 	if (abs(mcID - 8.5) < 0.6) diffuse.a = 0.5; // Force water alpha
 	
-	vec3 composite  = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, vec3(0.0), normal.xyz, specularity.r, viewSpacePosition);
+	vec3 composite  = CalculateShadedFragment(mask, vertLightmap.r, vertLightmap.g, vec3(0.0), 1.0, normal.xyz, specularity.r, viewSpacePosition);
 	     composite *= pow(diffuse.rgb, vec3(2.2));
 	
 	gl_FragData[0] = vec4(encodedNormal, encode, 1.0);

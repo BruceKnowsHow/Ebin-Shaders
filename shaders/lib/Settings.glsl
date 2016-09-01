@@ -79,20 +79,32 @@ const int noiseTextureResolution = 64;
 #endif
 
 //#define PLAYER_GI_BOUNCE
-#define GI_MODE         1    // [1]
+#define GI_MODE         1    // [1 2 3]
 #define GI_RADIUS       16   // [4 8 16 24 32]
 #define GI_SAMPLE_COUNT 80   // [20 40 80 128 160 256]
 #define GI_BOOST
 #define GI_TRANSLUCENCE 0.2  // [0.0 0.2 0.4 0.6 0.8 1.0]
 #define GI_BRIGHTNESS   1.00 // [0.25 0.50 0.75 1.00 2.00 4.00]
 
-#define TERRAIN_PARALLAX
+#if !defined low_profile
+	#define AO_ENABLED
+#endif
+
+#define AO_MODE 1 // [1 2]
 
 #define REFLECTION_EDGE_FALLOFF
 
 #define WAVE_MULT 2.0
 #define WAVE_SPEED 0.5
 
+
+#define FRESNEL 4 // [1 2 3 4]
+#define undefF0 0.02
+#define PBR_SKEW 3 // [1 2 3]
+#define PBR_RAYS 2 // [1 2 4 8 16 32 64]
+#define PBR_GEOMETRY_MODEL 5 // [1 2 3 4 5 6]
+#define PBR_DISTROBUTION_MODEL 3 // [1 2 3]
+#define PBR_Diffuse 3 // [1 2 3 4 5]
 
 #define CUSTOM_HORIZON_HEIGHT
 #define HORIZON_HEIGHT 62 // [5 62 72 80 128 192 208]

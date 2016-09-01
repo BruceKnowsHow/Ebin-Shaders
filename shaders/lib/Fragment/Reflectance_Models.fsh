@@ -363,7 +363,13 @@ float CalculateNormalizationFactor(float NoL, float NoV, float alpha) {
  *
  * \return The color of the specular highlight at the current fragment
  */
-float specularBRDF(vec3 inVector, vec3 normal, float F0, vec3 viewVector, float alpha) {
+float specularBRDF(
+	vec3 inVector,
+	vec3 normal,
+	float F0,
+	vec3 viewVector,
+	float alpha) {
+	
 	vec3 halfVector = (viewVector + inVector) / length(viewVector + inVector);
 	
 	float NoL = dot(normal, inVector);

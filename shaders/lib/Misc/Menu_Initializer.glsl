@@ -5,6 +5,5 @@
 
 #ifdef SHADOW_TYPE
 #ifdef GI_MODE
-#ifdef TERRAIN_PARALLAX
 
 */
