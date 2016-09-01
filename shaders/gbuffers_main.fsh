@@ -63,8 +63,7 @@ vec2 getParallaxCoord(in vec2 coord, in vec3 direction, out float endHeight) {
 	float foundHeight = textureLod(normals, coord, 0).a;
 	vec3  offset = vec3(0.0, 0.0, 1.0);
 
-	for(int i = 0; offset.z > foundHeight + 0.01 && i < 255; i++)
-	{
+	for(int i = 0; offset.z > foundHeight + 0.01 && i < 255; i++) {
 		offset += mix(vec3(0.0), interval, pow(offset.z - foundHeight, 0.8));
 
 		foundHeight = textureLod(normals, normalCoord(vec4(tileCoord.xy + offset.xy, tileCoord.zw)), 0).a;
@@ -160,14 +159,16 @@ vec2 EncodeNormalData(vec3 normalTexture, float tbnIndex) {
 void main() {
 	if (CalculateFogFactor(viewSpacePosition, FOG_POWER) >= 1.0) discard;
 	
-	vec3 tangentVector = normalize(tbnMatrix * normalize(viewSpacePosition.xyz));
+	vec3 tangentVector = normalize(normalize(viewSpacePosition.xyz) * tbnMatrix);
 	float textureHeight;
-	
+	show(tangentVector);
 	vec2 coord = texcoord;
 	
+	#ifdef gbuffers_textured
 	if(length(viewSpacePosition.xyz) < 30.0)
 		coord = getParallaxCoord(texcoord, tangentVector, textureHeight);
-  
+  #endif
+	
 	vec4 diffuse = GetDiffuse(coord);
 	if (diffuse.a < 0.1000003) discard;
 	
