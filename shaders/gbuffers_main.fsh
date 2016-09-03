@@ -67,7 +67,7 @@ vec2 getParallaxCoord(in vec2 coord, in vec3 direction) {
 	vec4 tileCoord = tileCoordinate(coord);
 	
 	// Scale up interval based on angle relative to surface
-	interval /= abs(tbnMatrix[2].z);
+	interval /= abs(dot(tbnMatrix[2].z, normalize(viewSpacePosition.xyz)));
 
 	// Start state
 	vec3  offset = vec3(0.0, 0.0, 1.0);
