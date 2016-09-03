@@ -61,7 +61,7 @@ vec2 getParallaxCoord(in vec2 coord, in vec3 direction) {
 	float currentHeight = texture2D(normals, coord).a;
 	if(currentHeight == 0.0) return coord;
 	
-	cvec3 stepSize = vec3(0.2, 0.2, 1.0) * 32.0 / TEXTURE_PACK_RESOLUTION;
+	cvec3 stepSize = vec3(0.2, 0.2, 1.0) / 16.0;
 
 	vec3 interval = direction * stepSize;
 	vec4 tileCoord = tileCoordinate(coord);
