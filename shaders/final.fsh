@@ -138,7 +138,7 @@ float get8x8Dither(in vec2 coord)
 
 	ivec2 patternCoord = ivec2(mod(coord.x, 8.0), mod(coord.y, 8.0));
 
-	return ditherPattern[patternCoord.y * patternCoord.x] / 65.0;
+	return ditherPattern[patternCoord.x + (patternCoord.y * 8)] / 65.0;
 }
 
 
