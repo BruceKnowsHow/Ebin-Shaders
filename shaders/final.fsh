@@ -123,6 +123,24 @@ vec3 Uncharted2Tonemap(vec3 color) {
 	return pow(color, vec3(1.0 / 2.2));
 }
 
+float get8x8Dither(in vec2 coord)
+{
+	const float[64] ditherPattern = float[64](
+		 1, 49, 12, 61,  4, 52, 16, 64,
+		33, 17, 45, 29, 36, 20, 48, 32,
+		 9, 57,  5, 53, 12, 60,  8, 56,
+		41, 25, 37, 21, 44, 28, 40, 24,
+		 3, 51, 15, 63,  2, 50, 14, 62,
+		35, 19, 47, 31, 34, 18, 46, 30,
+		11, 59,  7, 55, 10, 58,  6, 54,
+		43, 27, 39, 23, 42, 26, 38, 22
+	);
+
+	ivec2 patternCoord = ivec2(mod(coord.x, 8.0), mod(coord.y, 8.0));
+
+	return ditherPattern[patternCoord.y * patternCoord.x] / 65.0;
+}
+
 
 void main() {
 	float depth = GetDepth(texcoord);
@@ -141,7 +159,9 @@ void main() {
 	color = Uncharted2Tonemap(color);
 	
 	color = SetSaturationLevel(color, SATURATION);
-	
+
+	color += get8x8Dither(gl_FragCoord.st) / 255.0;
+
 	gl_FragData[0] = vec4(color, 1.0);
 	
 	exit();
