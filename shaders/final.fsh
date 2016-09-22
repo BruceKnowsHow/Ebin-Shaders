@@ -23,6 +23,7 @@ varying vec2 pixelSize;
 #include "/lib/Utility.glsl"
 #include "/lib/Debug.glsl"
 #include "/lib/Fragment/Masks.fsh"
+#include "/lib/Misc/dither.glsl"
 
 vec3 GetColor(vec2 coord) {
 	return DecodeColor(texture2D(colortex3, coord).rgb);
@@ -133,7 +134,9 @@ void main() {
 	color = Uncharted2Tonemap(color);
 	
 	color = SetSaturationLevel(color, SATURATION);
-	
+
+	color += get8x8Dither(gl_FragCoord.st) / 255.0;
+
 	gl_FragData[0] = vec4(color, 1.0);
 	
 	exit();
