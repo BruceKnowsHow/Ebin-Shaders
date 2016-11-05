@@ -112,6 +112,10 @@ void main() {
 	#include "/lib/Vertex/Shading_Setup.vsh"
 #endif
 	
+#if defined gbuffers_spidereyes
+	gl_Position.z += 0.0001 * sign(dot(position[0], tbnMatrix[2])); // Stop flicker
+#endif
+	
 	
 	exit();
 }
