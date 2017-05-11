@@ -33,7 +33,7 @@ vec3 TerrainDeformation(vec3 position) {
 	
 	#if DEFORMATION == 1
 		
-		position = Globe(position, 500.0);
+		position = Globe(position, 5000.0);
 		
 	#elif DEFORMATION == 2
 		
