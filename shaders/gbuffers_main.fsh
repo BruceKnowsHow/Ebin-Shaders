@@ -94,7 +94,7 @@ float GetSpecularity(vec2 coord) {
 
 #define TERRAIN_PARALLAX_QUALITY     1.0  // [0.5 1.0 2.0]
 #define TERRAIN_PARALLAX_DISTANCE   12.0  // [6.0 12.0 24.0 48.0]
-#define TERRAIN_PARALLAX_INTENSITY   1.00 // [0.25 0.50 0.75 1.00 1.50 2.00]
+#define TERRAIN_PARALLAX_INTENSITY   1.00 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 
 vec2 ComputeParallaxCoordinate(vec2 coord, vec3 position) {
 #if !defined TERRAIN_PARALLAX || !defined gbuffers_terrain
